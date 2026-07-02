@@ -166,3 +166,12 @@ If you discover a security issue, please report it following our [Security Polic
 ---
 
 **Experience better cognitive assessment with RPM IQ Exam!** 🚀
+
+<!-- BEGIN gh-mutual-linking -->
+
+---
+
+### Related projects
+
+- [**iq**](https://github.com/didvc/iq) — Greater Male Variability in IQ: Upper Tail Ratio Analysis up to IQ 175
+<!-- END gh-mutual-linking -->
