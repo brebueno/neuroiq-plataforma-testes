@@ -1,160 +1,240 @@
-import React, { useState, useEffect } from 'react';
-import { Brain, RotateCcw, Trophy, ArrowRight, Github } from 'lucide-react';
+import { useState } from 'react';
+import { Brain, RotateCcw, Trophy, Zap } from 'lucide-react';
 import LevelSelection from './components/LevelSelection';
 import PuzzleGame from './components/PuzzleGame';
+import Funnel from './components/Funnel';
+import Landing from './components/Landing';
+import PersonalityFlow from './components/PersonalityFlow';
+import CareerFlow from './components/CareerFlow';
 import { GameState, Level, QuestionResult } from './types/game';
-import { calculateOverallIQ, getIQClassification, getIQPercentile } from './utils/iqCalculator';
-import { loadGameData, saveGameData, updateHighScore, updateBestIQ, markLevelCompleted } from './utils/localStorage';
+import { calculateIQFromResults, getIQClassification, getIQPercentile } from './utils/iqCalculator';
+import { loadGameData, updateHighScore, updateBestIQ, markLevelCompleted } from './utils/localStorage';
+
+// A single question in a test = which difficulty level + which puzzle variant to show.
+interface PlannedQuestion {
+  level: Level;
+  puzzleIndex: number;
+}
+
+// Build a full 25-question test with progressively harder questions.
+// Real IQ tests ramp difficulty and score across the whole spread.
+const FULL_TEST_DISTRIBUTION: Record<Level, number> = {
+  1: 4,
+  2: 6,
+  3: 7,
+  4: 7,
+  5: 6,
+  6: 5,
+};
+
+const buildFullTestPlan = (): PlannedQuestion[] => {
+  const plan: PlannedQuestion[] = [];
+  (Object.keys(FULL_TEST_DISTRIBUTION) as unknown as Level[]).forEach((key) => {
+    const level = Number(key) as Level;
+    const count = FULL_TEST_DISTRIBUTION[level];
+    for (let i = 0; i < count; i++) {
+      plan.push({ level, puzzleIndex: i });
+    }
+  });
+  return plan;
+};
+
+const buildLevelPlan = (level: Level, count = 5): PlannedQuestion[] => {
+  const plan: PlannedQuestion[] = [];
+  for (let i = 0; i < count; i++) {
+    plan.push({ level, puzzleIndex: i });
+  }
+  return plan;
+};
+
+type Mode = 'landing' | 'menu' | 'level' | 'full';
 
 function App() {
+  const [mode, setMode] = useState<Mode>('landing');
+  const [plan, setPlan] = useState<PlannedQuestion[]>([]);
   const [gameState, setGameState] = useState<GameState>({
     currentLevel: null,
     currentPuzzle: 0,
     score: 0,
-    totalPuzzles: 5,
+    totalPuzzles: 0,
     showResults: false,
     iq: 0,
-    timeSpent: []
+    timeSpent: [],
   });
-  
+
   const [questionResults, setQuestionResults] = useState<QuestionResult[]>([]);
   const [storedData, setStoredData] = useState(loadGameData());
   const [isNewHighScore, setIsNewHighScore] = useState(false);
   const [isNewBestIQ, setIsNewBestIQ] = useState(false);
+  const [paid, setPaid] = useState(false);
+  const [activeTest, setActiveTest] = useState<'personality' | 'career' | null>(null);
 
-  const startLevel = (level: Level) => {
+  const startTest = (newMode: Mode, newPlan: PlannedQuestion[]) => {
+    setMode(newMode);
+    setPlan(newPlan);
+    setPaid(false);
     setGameState({
-      currentLevel: level,
+      currentLevel: newPlan[0]?.level ?? null,
       currentPuzzle: 0,
       score: 0,
-      totalPuzzles: 5,
+      totalPuzzles: newPlan.length,
       showResults: false,
       iq: 0,
-      timeSpent: []
+      timeSpent: [],
     });
     setQuestionResults([]);
     setIsNewHighScore(false);
     setIsNewBestIQ(false);
   };
+
+  const startFullTest = () => startTest('full', buildFullTestPlan());
+  const startLevel = (level: Level) => startTest('level', buildLevelPlan(level));
 
   const nextPuzzle = (result: QuestionResult) => {
     const newScore = result.correct ? gameState.score + 1 : gameState.score;
     const nextPuzzleIndex = gameState.currentPuzzle + 1;
     const newQuestionResults = [...questionResults, result];
     const newTimeSpent = [...gameState.timeSpent, result.timeSpent];
-    
+
     setQuestionResults(newQuestionResults);
 
     if (nextPuzzleIndex >= gameState.totalPuzzles) {
-      // Calculate overall IQ
-      const levelDistribution = { [gameState.currentLevel!]: gameState.totalPuzzles };
-      const overallIQ = calculateOverallIQ(newScore, gameState.totalPuzzles, levelDistribution);
-      
-      // Check for new records
+      // Weight the IQ by the difficulty of the questions actually answered.
+      const overallIQ = calculateIQFromResults(newQuestionResults);
+
       const newHigh = updateHighScore(newScore);
       const newBestIQ = updateBestIQ(overallIQ);
-      
-      // Mark level as completed if score is good enough
-      if (newScore >= Math.ceil(gameState.totalPuzzles * 0.6)) {
+
+      if (mode === 'level' && newScore >= Math.ceil(gameState.totalPuzzles * 0.6)) {
         markLevelCompleted(gameState.currentLevel!);
       }
-      
+
       setIsNewHighScore(newHigh);
       setIsNewBestIQ(newBestIQ);
       setStoredData(loadGameData());
-      
-      setGameState(prev => ({
+
+      setGameState((prev) => ({
         ...prev,
         score: newScore,
         iq: overallIQ,
         timeSpent: newTimeSpent,
-        showResults: true
+        showResults: true,
       }));
     } else {
-      setGameState(prev => ({
+      setGameState((prev) => ({
         ...prev,
+        currentLevel: plan[nextPuzzleIndex].level,
         score: newScore,
         timeSpent: newTimeSpent,
-        currentPuzzle: nextPuzzleIndex
+        currentPuzzle: nextPuzzleIndex,
       }));
     }
   };
 
-  const resetGame = () => {
+  const backToMenu = () => {
+    setMode('landing');
+    setPlan([]);
+    setPaid(false);
     setGameState({
       currentLevel: null,
       currentPuzzle: 0,
       score: 0,
-      totalPuzzles: 5,
+      totalPuzzles: 0,
       showResults: false,
       iq: 0,
-      timeSpent: []
+      timeSpent: [],
     });
     setQuestionResults([]);
     setIsNewHighScore(false);
     setIsNewBestIQ(false);
   };
 
-  const getScoreMessage = () => {
-    const percentage = (gameState.score / gameState.totalPuzzles) * 100;
-    
-    if (gameState.currentLevel! >= 4) {
-      // Messages for extreme difficulty levels
-      if (percentage >= 80) return "Extraordinary! You possess exceptional analytical intelligence.";
-      if (percentage >= 60) return "Impressive! Your pattern recognition abilities are remarkable.";
-      if (percentage >= 40) return "Challenging! These puzzles push the limits of human cognition.";
-      return "These puzzles are designed for the most gifted minds. Keep pushing your limits!";
-    } else {
-      // Messages for standard levels
-      if (percentage >= 80) return "Excellent! Outstanding pattern recognition.";
-      if (percentage >= 60) return "Good work! You're developing strong analytical skills.";
-      if (percentage >= 40) return "Not bad! Keep practicing to improve your pattern recognition.";
-      return "Keep trying! Pattern recognition improves with practice.";
-    }
+  const retry = () => {
+    if (mode === 'full') startFullTest();
+    else if (gameState.currentLevel) startLevel(gameState.currentLevel);
   };
 
+  const getScoreMessage = () => {
+    const percentage = (gameState.score / gameState.totalPuzzles) * 100;
+    if (percentage >= 80) return 'Extraordinary! You possess exceptional analytical intelligence.';
+    if (percentage >= 60) return 'Impressive! Your pattern recognition abilities are remarkable.';
+    if (percentage >= 40) return 'Solid work! Your reasoning is developing well.';
+    return 'These puzzles push the limits of human cognition. Keep training!';
+  };
+
+  // ---------- OTHER TESTS (personality / career) ----------
+  if (activeTest === 'personality') {
+    return <PersonalityFlow onExit={() => setActiveTest(null)} />;
+  }
+  if (activeTest === 'career') {
+    return <CareerFlow onExit={() => setActiveTest(null)} />;
+  }
+
+  // ---------- FUNNEL (full IQ test only, before payment) ----------
+  if (gameState.showResults && mode === 'full' && !paid) {
+    return (
+      <Funnel
+        headline="Teste de QI concluído — veja seu resultado!"
+        lockedLabel="Seu QI"
+        lockedValue={String(gameState.iq)}
+        bullets={[
+          'Seu QI exato e a classificação',
+          'Seu percentil (entre os X% melhores)',
+          'Análise por tipo de raciocínio',
+          'Certificado em PDF',
+        ]}
+        onUnlock={() => setPaid(true)}
+        onBack={backToMenu}
+      />
+    );
+  }
+
+  // ---------- RESULTS ----------
   if (gameState.showResults) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
           <div className="mb-6">
             <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Level Complete!</h2>
-            <p className="text-gray-600">Level {gameState.currentLevel}</p>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              {mode === 'full' ? 'IQ Test Complete!' : `Level ${gameState.currentLevel} Complete!`}
+            </h2>
+            <p className="text-gray-600">
+              {mode === 'full' ? '35 questions · progressive difficulty' : `Level ${gameState.currentLevel}`}
+            </p>
           </div>
-          
-          <div className="mb-6">
-            <div className="text-4xl font-bold text-blue-600 mb-2">
-              {gameState.score}/{gameState.totalPuzzles}
+
+          {/* IQ Display — the payoff */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-4">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <Brain className="w-7 h-7 text-blue-600" />
+              <span className="text-4xl font-extrabold text-blue-800">IQ {gameState.iq}</span>
+              {isNewBestIQ && (
+                <span className="bg-yellow-400 text-yellow-800 text-xs px-2 py-1 rounded-full font-medium">
+                  NEW BEST!
+                </span>
+              )}
             </div>
-            <p className="text-gray-700 mb-4">{getScoreMessage()}</p>
+            <div className="text-sm text-blue-700">
+              {getIQClassification(gameState.iq)} • {getIQPercentile(gameState.iq)}th percentile
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <div className="text-2xl font-bold text-gray-700 mb-2">
+              {gameState.score}/{gameState.totalPuzzles} correct
+            </div>
+            <p className="text-gray-600 mb-4 text-sm">{getScoreMessage()}</p>
             <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
-              <div 
+              <div
                 className="bg-blue-500 h-3 rounded-full transition-all duration-500"
                 style={{ width: `${(gameState.score / gameState.totalPuzzles) * 100}%` }}
               ></div>
             </div>
-            
-            {/* IQ Display */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 mb-4">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Brain className="w-6 h-6 text-blue-600" />
-                <span className="text-2xl font-bold text-blue-800">IQ: {gameState.iq}</span>
-                {isNewBestIQ && (
-                  <span className="bg-yellow-400 text-yellow-800 text-xs px-2 py-1 rounded-full font-medium">
-                    NEW BEST!
-                  </span>
-                )}
-              </div>
-              <div className="text-sm text-blue-700 text-center">
-                {getIQClassification(gameState.iq)} • {getIQPercentile(gameState.iq)}th percentile
-              </div>
-            </div>
-            
-            {/* Statistics */}
+
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="bg-gray-50 rounded-lg p-3 text-center">
-                <div className="font-semibold text-gray-800">High Score</div>
+                <div className="font-semibold text-gray-800">Best Score</div>
                 <div className="text-2xl font-bold text-gray-700">
                   {storedData.highScore}
                   {isNewHighScore && <span className="text-xs text-yellow-600 ml-1">NEW!</span>}
@@ -169,97 +249,116 @@ function App() {
 
           <div className="space-y-3">
             <button
-              onClick={resetGame}
+              onClick={backToMenu}
               className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
-              Choose Another Level
+              Back to Menu
             </button>
             <button
-              onClick={() => startLevel(gameState.currentLevel!)}
+              onClick={retry}
               className="w-full bg-gray-200 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors font-medium flex items-center justify-center gap-2"
             >
               <RotateCcw className="w-4 h-4" />
-              Retry Level
+              {mode === 'full' ? 'Retake Test' : 'Retry Level'}
             </button>
-            <a
-              href="https://github.com/yuis-ice/rpm-iq-exam"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full bg-gray-800 text-white py-3 px-4 rounded-lg hover:bg-gray-900 transition-colors font-medium flex items-center justify-center gap-2"
-            >
-              <Github className="w-4 h-4" />
-              View on GitHub
-            </a>
           </div>
         </div>
       </div>
     );
   }
 
-  if (!gameState.currentLevel) {
+  // ---------- LANDING ----------
+  if (mode === 'landing') {
+    return (
+      <Landing
+        onStartIQ={startFullTest}
+        onStartPersonality={() => setActiveTest('personality')}
+        onStartCareer={() => setActiveTest('career')}
+        onPractice={() => setMode('menu')}
+      />
+    );
+  }
+
+  // ---------- MENU ----------
+  if (mode === 'menu') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
         <div className="container mx-auto px-4 py-12">
-          <div className="text-center mb-12">
+          <div className="text-center mb-10">
             <div className="flex items-center justify-center gap-3 mb-4">
               <Brain className="w-12 h-12 text-blue-600" />
-              <h1 className="text-4xl font-bold text-gray-800">Raven's Progressive Matrices</h1>
+              <h1 className="text-4xl font-bold text-gray-800">IQ Test</h1>
             </div>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-4">
-              Test your pattern recognition and logical reasoning skills with these classic intelligence puzzles.
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              35 progressive pattern-recognition questions. Discover your IQ score, classification, and percentile.
             </p>
-            <a
-              href="https://github.com/yuis-ice/rpm-iq-exam"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors text-sm"
-            >
-              <Github className="w-4 h-4" />
-              View on GitHub
-            </a>
           </div>
-          
+
+          {/* Primary CTA — the full test */}
+          <div className="max-w-md mx-auto mb-10">
+            <button
+              onClick={startFullTest}
+              className="w-full bg-blue-600 text-white py-5 px-6 rounded-2xl hover:bg-blue-700 transition-colors font-semibold text-lg shadow-xl flex items-center justify-center gap-3"
+            >
+              <Zap className="w-6 h-6" />
+              Start Full IQ Test (35 questions)
+            </button>
+            <p className="text-center text-gray-500 text-sm mt-3">
+              Takes ~15 minutes · no time pressure · think carefully
+            </p>
+          </div>
+
+          {/* Secondary — practice by difficulty */}
+          <div className="text-center mb-4">
+            <h2 className="text-lg font-semibold text-gray-700">Or practice a single difficulty level</h2>
+          </div>
           <LevelSelection onSelectLevel={startLevel} />
         </div>
       </div>
     );
   }
 
+  // ---------- IN-TEST ----------
+  const current = plan[gameState.currentPuzzle];
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <button
-              onClick={resetGame}
-              className="text-gray-600 hover:text-gray-800 transition-colors"
-            >
+            <button onClick={backToMenu} className="text-gray-600 hover:text-gray-800 transition-colors">
               <RotateCcw className="w-6 h-6" />
             </button>
             <h1 className="text-2xl font-bold text-gray-800">
-              Level {gameState.currentLevel}
+              {mode === 'full' ? 'Full IQ Test' : `Level ${gameState.currentLevel}`}
             </h1>
           </div>
-          
+
           <div className="flex items-center gap-4 text-gray-600">
-            <span>Progress: {gameState.currentPuzzle + 1}/{gameState.totalPuzzles}</span>
-            <span>Score: {gameState.score}</span>
-            <span>Accuracy: {gameState.score > 0 ? Math.round((gameState.score / (gameState.currentPuzzle || 1)) * 100) : 0}%</span>
-            <a
-              href="https://github.com/yuis-ice/rpm-iq-exam"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-500 hover:text-gray-700 transition-colors"
-              title="View on GitHub"
-            >
-              <Github className="w-5 h-5" />
-            </a>
+            <span>
+              Question {gameState.currentPuzzle + 1}/{gameState.totalPuzzles}
+            </span>
+            {mode === 'full' && (
+              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                Difficulty {current?.level}/6
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Progress bar across the whole test */}
+        <div className="max-w-4xl mx-auto mb-6">
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${(gameState.currentPuzzle / gameState.totalPuzzles) * 100}%` }}
+            ></div>
           </div>
         </div>
 
         <PuzzleGame
-          level={gameState.currentLevel}
-          puzzleIndex={gameState.currentPuzzle}
+          key={gameState.currentPuzzle}
+          level={current.level}
+          puzzleIndex={current.puzzleIndex}
           onAnswer={nextPuzzle}
         />
       </div>

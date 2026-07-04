@@ -1,93 +1,39 @@
 import { Level } from '../types/game';
 
-// IQ calculation based on RPM standard scoring
-// Base IQ is 100, with adjustments based on level difficulty and performance
-
-const LEVEL_BASE_IQ: Record<Level, number> = {
-  1: 85,   // Basic patterns
-  2: 95,   // Simple progressions
-  3: 105,  // Moderate complexity
-  4: 115,  // Advanced patterns
-  5: 125,  // Complex reasoning
-  6: 135   // Expert level
+// Per-question IQ shown after each answer (rough feedback, by difficulty).
+const QUESTION_IQ: Record<Level, number> = {
+  1: 95,
+  2: 105,
+  3: 115,
+  4: 125,
+  5: 135,
+  6: 145,
 };
 
-const LEVEL_IQ_RANGE: Record<Level, { min: number; max: number }> = {
-  1: { min: 70, max: 100 },
-  2: { min: 80, max: 110 },
-  3: { min: 90, max: 120 },
-  4: { min: 100, max: 130 },
-  5: { min: 110, max: 140 },
-  6: { min: 120, max: 150 }
-};
-
-/**
- * Calculate IQ for a single question based on level and correctness
- */
 export function calculateQuestionIQ(level: Level, correct: boolean): number {
-  const baseIQ = LEVEL_BASE_IQ[level];
-  const range = LEVEL_IQ_RANGE[level];
-  
-  if (correct) {
-    // Correct answer: base IQ for that level
-    return baseIQ;
-  } else {
-    // Incorrect answer: lower end of the range
-    return Math.max(range.min, baseIQ - 20);
-  }
+  if (correct) return QUESTION_IQ[level];
+  return Math.max(65, 72 + level * 2);
 }
 
 /**
- * Calculate overall IQ based on performance across multiple questions
+ * Overall IQ from the actual per-question results.
+ * Each question is worth points equal to its difficulty level (1..6), so
+ * getting HARD questions right matters far more than easy ones. The weighted
+ * ratio is mapped onto a realistic IQ range (~60 up to ~150) with a mild
+ * curve so a "got the easy ones" run lands near the average of 100.
  */
-export function calculateOverallIQ(
-  correctAnswers: number,
-  totalQuestions: number,
-  levelDistribution: Record<Level, number>
-): number {
-  if (totalQuestions === 0) return 100;
-  
-  const accuracy = correctAnswers / totalQuestions;
-  
-  // Calculate weighted average based on level distribution
-  let weightedSum = 0;
-  let totalWeight = 0;
-  
-  Object.entries(levelDistribution).forEach(([levelStr, count]) => {
-    const level = parseInt(levelStr) as Level;
-    const baseIQ = LEVEL_BASE_IQ[level];
-    weightedSum += baseIQ * count;
-    totalWeight += count;
-  });
-  
-  const averageBaseIQ = totalWeight > 0 ? weightedSum / totalWeight : 100;
-  
-  // Adjust based on accuracy
-  let adjustedIQ = averageBaseIQ;
-  
-  if (accuracy >= 0.9) {
-    adjustedIQ += 15; // Exceptional performance
-  } else if (accuracy >= 0.8) {
-    adjustedIQ += 10; // Very good performance
-  } else if (accuracy >= 0.7) {
-    adjustedIQ += 5;  // Good performance
-  } else if (accuracy >= 0.6) {
-    adjustedIQ += 0;  // Average performance
-  } else if (accuracy >= 0.5) {
-    adjustedIQ -= 5;  // Below average
-  } else if (accuracy >= 0.4) {
-    adjustedIQ -= 10; // Poor performance
-  } else {
-    adjustedIQ -= 15; // Very poor performance
-  }
-  
-  // Ensure IQ stays within reasonable bounds
-  return Math.max(60, Math.min(160, Math.round(adjustedIQ)));
+export function calculateIQFromResults(results: { level: Level; correct: boolean }[]): number {
+  if (results.length === 0) return 100;
+
+  const maxPoints = results.reduce((sum, r) => sum + r.level, 0);
+  const earned = results.reduce((sum, r) => sum + (r.correct ? r.level : 0), 0);
+  const raw = maxPoints > 0 ? earned / maxPoints : 0;
+
+  // 0 -> 60, ~0.3 -> ~96, 0.5 -> ~113, 1 -> 150
+  const iq = 60 + Math.pow(raw, 0.75) * 90;
+  return Math.max(55, Math.min(155, Math.round(iq)));
 }
 
-/**
- * Get IQ classification string
- */
 export function getIQClassification(iq: number): string {
   if (iq >= 145) return 'Genius';
   if (iq >= 130) return 'Very Superior';
@@ -99,29 +45,21 @@ export function getIQClassification(iq: number): string {
   return 'Below Average';
 }
 
-/**
- * Calculate IQ percentile
- */
 export function getIQPercentile(iq: number): number {
-  // Using normal distribution approximation for IQ scores
-  // Mean = 100, Standard Deviation = 15
+  // Normal distribution, mean 100, SD 15
   const z = (iq - 100) / 15;
-  
-  // Approximation of cumulative normal distribution
   const percentile = 0.5 * (1 + erf(z / Math.sqrt(2)));
-  
-  return Math.round(percentile * 100);
+  return Math.max(1, Math.min(99, Math.round(percentile * 100)));
 }
 
-// Error function approximation
+// Abramowitz & Stegun error-function approximation
 function erf(x: number): number {
-  // Abramowitz and Stegun approximation
-  const a1 =  0.254829592;
+  const a1 = 0.254829592;
   const a2 = -0.284496736;
-  const a3 =  1.421413741;
+  const a3 = 1.421413741;
   const a4 = -1.453152027;
-  const a5 =  1.061405429;
-  const p  =  0.3275911;
+  const a5 = 1.061405429;
+  const p = 0.3275911;
 
   const sign = x >= 0 ? 1 : -1;
   x = Math.abs(x);
