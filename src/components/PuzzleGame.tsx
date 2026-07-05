@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Check, X, ArrowRight, Clock, Brain } from 'lucide-react';
+import { Check, X, Clock, Brain } from 'lucide-react';
 import { Level, Puzzle, QuestionResult } from '../types/game';
 import { generatePuzzle } from '../utils/puzzleGenerator';
 import { calculateQuestionIQ, getIQClassification } from '../utils/iqCalculator';
@@ -22,7 +22,7 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({ level, puzzleIndex, onAnswer })
   const [questionIQ, setQuestionIQ] = useState<number>(0);
 
   useEffect(() => {
-    const newPuzzle = generatePuzzle(level, puzzleIndex);
+    const newPuzzle = generatePuzzle(level);
     setPuzzle(newPuzzle);
     setSelectedAnswer(null);
     setShowResult(false);

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import LikertTest from './LikertTest';
 import Funnel from './Funnel';
 import DimensionResult from './DimensionResult';
-import { riasecItems, scoreRiasec } from '../data/riasec';
+import { sampleRiasec, scoreRiasec } from '../data/riasec';
 
 interface CareerFlowProps {
   onExit: () => void;
@@ -12,10 +12,13 @@ type Stage = 'quiz' | 'funnel' | 'result';
 
 export default function CareerFlow({ onExit }: CareerFlowProps) {
   const [stage, setStage] = useState<Stage>('quiz');
+  // Fresh, RIASEC-balanced subset per session — no repetition on retake.
+  const [items, setItems] = useState(() => sampleRiasec(6));
   const [result, setResult] = useState<ReturnType<typeof scoreRiasec> | null>(null);
 
   const restart = () => {
     setResult(null);
+    setItems(sampleRiasec(6));
     setStage('quiz');
   };
 
@@ -23,10 +26,10 @@ export default function CareerFlow({ onExit }: CareerFlowProps) {
     return (
       <LikertTest
         title="Teste Vocacional / Carreira"
-        items={riasecItems}
+        items={items}
         onExit={onExit}
         onComplete={(answers) => {
-          setResult(scoreRiasec(answers));
+          setResult(scoreRiasec(answers, items));
           setStage('funnel');
         }}
       />
