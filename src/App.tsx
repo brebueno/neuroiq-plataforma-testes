@@ -3,6 +3,7 @@ import { Brain, RotateCcw, Trophy, Zap } from 'lucide-react';
 import LevelSelection from './components/LevelSelection';
 import PuzzleGame from './components/PuzzleGame';
 import Funnel from './components/Funnel';
+import RevealSequence from './components/RevealSequence';
 import Landing from './components/Landing';
 import PersonalityFlow from './components/PersonalityFlow';
 import CareerFlow from './components/CareerFlow';
@@ -67,12 +68,14 @@ function App() {
   const [isNewHighScore, setIsNewHighScore] = useState(false);
   const [isNewBestIQ, setIsNewBestIQ] = useState(false);
   const [paid, setPaid] = useState(false);
+  const [revealed, setRevealed] = useState(false);
   const [activeTest, setActiveTest] = useState<'personality' | 'career' | null>(null);
 
   const startTest = (newMode: Mode, newPlan: PlannedQuestion[]) => {
     setMode(newMode);
     setPlan(newPlan);
     setPaid(false);
+    setRevealed(false);
     setGameState({
       currentLevel: newPlan[0]?.level ?? null,
       currentPuzzle: 0,
@@ -135,6 +138,7 @@ function App() {
     setMode('landing');
     setPlan([]);
     setPaid(false);
+    setRevealed(false);
     setGameState({
       currentLevel: null,
       currentPuzzle: 0,
@@ -170,10 +174,29 @@ function App() {
     return <CareerFlow onExit={() => setActiveTest(null)} />;
   }
 
-  // ---------- FUNNEL (full IQ test only, before payment) ----------
+  // ---------- REVEAL + FUNNEL (full IQ test only, before payment) ----------
   if (gameState.showResults && mode === 'full' && !paid) {
+    const accuracyPct = Math.round((gameState.score / gameState.totalPuzzles) * 100);
+    const avgSeconds = gameState.timeSpent.length
+      ? gameState.timeSpent.reduce((a, b) => a + b, 0) / gameState.timeSpent.length
+      : 20;
+
+    // The ego reveal plays the tease; the paywall follows.
+    if (!revealed) {
+      return (
+        <RevealSequence
+          percentile={getIQPercentile(gameState.iq)}
+          accuracyPct={accuracyPct}
+          avgSeconds={avgSeconds}
+          onUnlock={() => setRevealed(true)}
+          onBack={backToMenu}
+        />
+      );
+    }
+
     return (
       <Funnel
+        initialStage="paywall"
         headline="Teste de QI concluído — veja seu resultado!"
         lockedLabel="Seu QI"
         lockedValue={String(gameState.iq)}

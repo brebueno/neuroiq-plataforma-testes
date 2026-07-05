@@ -8,6 +8,7 @@ interface FunnelProps {
   bullets: string[]; // what the user unlocks
   onUnlock: () => void;
   onBack: () => void;
+  initialStage?: Stage; // start at 'paywall' when a richer reveal already played the tease
 }
 
 /**
@@ -33,8 +34,8 @@ const fakePay = () => new Promise<void>((resolve) => setTimeout(resolve, 1800));
 
 type Stage = 'tease' | 'paywall' | 'processing';
 
-export default function Funnel({ headline, lockedLabel, lockedValue, bullets, onUnlock, onBack }: FunnelProps) {
-  const [stage, setStage] = useState<Stage>('tease');
+export default function Funnel({ headline, lockedLabel, lockedValue, bullets, onUnlock, onBack, initialStage = 'tease' }: FunnelProps) {
+  const [stage, setStage] = useState<Stage>(initialStage);
 
   // ---------- TEASE: result is ready, but locked ----------
   if (stage === 'tease') {
