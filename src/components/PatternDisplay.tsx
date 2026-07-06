@@ -67,7 +67,7 @@ const PatternDisplay: React.FC<PatternDisplayProps> = ({ pattern, size }) => {
           />
         );
         
-      case 'triangle':
+      case 'triangle': {
         const trianglePoints = [
           `${x},${y - shapeSize / 2}`,
           `${x - shapeSize / 2},${y + shapeSize / 2}`,
@@ -85,7 +85,8 @@ const PatternDisplay: React.FC<PatternDisplayProps> = ({ pattern, size }) => {
           />
         );
         
-      case 'diamond':
+      }
+      case 'diamond': {
         const diamondPoints = [
           `${x},${y - shapeSize / 2}`,
           `${x + shapeSize / 2},${y}`,
@@ -104,7 +105,8 @@ const PatternDisplay: React.FC<PatternDisplayProps> = ({ pattern, size }) => {
           />
         );
         
-      case 'cross':
+      }
+      case 'cross': {
         const crossThickness = shapeSize * 0.3;
         return (
           <g key={index} transform={transform}>
@@ -129,7 +131,8 @@ const PatternDisplay: React.FC<PatternDisplayProps> = ({ pattern, size }) => {
           </g>
         );
         
-      case 'star':
+      }
+      case 'star': {
         const starPoints = [];
         const outerRadius = shapeSize / 2;
         const innerRadius = outerRadius * 0.4;
@@ -153,6 +156,7 @@ const PatternDisplay: React.FC<PatternDisplayProps> = ({ pattern, size }) => {
           />
         );
         
+      }
       default:
         return null;
     }

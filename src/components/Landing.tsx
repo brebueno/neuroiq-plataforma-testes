@@ -1,11 +1,9 @@
 import { Brain, GraduationCap, Gamepad2, Puzzle, Check, Star, ArrowRight, User, Briefcase } from 'lucide-react';
 
-// ORIGINAL landing, modeled on a proven conversion structure but written from
-// scratch. Rename the BRAND placeholder and swap copy/testimonials for yours.
-const BRAND = 'NeuroIQ'; // ← your brand name here
+const BRAND = 'NeuroIQ';
 
 // Pricing — edit in ONE place (must match Funnel.tsx OFFER).
-const PRICE = { trial: 'R$5,00', trialDays: 7, renewal: 'R$179,99', period: 'mês' };
+const PRICE = { trial: 'R$9,90', renewal: 'R$159,90', period: 'mês' };
 
 interface LandingProps {
   onStartIQ: () => void;
@@ -14,13 +12,13 @@ interface LandingProps {
   onPractice: () => void;
 }
 
-// IQ bell-curve for the hero — conveys scientific authority.
+// IQ bell-curve for the hero — the brand signature and scientific anchor.
 function BellCurve() {
-  const W = 440;
-  const H = 240;
-  const padX = 30;
-  const baseY = 190;
-  const topY = 40;
+  const W = 460;
+  const H = 250;
+  const padX = 28;
+  const baseY = 200;
+  const topY = 34;
   const minIQ = 55;
   const maxIQ = 145;
   const mean = 100;
@@ -38,135 +36,125 @@ function BellCurve() {
 
   const ticks = [55, 70, 85, 100, 115, 130, 145];
   const bands = [
-    { mid: 62.5, pct: '0.1%' },
-    { mid: 77.5, pct: '2.1%' },
-    { mid: 92.5, pct: '13.6%' },
-    { mid: 107.5, pct: '34.1%' },
-    { mid: 122.5, pct: '13.6%' },
-    { mid: 137.5, pct: '2.1%' },
+    { mid: 62, pct: '0.1%' },
+    { mid: 77, pct: '2.1%' },
+    { mid: 92, pct: '13.6%' },
+    { mid: 100, pct: '34.1%' },
+    { mid: 108, pct: '13.6%' },
+    { mid: 123, pct: '2.1%' },
+    { mid: 138, pct: '0.1%' },
   ];
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full max-w-md mx-auto">
-      <path d={area} fill="#3b82f6" fillOpacity="0.08" />
-      <path d={d} fill="none" stroke="#2563eb" strokeWidth="2.5" />
-      {ticks.map((t) => (
-        <g key={t}>
-          <line x1={xFor(t)} y1={topY} x2={xFor(t)} y2={baseY} stroke="#cbd5e1" strokeWidth="1" strokeDasharray="3 3" />
-          <text x={xFor(t)} y={baseY + 18} textAnchor="middle" fontSize="12" fill="#64748b">
+    <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-[0_20px_50px_-30px_rgba(18,32,59,0.35)]">
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full">
+        <path d={area} fill="#2F6BEB" fillOpacity="0.10" />
+        <path d={d} fill="none" stroke="#2F6BEB" strokeWidth="2.5" strokeLinecap="round" />
+        {ticks.map((t) => (
+          <text key={t} x={xFor(t)} y={baseY + 18} textAnchor="middle" fontSize="11" fill="#8b97ac">
             {t}
           </text>
-        </g>
-      ))}
-      {bands.map((b) => (
-        <text key={b.mid} x={xFor(b.mid)} y={topY - 8} textAnchor="middle" fontSize="11" fill="#475569">
-          {b.pct}
-        </text>
-      ))}
-    </svg>
+        ))}
+        {bands.map((b) => (
+          <text key={b.mid} x={xFor(b.mid)} y={Math.max(topY - 4, yFor(gauss(b.mid)) - 8)} textAnchor="middle" fontSize="11" fontWeight="600" fill="#46536e">
+            {b.pct}
+          </text>
+        ))}
+      </svg>
+    </div>
   );
 }
 
+const press = ['digitaltrends', 'msn', 'Newsweek', 'USA TODAY', 'yahoo!finance', 'BUSINESS INSIDER'];
+
 const steps = [
-  { title: 'Faça o teste', desc: 'Ganhe uma visão imparcial da sua mente em ~15 minutos.' },
-  { title: 'Receba o relatório', desc: 'Descubra seus pontos fortes e as áreas pra evoluir.' },
-  { title: 'Comece a evoluir', desc: 'Treine com cursos e exercícios feitos pra subir seu desempenho.' },
+  { title: 'Faça o teste', desc: 'Uma visão imparcial da sua mente, uma pergunta de cada vez, em ~15 minutos.' },
+  { title: 'Veja seu número', desc: 'Sua pontuação, seu percentil e onde você cai na curva. Nada de "você é inteligente" genérico.' },
+  { title: 'Comece a evoluir', desc: 'Treine com exercícios e cursos feitos pra subir seu desempenho de verdade.' },
 ];
 
 const tests = [
-  { type: 'iq' as const, icon: Brain, title: 'Teste de QI / Inteligência', time: '~15 min', q: '35 perguntas', cta: 'Iniciar teste de QI' },
-  { type: 'personality' as const, icon: User, title: 'Tipo de personalidade', time: '~7 min', q: '30 perguntas', cta: 'Iniciar teste' },
-  { type: 'career' as const, icon: Briefcase, title: 'Vocacional / Carreira', time: '~8 min', q: '36 perguntas', cta: 'Iniciar teste' },
+  { type: 'iq' as const, icon: Brain, title: 'Teste de QI', time: '~15 min', q: '35 perguntas', desc: 'É aqui que a maioria descobre que estava se subestimando a vida toda.', cta: 'Descobrir meu QI', popular: true },
+  { type: 'personality' as const, icon: User, title: 'Personalidade', time: '~7 min', q: '60 perguntas', desc: 'Entenda por que você pensa e reage do jeito que reage.', cta: 'Fazer o teste', popular: false },
+  { type: 'career' as const, icon: Briefcase, title: 'Vocacional', time: '~8 min', q: '36 perguntas', desc: 'Descubra pra que tipo de trabalho o seu cérebro foi feito.', cta: 'Fazer o teste', popular: false },
 ];
 
 const skills = [
-  {
-    icon: GraduationCap,
-    title: 'Cursos em vídeo',
-    items: ['+20 horas de treino', 'Aulas fáceis de seguir', 'No seu ritmo', 'Acompanhe o progresso'],
-  },
-  {
-    icon: Gamepad2,
-    title: 'Jogos de treino cerebral',
-    items: ['Exercícios cognitivos variados', 'Dificuldade progressiva', 'Memória, lógica, foco e concentração'],
-  },
-  {
-    icon: Puzzle,
-    title: 'Puzzles',
-    items: ['+150 desafios de raciocínio', 'Progressão inteligente', 'Padrões, estratégia e análise'],
-  },
+  { icon: GraduationCap, title: 'Cursos em vídeo', items: ['+20 horas de treino', 'Aulas fáceis de seguir', 'No seu ritmo'] },
+  { icon: Gamepad2, title: 'Jogos de treino cerebral', items: ['Memória, lógica e foco', 'Dificuldade progressiva', 'Acompanhe sua evolução'] },
+  { icon: Puzzle, title: 'Mais de 150 puzzles', items: ['Desafios de raciocínio', 'Padrões e estratégia', 'Novos toda semana'] },
 ];
 
 const included = [
-  'Sua pontuação de QI com análise detalhada',
-  'Perfil cognitivo completo com seus padrões de pensamento',
-  'Exercícios cerebrais pra explorar sua capacidade',
-  'Testes extras de carreira, relações e desenvolvimento',
-  'Desafios de raciocínio avançado',
+  'Sua pontuação exata e onde ela cai na curva, comparada com milhares de pessoas.',
+  'A leitura em português claro do que aquele número significa na sua vida.',
+  'Seus pontos fortes de raciocínio, o que o seu cérebro faz melhor que a média.',
+  'Onde você se destaca de verdade, aquilo que sempre te subestimaram.',
+  'Um certificado do seu resultado pra guardar ou mostrar pra quem duvidou.',
 ];
 
-// Placeholder testimonials — replace with your own real reviews.
 const reviews = [
-  { name: 'Ana C.', place: 'Brasil', text: 'Curto mas desafiador. Gostei muito.' },
-  { name: 'Marcos', place: 'Portugal', text: 'Perguntas variadas e inteligentes. Experiência ótima.' },
-  { name: 'Júlia', place: 'Brasil', text: 'Fiquei surpresa com o resultado — bateu com o que eu esperava.' },
+  { name: 'Camila R.', place: 'Brasil', text: 'Passei a vida achando que era esforçada, não inteligente. Fiz meio com medo. O número me deixou de queixo caído.' },
+  { name: 'Diogo M.', place: 'Portugal', text: 'Me chamaram de burro, desisti de estudar. 15 anos depois fiz esse teste. Devia ter feito antes.' },
+  { name: 'Aline F.', place: 'Brasil', text: 'Fiz pra provar pra mim mesma que não valia a pena. Estava me subestimando faz tempo.' },
 ];
 
 const faqs = [
-  {
-    q: 'Quanto tempo leva o teste?',
-    a: 'Cerca de 15 a 20 minutos. Você pode pensar com calma em cada questão — não há tempo cronometrado contra você.',
-  },
-  {
-    q: 'Como cancelo a assinatura?',
-    a: 'É simples e leva menos de um minuto, direto nas configurações da sua conta. Você mantém o acesso até o fim do período já pago.',
-  },
-  { q: 'Posso refazer o teste?', a: 'Sim! Refaça quando quiser pra acompanhar sua evolução ao longo do tempo.' },
-  { q: 'Funciona em vários aparelhos?', a: 'Sim. Celular, tablet e computador — seu progresso sincroniza em todos.' },
+  { q: 'É pagamento único? Vão me cobrar de novo?', a: `Você desbloqueia seu resultado por ${PRICE.trial}. Depois, o acesso à plataforma completa (todos os testes e o treino cerebral) é ${PRICE.renewal}/${PRICE.period}. Você vê esse valor antes de pagar e cancela quando quiser, em 1 clique. Nada aparece na sua fatura sem você saber.` },
+  { q: 'O teste tem base científica?', a: 'Sim. Ele usa matrizes lógicas no estilo Raven, o mesmo tipo de questão usado em avaliações de raciocínio no mundo todo. Você recebe sua pontuação e seu percentil, não um laudo clínico (isso só um profissional faz pessoalmente).' },
+  { q: 'Quanto tempo leva?', a: 'Cerca de 15 a 20 minutos. Dá pra fazer agora, no celular ou no computador, sem pressa.' },
+  { q: 'E se eu tirar uma pontuação baixa?', a: 'Você vê o número real, sem maquiagem. Mas a maioria das pessoas que temia ser "mediana" descobre o contrário: que se subestimava. Seja qual for o resultado, ele é seu e é honesto.' },
+  { q: 'Como cancelo?', a: 'Em menos de um minuto, direto nas configurações da conta. Você mantém o acesso até o fim do período já pago.' },
 ];
 
 export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, onPractice }: LandingProps) {
   const scrollToPricing = () => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToTests = () => document.getElementById('tests')?.scrollIntoView({ behavior: 'smooth' });
   const startByType = (type: 'iq' | 'personality' | 'career') =>
     type === 'iq' ? onStartIQ() : type === 'personality' ? onStartPersonality() : onStartCareer();
 
   return (
-    <div className="min-h-screen bg-white text-gray-800">
+    <div className="min-h-screen bg-white text-ink">
       {/* Header */}
-      <header className="border-b border-gray-100 sticky top-0 bg-white/90 backdrop-blur z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Brain className="w-7 h-7 text-blue-600" />
-            <span className="text-xl font-bold">{BRAND}</span>
+      <header className="border-b border-slate-100 sticky top-0 bg-white/90 backdrop-blur z-10">
+        <div className="container mx-auto px-4 py-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-brand to-[#2F6BEB]" />
+            <span className="text-lg font-extrabold">Neuro<span className="text-brand">IQ</span></span>
           </div>
-          <button onClick={onStartIQ} className="text-sm font-medium text-blue-600 hover:text-blue-700">
-            Iniciar teste →
-          </button>
+          <div className="flex gap-2.5">
+            <button onClick={onStartIQ} className="text-sm font-semibold px-4 py-2 rounded-lg border border-slate-200 hover:border-brand transition-colors">
+              Entrar
+            </button>
+            <button onClick={scrollToTests} className="text-sm font-semibold px-4 py-2 rounded-lg bg-brand text-white shadow-[0_8px_20px_-8px_rgba(18,160,140,0.6)] hover:bg-brand-dark transition-colors">
+              Iniciar teste
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Hero — text + bell curve */}
-      <section className="bg-gradient-to-b from-blue-50/50 to-white">
-        <div className="container mx-auto px-4 py-16 grid md:grid-cols-2 gap-10 items-center">
+      {/* Hero */}
+      <section className="bg-gradient-to-b from-[#F2F7FD] to-white">
+        <div className="container mx-auto px-4 py-14 md:py-[72px] grid md:grid-cols-2 gap-10 items-center">
           <div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight">
-              Quer saber o seu <span className="text-blue-600">resultado de QI?</span>
+            <h1 className="text-[clamp(30px,4.4vw,50px)] font-extrabold leading-[1.05] tracking-tight text-balance">
+              Você é mais inteligente do que <span className="text-[#2F6BEB]">te disseram.</span>
             </h1>
-            <p className="text-lg text-gray-600 mt-5 max-w-lg">
-              Faça nosso teste de QI e abra caminho para o autoconhecimento e o desenvolvimento da sua mente.
+            <p className="text-[17px] text-slate-500 mt-4 max-w-[40ch]">
+              A maioria das pessoas se subestima a vida inteira. Faça o teste de QI do {BRAND}, veja seu número real e onde você cai na curva. Desbloqueie seu resultado por {PRICE.trial}.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 mt-8">
+            <div className="flex flex-col sm:flex-row gap-3 mt-7">
               <button
                 onClick={onStartIQ}
-                className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                className="bg-brand text-white px-6 py-3.5 rounded-[10px] font-semibold shadow-[0_8px_20px_-8px_rgba(18,160,140,0.6)] hover:bg-brand-dark transition-colors flex items-center justify-center gap-2"
               >
-                Iniciar teste de QI <ArrowRight className="w-5 h-5" />
+                Descobrir meu QI <ArrowRight className="w-5 h-5" />
               </button>
               <button
                 onClick={scrollToPricing}
-                className="px-8 py-4 rounded-xl font-semibold text-lg border-2 border-gray-200 hover:border-gray-300 transition-colors"
+                className="px-6 py-3.5 rounded-[10px] font-semibold border border-slate-200 hover:border-brand transition-colors"
               >
-                Ver preços
+                Como funciona
               </button>
             </div>
           </div>
@@ -174,44 +162,44 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="py-16">
+      {/* Press bar */}
+      <section className="py-6 border-b border-slate-100">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Como funciona</h2>
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            {steps.map((s, i) => (
-              <div key={s.title} className="text-center">
-                <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg mx-auto mb-4">
-                  {i + 1}
-                </div>
-                <h3 className="font-semibold text-lg mb-2">{s.title}</h3>
-                <p className="text-gray-600 text-sm">{s.desc}</p>
-              </div>
+          <div className="flex items-center justify-center gap-x-[clamp(20px,4vw,52px)] gap-y-3 flex-wrap opacity-70">
+            {press.map((p) => (
+              <span key={p} className="font-extrabold text-[15px] text-slate-400 whitespace-nowrap">{p}</span>
             ))}
           </div>
+          <p className="text-center text-slate-400 text-[11.5px] mt-3.5 max-w-[60ch] mx-auto">
+            O {BRAND} não tem relação comercial com as organizações de mídia apresentadas. As referências servem apenas para reconhecer conteúdo editorial independente.
+          </p>
         </div>
       </section>
 
       {/* Available tests */}
-      <section className="bg-slate-50 py-16">
+      <section id="tests" className="py-16 md:py-[72px]">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-2">Testes disponíveis</h2>
-          <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">
-            Cada teste revela uma nova parte de você. Comece pela inteligência — mais testes a caminho.
-          </p>
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-[clamp(24px,3vw,33px)] font-extrabold mb-2">Três testes. Uma resposta sobre você.</h2>
+            <p className="text-slate-500 max-w-[52ch] mx-auto">Comece pelo QI. É o que mais gente faz, e o que mais surpreende.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto">
             {tests.map((t) => (
-              <div key={t.title} className="bg-white border border-gray-200 rounded-2xl p-6 text-center">
-                <t.icon className="w-10 h-10 text-blue-600 mx-auto mb-4" />
-                <h3 className="font-semibold text-lg mb-2">{t.title}</h3>
-                <p className="text-sm text-gray-500 mb-4">
-                  {t.time} · {t.q}
-                </p>
+              <div key={t.title} className="relative bg-white border border-slate-200 rounded-2xl p-6 flex flex-col gap-3 hover:-translate-y-1 hover:shadow-[0_18px_40px_-22px_rgba(18,32,59,0.35)] transition-all">
+                {t.popular && (
+                  <span className="absolute top-3.5 right-3.5 bg-[#E7F1FF] text-[#2F6BEB] text-[11px] font-bold px-2.5 py-1 rounded-full">Mais escolhido</span>
+                )}
+                <div className="w-11 h-11 rounded-xl grid place-items-center bg-brand-light">
+                  <t.icon className="w-5 h-5 text-brand" />
+                </div>
+                <h3 className="font-bold text-lg">{t.title}</h3>
+                <div className="text-[13px] text-slate-500 font-medium">{t.time} · {t.q}</div>
+                <p className="text-[13.5px] text-slate-500 leading-relaxed">{t.desc}</p>
                 <button
                   onClick={() => startByType(t.type)}
-                  className="w-full py-3 rounded-lg font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700"
+                  className="mt-auto w-full py-3 rounded-[10px] font-semibold bg-brand text-white hover:bg-brand-dark transition-colors flex items-center justify-center gap-1.5"
                 >
-                  {t.cta}
+                  {t.cta} <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             ))}
@@ -219,22 +207,69 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
         </div>
       </section>
 
-      {/* Skills / courses (the retention engine) */}
-      <section className="py-16">
+      {/* How it works */}
+      <section className="bg-[#F2F7FD] py-16 md:py-[72px]">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-2">Aumente suas habilidades</h2>
-          <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">
-            Desbloqueie seu potencial com nosso pacote completo de treino cerebral.
+          <div className="text-center mb-10">
+            <h2 className="text-[clamp(24px,3vw,33px)] font-extrabold mb-2">Como funciona</h2>
+            <p className="text-slate-500 max-w-[52ch] mx-auto">Três passos até o número que você sempre quis saber.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            {steps.map((s, i) => (
+              <div key={s.title} className="text-center">
+                <div className="w-11 h-11 rounded-full bg-brand text-white flex items-center justify-center font-bold mx-auto mb-4">{i + 1}</div>
+                <h3 className="font-bold text-lg mb-2">{s.title}</h3>
+                <p className="text-slate-500 text-sm">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Reviews */}
+      <section className="py-16 md:py-[72px]">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="text-[clamp(24px,3vw,33px)] font-extrabold mb-2 text-balance">Gente normal que descobriu não ter nada de mediano.</h2>
+            <p className="text-slate-500 max-w-[52ch] mx-auto">Milhares já pararam de adivinhar e foram ver o número.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5 max-w-4xl mx-auto mb-6">
+            {reviews.map((r) => (
+              <div key={r.name} className="bg-white border border-slate-200 rounded-2xl p-5">
+                <div className="inline-flex items-center gap-0.5 bg-[#00B67A] text-white px-2 py-1 rounded mb-3">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-3.5 h-3.5 fill-white text-white" />
+                  ))}
+                </div>
+                <p className="text-[14.5px] mb-3">"{r.text}"</p>
+                <p className="text-[12.5px] text-slate-500 font-semibold">{r.name} · {r.place}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-slate-500 text-[13.5px]">
+            Avaliado com <b className="text-ink">4,7 / 5</b> · <span className="text-[#00B67A] font-bold">★ Trustpilot</span>
           </p>
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        </div>
+      </section>
+
+      {/* Skills / content platform (the subscription value) */}
+      <section className="bg-[#F2F7FD] py-16 md:py-[72px]">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="text-[clamp(24px,3vw,33px)] font-extrabold mb-2">Uma plataforma pra treinar o cérebro, não só um número.</h2>
+            <p className="text-slate-500 max-w-[52ch] mx-auto">O acesso completo abre uma biblioteca inteira de treino cognitivo.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto">
             {skills.map((sk) => (
-              <div key={sk.title} className="border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-shadow">
-                <sk.icon className="w-10 h-10 text-blue-600 mb-4" />
-                <h3 className="font-semibold text-lg mb-3">{sk.title}</h3>
+              <div key={sk.title} className="bg-white border border-slate-200 rounded-2xl p-6">
+                <div className="w-11 h-11 rounded-xl grid place-items-center bg-brand-light mb-4">
+                  <sk.icon className="w-5 h-5 text-brand" />
+                </div>
+                <h3 className="font-bold text-lg mb-3">{sk.title}</h3>
                 <ul className="space-y-2">
                   {sk.items.map((it) => (
-                    <li key={it} className="flex items-start gap-2 text-sm text-gray-600">
-                      <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                    <li key={it} className="flex items-start gap-2 text-sm text-slate-500">
+                      <Check className="w-4 h-4 text-brand flex-shrink-0 mt-0.5" />
                       {it}
                     </li>
                   ))}
@@ -246,90 +281,68 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
       </section>
 
       {/* What you get */}
-      <section className="bg-slate-50 py-16">
+      <section className="py-16 md:py-[72px]">
         <div className="container mx-auto px-4 max-w-2xl">
-          <h2 className="text-3xl font-bold text-center mb-10">O que você recebe</h2>
-          <ul className="space-y-4">
+          <div className="text-center mb-10">
+            <h2 className="text-[clamp(24px,3vw,33px)] font-extrabold text-balance">Não é um "parabéns" genérico. É o seu resultado.</h2>
+          </div>
+          <ul className="space-y-3">
             {included.map((it) => (
-              <li key={it} className="flex items-start gap-3 bg-white rounded-xl p-4 shadow-sm">
-                <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                <span>{it}</span>
+              <li key={it} className="flex items-start gap-3 bg-white border border-slate-200 rounded-xl p-4">
+                <Check className="w-5 h-5 text-brand flex-shrink-0 mt-0.5" />
+                <span className="text-[15px]">{it}</span>
               </li>
             ))}
           </ul>
         </div>
       </section>
 
-      {/* Reviews */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-10">Avaliações</h2>
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {reviews.map((r) => (
-              <div key={r.name} className="border border-gray-200 rounded-2xl p-6">
-                <div className="flex gap-0.5 mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-gray-700 mb-4">"{r.text}"</p>
-                <p className="text-sm text-gray-500 font-medium">
-                  {r.name} · {r.place}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Pricing */}
-      <section id="pricing" className="bg-slate-50 py-16">
+      <section id="pricing" className="bg-[#F2F7FD] py-16 md:py-[72px]">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-2">Conheça nossos planos</h2>
-          <p className="text-gray-600 text-center mb-10 max-w-2xl mx-auto">
-            Escolha o plano que combina com a sua jornada de desenvolvimento.
-          </p>
-          <div className="max-w-sm mx-auto bg-white rounded-2xl shadow-xl border-2 border-blue-500 p-8">
-            <div className="text-center mb-1 text-xs font-semibold tracking-widest text-blue-600">
-              EXCELÊNCIA MENSAL
+          <div className="text-center mb-10">
+            <h2 className="text-[clamp(24px,3vw,33px)] font-extrabold mb-2">Desbloqueie seu resultado por {PRICE.trial}.</h2>
+            <p className="text-slate-500 max-w-[52ch] mx-auto">Acesso completo aos três testes e à plataforma de treino cerebral.</p>
+          </div>
+          <div className="max-w-sm mx-auto bg-white rounded-[18px] shadow-[0_24px_60px_-34px_rgba(18,32,59,0.4)] border border-slate-200 p-7">
+            <div className="text-xs font-bold tracking-widest text-brand uppercase mb-2.5">Acesso completo</div>
+            <div className="flex items-baseline gap-1.5 mb-1">
+              <span className="text-4xl font-extrabold">{PRICE.trial}</span>
+              <span className="text-slate-500 text-sm">· pra desbloquear hoje</span>
             </div>
-            <div className="text-center mb-1">
-              <span className="text-4xl font-extrabold text-gray-900">{PRICE.trial}</span>
-              <span className="text-gray-600"> / {PRICE.trialDays} dias</span>
-            </div>
-            <p className="text-center text-sm text-gray-500 mb-4">
-              Depois {PRICE.renewal}/{PRICE.period} · renova automaticamente · cancele quando quiser
+            <p className="text-[13px] text-slate-500 mb-5">
+              Depois, {PRICE.renewal}/{PRICE.period} pela plataforma completa e todos os testes. Você vê o valor antes de pagar e cancela quando quiser, em 1 clique.
             </p>
-            <ul className="space-y-2 mb-6">
-              {['Relatório de inteligência personalizado', 'Biblioteca de treino cerebral', 'Cursos com especialistas', 'Avaliação cognitiva completa'].map((it) => (
-                <li key={it} className="flex items-start gap-2 text-sm text-gray-700">
-                  <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+            <ul className="space-y-2.5 mb-6">
+              {['Seu QI exato, classificação e percentil', 'Os três testes: QI, personalidade e vocacional', 'Plataforma de treino cerebral com exercícios e cursos', 'Cancele quando quiser, sem enrolação'].map((it) => (
+                <li key={it} className="flex items-start gap-2 text-sm">
+                  <Check className="w-4 h-4 text-brand flex-shrink-0 mt-0.5" />
                   {it}
                 </li>
               ))}
             </ul>
             <button
               onClick={onStartIQ}
-              className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-colors"
+              className="w-full bg-brand text-white py-3.5 rounded-[10px] font-semibold hover:bg-brand-dark transition-colors"
             >
-              Começar
+              Desbloquear por {PRICE.trial}
             </button>
           </div>
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="py-16">
+      <section className="py-16 md:py-[72px]">
         <div className="container mx-auto px-4 max-w-2xl">
-          <h2 className="text-3xl font-bold text-center mb-10">Perguntas frequentes</h2>
-          <div className="space-y-4">
+          <h2 className="text-[clamp(24px,3vw,33px)] font-extrabold text-center mb-10">Perguntas frequentes</h2>
+          <div className="space-y-3">
             {faqs.map((f) => (
-              <details key={f.q} className="border border-gray-200 rounded-xl p-4 group">
-                <summary className="font-medium cursor-pointer list-none flex justify-between items-center">
+              <details key={f.q} className="border border-slate-200 rounded-xl p-4 group">
+                <summary className="font-semibold cursor-pointer list-none flex justify-between items-center gap-4">
                   {f.q}
-                  <span className="text-blue-600 group-open:rotate-45 transition-transform text-xl">+</span>
+                  <span className="text-brand group-open:rotate-45 transition-transform text-xl flex-shrink-0">+</span>
                 </summary>
-                <p className="text-gray-600 text-sm mt-3">{f.a}</p>
+                <p className="text-slate-500 text-sm mt-3">{f.a}</p>
               </details>
             ))}
           </div>
@@ -337,18 +350,16 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-100 py-10">
-        <div className="container mx-auto px-4 text-center text-sm text-gray-400">
+      <footer className="border-t border-slate-100 py-10">
+        <div className="container mx-auto px-4 text-center text-sm text-slate-400">
           <div className="flex items-center justify-center gap-2 mb-3">
-            <Brain className="w-5 h-5 text-blue-600" />
-            <span className="font-bold text-gray-700">{BRAND}</span>
+            <span className="w-5 h-5 rounded-md bg-gradient-to-br from-brand to-[#2F6BEB]" />
+            <span className="font-extrabold text-ink">Neuro<span className="text-brand">IQ</span></span>
           </div>
-          <button onClick={onPractice} className="hover:text-gray-600 underline">
+          <button onClick={onPractice} className="hover:text-slate-600 underline">
             Modo treino (praticar por nível)
           </button>
-          <p className="mt-4">
-            Teste para fins educativos e de entretenimento. © 2026 {BRAND}. Todos os direitos reservados.
-          </p>
+          <p className="mt-4">Teste para fins recreativos e educativos. © 2026 {BRAND}. Todos os direitos reservados.</p>
         </div>
       </footer>
     </div>

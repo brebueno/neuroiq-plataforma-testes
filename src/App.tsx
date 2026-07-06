@@ -160,10 +160,10 @@ function App() {
 
   const getScoreMessage = () => {
     const percentage = (gameState.score / gameState.totalPuzzles) * 100;
-    if (percentage >= 80) return 'Extraordinary! You possess exceptional analytical intelligence.';
-    if (percentage >= 60) return 'Impressive! Your pattern recognition abilities are remarkable.';
-    if (percentage >= 40) return 'Solid work! Your reasoning is developing well.';
-    return 'These puzzles push the limits of human cognition. Keep training!';
+    if (percentage >= 80) return 'Extraordinário! Sua inteligência analítica é excepcional.';
+    if (percentage >= 60) return 'Impressionante! Seu reconhecimento de padrões é notável.';
+    if (percentage >= 40) return 'Bom trabalho! Seu raciocínio está se desenvolvendo bem.';
+    return 'Esses desafios testam os limites da mente. Continue treinando!';
   };
 
   // ---------- OTHER TESTS (personality / career) ----------
@@ -220,51 +220,51 @@ function App() {
           <div className="mb-6">
             <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              {mode === 'full' ? 'IQ Test Complete!' : `Level ${gameState.currentLevel} Complete!`}
+              {mode === 'full' ? 'Teste de QI concluído!' : `Nível ${gameState.currentLevel} concluído!`}
             </h2>
             <p className="text-gray-600">
-              {mode === 'full' ? '35 questions · progressive difficulty' : `Level ${gameState.currentLevel}`}
+              {mode === 'full' ? '35 perguntas · dificuldade crescente' : `Nível ${gameState.currentLevel}`}
             </p>
           </div>
 
           {/* IQ Display — the payoff */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-4">
+          <div className="bg-gradient-to-r from-teal-50 to-teal-50 rounded-xl p-6 mb-4">
             <div className="flex items-center justify-center gap-2 mb-1">
-              <Brain className="w-7 h-7 text-blue-600" />
-              <span className="text-4xl font-extrabold text-blue-800">IQ {gameState.iq}</span>
+              <Brain className="w-7 h-7 text-teal-600" />
+              <span className="text-4xl font-extrabold text-teal-800">QI {gameState.iq}</span>
               {isNewBestIQ && (
                 <span className="bg-yellow-400 text-yellow-800 text-xs px-2 py-1 rounded-full font-medium">
-                  NEW BEST!
+                  NOVO RECORDE!
                 </span>
               )}
             </div>
-            <div className="text-sm text-blue-700">
-              {getIQClassification(gameState.iq)} • {getIQPercentile(gameState.iq)}th percentile
+            <div className="text-sm text-teal-700">
+              {getIQClassification(gameState.iq)} • percentil {getIQPercentile(gameState.iq)}
             </div>
           </div>
 
           <div className="mb-6">
             <div className="text-2xl font-bold text-gray-700 mb-2">
-              {gameState.score}/{gameState.totalPuzzles} correct
+              {gameState.score}/{gameState.totalPuzzles} certas
             </div>
             <p className="text-gray-600 mb-4 text-sm">{getScoreMessage()}</p>
             <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
               <div
-                className="bg-blue-500 h-3 rounded-full transition-all duration-500"
+                className="bg-teal-500 h-3 rounded-full transition-all duration-500"
                 style={{ width: `${(gameState.score / gameState.totalPuzzles) * 100}%` }}
               ></div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="bg-gray-50 rounded-lg p-3 text-center">
-                <div className="font-semibold text-gray-800">Best Score</div>
+                <div className="font-semibold text-gray-800">Melhor pontuação</div>
                 <div className="text-2xl font-bold text-gray-700">
                   {storedData.highScore}
-                  {isNewHighScore && <span className="text-xs text-yellow-600 ml-1">NEW!</span>}
+                  {isNewHighScore && <span className="text-xs text-yellow-600 ml-1">NOVO!</span>}
                 </div>
               </div>
               <div className="bg-gray-50 rounded-lg p-3 text-center">
-                <div className="font-semibold text-gray-800">Best IQ</div>
+                <div className="font-semibold text-gray-800">Melhor QI</div>
                 <div className="text-2xl font-bold text-gray-700">{storedData.bestIQ}</div>
               </div>
             </div>
@@ -273,16 +273,16 @@ function App() {
           <div className="space-y-3">
             <button
               onClick={backToMenu}
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              className="w-full bg-teal-600 text-white py-3 px-4 rounded-lg hover:bg-teal-700 transition-colors font-medium"
             >
-              Back to Menu
+              Voltar ao início
             </button>
             <button
               onClick={retry}
               className="w-full bg-gray-200 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors font-medium flex items-center justify-center gap-2"
             >
               <RotateCcw className="w-4 h-4" />
-              {mode === 'full' ? 'Retake Test' : 'Retry Level'}
+              {mode === 'full' ? 'Refazer teste' : 'Repetir nível'}
             </button>
           </div>
         </div>
@@ -309,11 +309,11 @@ function App() {
         <div className="container mx-auto px-4 py-12">
           <div className="text-center mb-10">
             <div className="flex items-center justify-center gap-3 mb-4">
-              <Brain className="w-12 h-12 text-blue-600" />
-              <h1 className="text-4xl font-bold text-gray-800">IQ Test</h1>
+              <Brain className="w-12 h-12 text-teal-600" />
+              <h1 className="text-4xl font-bold text-gray-800">Teste de QI</h1>
             </div>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              35 progressive pattern-recognition questions. Discover your IQ score, classification, and percentile.
+              35 perguntas de reconhecimento de padrões, em dificuldade crescente. Descubra sua pontuação, classificação e percentil.
             </p>
           </div>
 
@@ -321,19 +321,19 @@ function App() {
           <div className="max-w-md mx-auto mb-10">
             <button
               onClick={startFullTest}
-              className="w-full bg-blue-600 text-white py-5 px-6 rounded-2xl hover:bg-blue-700 transition-colors font-semibold text-lg shadow-xl flex items-center justify-center gap-3"
+              className="w-full bg-teal-600 text-white py-5 px-6 rounded-2xl hover:bg-teal-700 transition-colors font-semibold text-lg shadow-xl flex items-center justify-center gap-3"
             >
               <Zap className="w-6 h-6" />
-              Start Full IQ Test (35 questions)
+              Começar teste completo (35 perguntas)
             </button>
             <p className="text-center text-gray-500 text-sm mt-3">
-              Takes ~15 minutes · no time pressure · think carefully
+              Leva ~15 minutos · sem pressão de tempo · pense com calma
             </p>
           </div>
 
           {/* Secondary — practice by difficulty */}
           <div className="text-center mb-4">
-            <h2 className="text-lg font-semibold text-gray-700">Or practice a single difficulty level</h2>
+            <h2 className="text-lg font-semibold text-gray-700">Ou pratique um nível de dificuldade</h2>
           </div>
           <LevelSelection onSelectLevel={startLevel} />
         </div>
@@ -352,17 +352,17 @@ function App() {
               <RotateCcw className="w-6 h-6" />
             </button>
             <h1 className="text-2xl font-bold text-gray-800">
-              {mode === 'full' ? 'Full IQ Test' : `Level ${gameState.currentLevel}`}
+              {mode === 'full' ? 'Teste de QI' : `Nível ${gameState.currentLevel}`}
             </h1>
           </div>
 
           <div className="flex items-center gap-4 text-gray-600">
             <span>
-              Question {gameState.currentPuzzle + 1}/{gameState.totalPuzzles}
+              Pergunta {gameState.currentPuzzle + 1}/{gameState.totalPuzzles}
             </span>
             {mode === 'full' && (
-              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                Difficulty {current?.level}/6
+              <span className="text-xs bg-teal-100 text-teal-700 px-2 py-1 rounded-full">
+                Dificuldade {current?.level}/6
               </span>
             )}
           </div>
@@ -372,7 +372,7 @@ function App() {
         <div className="max-w-4xl mx-auto mb-6">
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
-              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+              className="bg-teal-500 h-2 rounded-full transition-all duration-300"
               style={{ width: `${(gameState.currentPuzzle / gameState.totalPuzzles) * 100}%` }}
             ></div>
           </div>

@@ -53,7 +53,7 @@ export default function LikertTest({ title, items, onComplete, onExit }: LikertT
         {/* Progress */}
         <div className="w-full bg-gray-200 rounded-full h-2 mb-10">
           <div
-            className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+            className="bg-teal-500 h-2 rounded-full transition-all duration-300"
             style={{ width: `${(index / items.length) * 100}%` }}
           ></div>
         </div>
@@ -69,7 +69,7 @@ export default function LikertTest({ title, items, onComplete, onExit }: LikertT
               <button
                 key={opt.value}
                 onClick={() => answer(opt.value)}
-                className="w-full py-3 px-4 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-colors font-medium text-gray-700"
+                className="w-full py-3 px-4 rounded-xl border-2 border-gray-200 hover:border-teal-500 hover:bg-teal-50 transition-colors font-medium text-gray-700"
               >
                 {opt.label}
               </button>
