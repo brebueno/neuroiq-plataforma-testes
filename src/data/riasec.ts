@@ -92,14 +92,35 @@ const DESC: Record<string, string> = {
   C: 'Gosta de organizar, seguir processos e trabalhar com precisão.',
 };
 
-const CAREERS: Record<string, string> = {
-  R: 'Engenharia, mecânica, construção, agronomia, TI de infraestrutura.',
-  I: 'Ciências, pesquisa, medicina, dados, análise e tecnologia.',
-  A: 'Design, publicidade, música, escrita, arquitetura e artes.',
-  S: 'Educação, saúde, psicologia, RH e serviço social.',
-  E: 'Vendas, empreendedorismo, gestão, direito e marketing.',
-  C: 'Finanças, contabilidade, administração, logística e auditoria.',
+const COLORS: Record<string, string> = {
+  R: '#64748B',
+  I: '#3B82F6',
+  A: '#EC4899',
+  S: '#10B981',
+  E: '#F59E0B',
+  C: '#14B8A6',
 };
+
+const noteFor = (key: string, pct: number): string =>
+  pct >= 50 ? DESC[key] : `Menos interesse por atividades ${LABELS[key].toLowerCase()}s no momento.`;
+
+// pt-BR careers tagged with a 1–2 letter Holland code. Match = média dos
+// interesses do usuário nas letras do código, então cada carreira puxa das
+// dimensões certas.
+const CAREERS_LIST: [string, string][] = [
+  ['Engenharia', 'RI'], ['Programação e software', 'IR'], ['Ciência de dados', 'IC'],
+  ['Medicina', 'IS'], ['Enfermagem', 'SR'], ['Psicologia', 'SI'], ['Nutrição', 'SI'],
+  ['Fisioterapia', 'SR'], ['Professor / Educação', 'SA'], ['Recursos Humanos', 'SE'],
+  ['Design gráfico', 'AE'], ['Arquitetura', 'AR'], ['Publicidade e marketing', 'AE'],
+  ['Jornalismo', 'AS'], ['Música e artes', 'A'], ['Gastronomia', 'AR'],
+  ['Direito', 'ES'], ['Administração', 'EC'], ['Empreendedorismo', 'ER'], ['Vendas', 'EC'],
+  ['Contabilidade', 'CE'], ['Finanças', 'CI'], ['Logística', 'CR'], ['Veterinária', 'IR'],
+];
+
+export interface CareerMatch {
+  name: string;
+  match: number;
+}
 
 const SCALES = ['R', 'I', 'A', 'S', 'E', 'C'];
 
@@ -133,7 +154,7 @@ export function sampleRiasec(perScale = 6): LikertItem[] {
 export function scoreRiasec(
   answers: number[],
   items: LikertItem[] = riasecPool,
-): { dims: DimensionScore[]; headline: string; careers: string[] } {
+): { dims: DimensionScore[]; headline: string; careers: CareerMatch[] } {
   const acc: Record<string, { sum: number; count: number }> = {};
   items.forEach((item, i) => {
     const a = answers[i] ?? 3;
@@ -143,14 +164,24 @@ export function scoreRiasec(
     acc[item.dim].count += 1;
   });
 
+  const pctByKey: Record<string, number> = {};
   const dims: DimensionScore[] = SCALES.map((k) => {
     const { sum, count } = acc[k] ?? { sum: 0, count: 1 };
-    const pct = Math.round(((sum - count) / (count * 4)) * 100);
-    return { key: k, label: LABELS[k], pct: Math.max(0, Math.min(100, pct)), desc: DESC[k] };
+    const pct = Math.max(0, Math.min(100, Math.round(((sum - count) / (count * 4)) * 100)));
+    pctByKey[k] = pct;
+    return { key: k, label: LABELS[k], pct, desc: DESC[k], color: COLORS[k], note: noteFor(k, pct) };
   });
 
   const top3 = [...dims].sort((a, b) => b.pct - a.pct).slice(0, 3);
   const headline = top3.map((d) => d.key).join('');
-  const careers = top3.map((d) => CAREERS[d.key]);
+
+  const careers: CareerMatch[] = CAREERS_LIST.map(([name, code]) => {
+    const letters = code.split('');
+    const match = Math.round(letters.reduce((s, l) => s + (pctByKey[l] ?? 0), 0) / letters.length);
+    return { name, match };
+  })
+    .sort((a, b) => b.match - a.match)
+    .slice(0, 8);
+
   return { dims, headline, careers };
 }

@@ -19,6 +19,8 @@ export interface DimensionScore {
   label: string;
   pct: number;
   desc: string;
+  color: string; // semantic color for the dimension
+  note: string; // level-based narrative (low / balanced / high)
 }
 
 export const bigFivePool: LikertItem[] = [
@@ -160,6 +162,26 @@ const DESC: Record<string, string> = {
   ES: 'Calmo, equilibrado e resiliente ao estresse.',
 };
 
+// Low-pole descriptions (the other side of each trait) and a semantic color.
+const LOW: Record<string, string> = {
+  O: 'Prático e pé no chão, prefere o testado e aprovado.',
+  C: 'Espontâneo e flexível, menos preso a planos e rotinas.',
+  E: 'Reservado, recarrega as energias na própria companhia.',
+  A: 'Direto e questionador, põe a verdade acima da harmonia.',
+  ES: 'Sensível ao estresse, sente as coisas com intensidade.',
+};
+
+const COLORS: Record<string, string> = {
+  O: '#7C6BFF',
+  C: '#3B82F6',
+  E: '#F59E0B',
+  A: '#10B981',
+  ES: '#14B8A6',
+};
+
+const noteFor = (key: string, pct: number): string =>
+  pct >= 60 ? DESC[key] : pct <= 40 ? LOW[key] : `Equilíbrio entre os dois lados de ${LABELS[key].toLowerCase()}.`;
+
 const shuffle = <T,>(arr: T[]): T[] => {
   const out = [...arr];
   for (let i = out.length - 1; i > 0; i--) {
@@ -204,8 +226,8 @@ export function scoreBigFive(
   const order = ['O', 'C', 'E', 'A', 'ES'];
   const dims: DimensionScore[] = order.map((k) => {
     const { sum, count } = acc[k] ?? { sum: 0, count: 1 };
-    const pct = Math.round(((sum - count) / (count * 4)) * 100);
-    return { key: k, label: LABELS[k], pct: Math.max(0, Math.min(100, pct)), desc: DESC[k] };
+    const pct = Math.max(0, Math.min(100, Math.round(((sum - count) / (count * 4)) * 100)));
+    return { key: k, label: LABELS[k], pct, desc: DESC[k], color: COLORS[k], note: noteFor(k, pct) };
   });
 
   const top = [...dims].sort((a, b) => b.pct - a.pct)[0];

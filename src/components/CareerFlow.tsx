@@ -57,11 +57,13 @@ export default function CareerFlow({ onExit }: CareerFlowProps) {
   if (stage === 'result' && result) {
     return (
       <DimensionResult
-        title="Seu Perfil Vocacional"
-        headline={`Código: ${result.headline}`}
-        subtitle="Modelo RIASEC (Holland Codes)"
+        title="Seu perfil vocacional"
+        headline={result.headline}
+        heroNote="Seu código Holland: os 3 interesses que mais te definem."
+        subtitle="Modelo RIASEC · O*NET"
         dims={result.dims}
-        extra={result.careers}
+        careers={result.careers}
+        hexagon
         onRetake={restart}
         onBack={onExit}
       />

@@ -58,9 +58,10 @@ export default function PersonalityFlow({ onExit }: PersonalityFlowProps) {
   if (stage === 'result' && result) {
     return (
       <DimensionResult
-        title="Seu Perfil de Personalidade"
-        headline={`Traço dominante: ${result.headline}`}
-        subtitle="Modelo Big Five (Cinco Grandes Fatores)"
+        title="Seu perfil de personalidade"
+        headline={result.headline}
+        heroNote={`Seu traço mais forte é ${result.headline.toLowerCase()}.`}
+        subtitle="Modelo Big Five · IPIP-NEO"
         dims={result.dims}
         onRetake={restart}
         onBack={onExit}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Brain, RotateCcw, Trophy, Zap } from 'lucide-react';
+import { Brain, RotateCcw, Zap } from 'lucide-react';
 import LevelSelection from './components/LevelSelection';
 import PuzzleGame from './components/PuzzleGame';
 import Funnel from './components/Funnel';
@@ -8,6 +8,7 @@ import Landing from './components/Landing';
 import PersonalityFlow from './components/PersonalityFlow';
 import CareerFlow from './components/CareerFlow';
 import QuestionView from './components/QuestionView';
+import IQResult from './components/IQResult';
 import { Question } from './quiz/types';
 import { buildQuiz, TYPE_LABEL } from './quiz/build';
 import { GameState, Level, QuestionResult } from './types/game';
@@ -165,14 +166,6 @@ function App() {
     else if (gameState.currentLevel) startLevel(gameState.currentLevel);
   };
 
-  const getScoreMessage = () => {
-    const percentage = (gameState.score / gameState.totalPuzzles) * 100;
-    if (percentage >= 80) return 'Extraordinário! Sua inteligência analítica é excepcional.';
-    if (percentage >= 60) return 'Impressionante! Seu reconhecimento de padrões é notável.';
-    if (percentage >= 40) return 'Bom trabalho! Seu raciocínio está se desenvolvendo bem.';
-    return 'Esses desafios testam os limites da mente. Continue treinando!';
-  };
-
   // ---------- OTHER TESTS (personality / career) ----------
   if (activeTest === 'personality') {
     return <PersonalityFlow onExit={() => setActiveTest(null)} />;
@@ -221,79 +214,35 @@ function App() {
 
   // ---------- RESULTS ----------
   if (gameState.showResults) {
+    const byType = mode === 'full'
+      ? Object.values(
+          questionResults.reduce<Record<string, { type: string; label: string; correct: number; total: number }>>((agg, r, i) => {
+            const t = questions[i]?.type;
+            if (!t) return agg;
+            (agg[t] ||= { type: t, label: TYPE_LABEL[t], correct: 0, total: 0 });
+            agg[t].total += 1;
+            if (r.correct) agg[t].correct += 1;
+            return agg;
+          }, {}),
+        )
+      : undefined;
+
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-          <div className="mb-6">
-            <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              {mode === 'full' ? 'Teste de QI concluído!' : `Nível ${gameState.currentLevel} concluído!`}
-            </h2>
-            <p className="text-gray-600">
-              {mode === 'full' ? `${gameState.totalPuzzles} perguntas · dificuldade crescente` : `Nível ${gameState.currentLevel}`}
-            </p>
-          </div>
-
-          {/* IQ Display — the payoff */}
-          <div className="bg-gradient-to-r from-teal-50 to-teal-50 rounded-xl p-6 mb-4">
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <Brain className="w-7 h-7 text-teal-600" />
-              <span className="text-4xl font-extrabold text-teal-800">QI {gameState.iq}</span>
-              {isNewBestIQ && (
-                <span className="bg-yellow-400 text-yellow-800 text-xs px-2 py-1 rounded-full font-medium">
-                  NOVO RECORDE!
-                </span>
-              )}
-            </div>
-            <div className="text-sm text-teal-700">
-              {getIQClassification(gameState.iq)} • percentil {getIQPercentile(gameState.iq)}
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <div className="text-2xl font-bold text-gray-700 mb-2">
-              {gameState.score}/{gameState.totalPuzzles} certas
-            </div>
-            <p className="text-gray-600 mb-4 text-sm">{getScoreMessage()}</p>
-            <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
-              <div
-                className="bg-teal-500 h-3 rounded-full transition-all duration-500"
-                style={{ width: `${(gameState.score / gameState.totalPuzzles) * 100}%` }}
-              ></div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div className="bg-gray-50 rounded-lg p-3 text-center">
-                <div className="font-semibold text-gray-800">Melhor pontuação</div>
-                <div className="text-2xl font-bold text-gray-700">
-                  {storedData.highScore}
-                  {isNewHighScore && <span className="text-xs text-yellow-600 ml-1">NOVO!</span>}
-                </div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3 text-center">
-                <div className="font-semibold text-gray-800">Melhor QI</div>
-                <div className="text-2xl font-bold text-gray-700">{storedData.bestIQ}</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <button
-              onClick={backToMenu}
-              className="w-full bg-teal-600 text-white py-3 px-4 rounded-lg hover:bg-teal-700 transition-colors font-medium"
-            >
-              Voltar ao início
-            </button>
-            <button
-              onClick={retry}
-              className="w-full bg-gray-200 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors font-medium flex items-center justify-center gap-2"
-            >
-              <RotateCcw className="w-4 h-4" />
-              {mode === 'full' ? 'Refazer teste' : 'Repetir nível'}
-            </button>
-          </div>
-        </div>
-      </div>
+      <IQResult
+        iq={gameState.iq}
+        classification={getIQClassification(gameState.iq)}
+        percentile={getIQPercentile(gameState.iq)}
+        score={gameState.score}
+        total={gameState.totalPuzzles}
+        bestScore={storedData.highScore}
+        bestIQ={storedData.bestIQ}
+        isNewBestIQ={isNewBestIQ}
+        isNewHighScore={isNewHighScore}
+        byType={byType}
+        retryLabel={mode === 'full' ? 'Refazer teste' : 'Repetir nível'}
+        onBack={backToMenu}
+        onRetry={retry}
+      />
     );
   }
 
