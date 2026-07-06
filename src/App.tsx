@@ -7,6 +7,9 @@ import RevealSequence from './components/RevealSequence';
 import Landing from './components/Landing';
 import PersonalityFlow from './components/PersonalityFlow';
 import CareerFlow from './components/CareerFlow';
+import QuestionView from './components/QuestionView';
+import { Question } from './quiz/types';
+import { buildQuiz, TYPE_LABEL } from './quiz/build';
 import { GameState, Level, QuestionResult } from './types/game';
 import { calculateIQFromResults, getIQClassification, getIQPercentile } from './utils/iqCalculator';
 import { loadGameData, updateHighScore, updateBestIQ, markLevelCompleted } from './utils/localStorage';
@@ -17,29 +20,8 @@ interface PlannedQuestion {
   puzzleIndex: number;
 }
 
-// Build a full 25-question test with progressively harder questions.
-// Real IQ tests ramp difficulty and score across the whole spread.
-const FULL_TEST_DISTRIBUTION: Record<Level, number> = {
-  1: 4,
-  2: 6,
-  3: 7,
-  4: 7,
-  5: 6,
-  6: 5,
-};
-
-const buildFullTestPlan = (): PlannedQuestion[] => {
-  const plan: PlannedQuestion[] = [];
-  (Object.keys(FULL_TEST_DISTRIBUTION) as unknown as Level[]).forEach((key) => {
-    const level = Number(key) as Level;
-    const count = FULL_TEST_DISTRIBUTION[level];
-    for (let i = 0; i < count; i++) {
-      plan.push({ level, puzzleIndex: i });
-    }
-  });
-  return plan;
-};
-
+// The full IQ test is now a MIXED, multi-type quiz (see quiz/build). Practice
+// mode still uses a single-level matrix plan.
 const buildLevelPlan = (level: Level, count = 5): PlannedQuestion[] => {
   const plan: PlannedQuestion[] = [];
   for (let i = 0; i < count; i++) {
@@ -53,6 +35,7 @@ type Mode = 'landing' | 'menu' | 'level' | 'full';
 function App() {
   const [mode, setMode] = useState<Mode>('landing');
   const [plan, setPlan] = useState<PlannedQuestion[]>([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [gameState, setGameState] = useState<GameState>({
     currentLevel: null,
     currentPuzzle: 0,
@@ -74,6 +57,7 @@ function App() {
   const startTest = (newMode: Mode, newPlan: PlannedQuestion[]) => {
     setMode(newMode);
     setPlan(newPlan);
+    setQuestions([]);
     setPaid(false);
     setRevealed(false);
     setGameState({
@@ -90,7 +74,26 @@ function App() {
     setIsNewBestIQ(false);
   };
 
-  const startFullTest = () => startTest('full', buildFullTestPlan());
+  const startFullTest = () => {
+    const qs = buildQuiz();
+    setMode('full');
+    setPlan([]);
+    setQuestions(qs);
+    setPaid(false);
+    setRevealed(false);
+    setGameState({
+      currentLevel: (qs[0]?.difficulty ?? 1) as Level,
+      currentPuzzle: 0,
+      score: 0,
+      totalPuzzles: qs.length,
+      showResults: false,
+      iq: 0,
+      timeSpent: [],
+    });
+    setQuestionResults([]);
+    setIsNewHighScore(false);
+    setIsNewBestIQ(false);
+  };
   const startLevel = (level: Level) => startTest('level', buildLevelPlan(level));
 
   const nextPuzzle = (result: QuestionResult) => {
@@ -124,9 +127,12 @@ function App() {
         showResults: true,
       }));
     } else {
+      const nextLevel = (mode === 'full'
+        ? questions[nextPuzzleIndex]?.difficulty
+        : plan[nextPuzzleIndex]?.level) as Level;
       setGameState((prev) => ({
         ...prev,
-        currentLevel: plan[nextPuzzleIndex].level,
+        currentLevel: nextLevel,
         score: newScore,
         timeSpent: newTimeSpent,
         currentPuzzle: nextPuzzleIndex,
@@ -137,6 +143,7 @@ function App() {
   const backToMenu = () => {
     setMode('landing');
     setPlan([]);
+    setQuestions([]);
     setPaid(false);
     setRevealed(false);
     setGameState({
@@ -223,7 +230,7 @@ function App() {
               {mode === 'full' ? 'Teste de QI concluído!' : `Nível ${gameState.currentLevel} concluído!`}
             </h2>
             <p className="text-gray-600">
-              {mode === 'full' ? '35 perguntas · dificuldade crescente' : `Nível ${gameState.currentLevel}`}
+              {mode === 'full' ? `${gameState.totalPuzzles} perguntas · dificuldade crescente` : `Nível ${gameState.currentLevel}`}
             </p>
           </div>
 
@@ -342,9 +349,10 @@ function App() {
   }
 
   // ---------- IN-TEST ----------
-  const current = plan[gameState.currentPuzzle];
+  const currentQ = mode === 'full' ? questions[gameState.currentPuzzle] : null;
+  const currentP = mode !== 'full' ? plan[gameState.currentPuzzle] : null;
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-b from-[#F2F7FD] to-white">
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
@@ -356,13 +364,13 @@ function App() {
             </h1>
           </div>
 
-          <div className="flex items-center gap-4 text-gray-600">
-            <span>
+          <div className="flex items-center gap-3 text-gray-600">
+            <span className="text-sm">
               Pergunta {gameState.currentPuzzle + 1}/{gameState.totalPuzzles}
             </span>
-            {mode === 'full' && (
-              <span className="text-xs bg-teal-100 text-teal-700 px-2 py-1 rounded-full">
-                Dificuldade {current?.level}/6
+            {currentQ && (
+              <span className="text-xs font-medium bg-teal-100 text-teal-700 px-2.5 py-1 rounded-full">
+                {TYPE_LABEL[currentQ.type]}
               </span>
             )}
           </div>
@@ -378,12 +386,16 @@ function App() {
           </div>
         </div>
 
-        <PuzzleGame
-          key={gameState.currentPuzzle}
-          level={current.level}
-          puzzleIndex={current.puzzleIndex}
-          onAnswer={nextPuzzle}
-        />
+        {mode === 'full' && currentQ ? (
+          <QuestionView key={gameState.currentPuzzle} question={currentQ} index={gameState.currentPuzzle} onAnswer={nextPuzzle} />
+        ) : currentP ? (
+          <PuzzleGame
+            key={gameState.currentPuzzle}
+            level={currentP.level}
+            puzzleIndex={currentP.puzzleIndex}
+            onAnswer={nextPuzzle}
+          />
+        ) : null}
       </div>
     </div>
   );
