@@ -35,14 +35,14 @@ export function calculateIQFromResults(results: { level: Level; correct: boolean
 }
 
 export function getIQClassification(iq: number): string {
-  if (iq >= 145) return 'Genius';
-  if (iq >= 130) return 'Very Superior';
+  if (iq >= 145) return 'Gênio';
+  if (iq >= 130) return 'Muito superior';
   if (iq >= 120) return 'Superior';
-  if (iq >= 110) return 'High Average';
-  if (iq >= 90) return 'Average';
-  if (iq >= 80) return 'Low Average';
-  if (iq >= 70) return 'Borderline';
-  return 'Below Average';
+  if (iq >= 110) return 'Acima da média';
+  if (iq >= 90) return 'Média';
+  if (iq >= 80) return 'Abaixo da média';
+  if (iq >= 70) return 'Limítrofe';
+  return 'Baixa';
 }
 
 export function getIQPercentile(iq: number): number {

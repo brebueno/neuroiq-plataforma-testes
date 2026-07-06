@@ -1,79 +1,160 @@
-import { Trophy, RotateCcw } from 'lucide-react';
+import { RotateCcw, Sparkles, Lock } from 'lucide-react';
 import { DimensionScore } from '../data/bigFive';
+import { CareerMatch } from '../data/riasec';
 
 interface DimensionResultProps {
   title: string;
-  headline: string;
+  headline: string; // dominant trait or Holland code
+  heroNote?: string;
   subtitle?: string;
   dims: DimensionScore[];
-  extra?: string[];
+  careers?: CareerMatch[];
+  hexagon?: boolean;
   onRetake: () => void;
   onBack: () => void;
+}
+
+// RIASEC / radar hexagon — plots all 6 interest scores on their axes.
+function Hexagon({ dims }: { dims: DimensionScore[] }) {
+  const size = 240;
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = 92;
+  const n = dims.length; // 6
+  const angle = (i: number) => (Math.PI * 2 * i) / n - Math.PI / 2;
+  const pt = (i: number, radius: number) => ({
+    x: cx + radius * Math.cos(angle(i)),
+    y: cy + radius * Math.sin(angle(i)),
+  });
+
+  const grid = [0.25, 0.5, 0.75, 1].map((f) =>
+    dims.map((_, i) => pt(i, r * f)).map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' '),
+  );
+  const profile = dims.map((d, i) => pt(i, r * (d.pct / 100))).map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+
+  return (
+    <svg viewBox={`0 0 ${size} ${size}`} className="w-full max-w-[260px] mx-auto">
+      {grid.map((g, i) => (
+        <polygon key={i} points={g} fill="none" stroke="#e5e9f0" strokeWidth="1" />
+      ))}
+      {dims.map((_, i) => {
+        const p = pt(i, r);
+        return <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#e5e9f0" strokeWidth="1" />;
+      })}
+      <polygon points={profile} fill="rgba(18,160,140,0.18)" stroke="#12A08C" strokeWidth="2" />
+      {dims.map((d, i) => {
+        const p = pt(i, r + 16);
+        return (
+          <text key={d.key} x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle" fontSize="12" fontWeight="700" fill={d.color}>
+            {d.key}
+          </text>
+        );
+      })}
+    </svg>
+  );
+}
+
+function Ring({ pct, color }: { pct: number; color: string }) {
+  const r = 18;
+  const c = 2 * Math.PI * r;
+  return (
+    <svg viewBox="0 0 44 44" className="w-11 h-11 flex-shrink-0 -rotate-90">
+      <circle cx="22" cy="22" r={r} fill="none" stroke="#eef1f5" strokeWidth="4" />
+      <circle cx="22" cy="22" r={r} fill="none" stroke={color} strokeWidth="4" strokeLinecap="round" strokeDasharray={`${(pct / 100) * c} ${c}`} />
+      <text x="22" y="22" textAnchor="middle" dominantBaseline="middle" className="rotate-90" transform="rotate(90 22 22)" fontSize="11" fontWeight="700" fill="#12203b">
+        {pct}
+      </text>
+    </svg>
+  );
 }
 
 export default function DimensionResult({
   title,
   headline,
+  heroNote,
   subtitle,
   dims,
-  extra,
+  careers,
+  hexagon,
   onRetake,
   onBack,
 }: DimensionResultProps) {
+  const top = [...dims].sort((a, b) => b.pct - a.pct)[0];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-lg w-full">
-        <div className="text-center mb-6">
-          <Trophy className="w-14 h-14 text-yellow-500 mx-auto mb-3" />
-          <h2 className="text-xl font-bold text-gray-800">{title}</h2>
-          <div className="text-3xl font-extrabold text-blue-700 mt-2">{headline}</div>
-          {subtitle && <p className="text-gray-600 text-sm mt-1">{subtitle}</p>}
+    <div className="min-h-screen bg-gradient-to-b from-[#F2F7FD] to-white py-10 px-4">
+      <div className="max-w-xl mx-auto">
+        {/* Hero */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-teal-600 mb-3">
+            <Sparkles className="w-4 h-4" /> {title}
+          </div>
+          <div className="text-5xl font-extrabold tracking-tight mb-2" style={{ color: top.color }}>
+            {headline}
+          </div>
+          {heroNote && <p className="text-gray-600 max-w-sm mx-auto">{heroNote}</p>}
+          {subtitle && <p className="text-gray-400 text-xs mt-2">{subtitle}</p>}
         </div>
 
-        <div className="space-y-4 mb-6">
-          {dims.map((d) => (
-            <div key={d.key}>
-              <div className="flex justify-between items-center mb-1">
-                <span className="font-medium text-gray-800">{d.label}</span>
-                <span className="text-sm font-semibold text-blue-700">{d.pct}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5 mb-1">
-                <div
-                  className="bg-blue-500 h-2.5 rounded-full transition-all duration-700"
-                  style={{ width: `${d.pct}%` }}
-                ></div>
-              </div>
-              <p className="text-xs text-gray-500">{d.desc}</p>
-            </div>
-          ))}
-        </div>
-
-        {extra && extra.length > 0 && (
-          <div className="bg-blue-50 rounded-xl p-4 mb-6">
-            <h3 className="font-semibold text-gray-800 text-sm mb-2">Carreiras que combinam com você</h3>
-            <ul className="space-y-1">
-              {extra.map((e, i) => (
-                <li key={i} className="text-sm text-gray-700">
-                  • {e}
-                </li>
-              ))}
-            </ul>
+        {/* Hexagon (vocational) */}
+        {hexagon && (
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 mb-5 shadow-sm">
+            <Hexagon dims={dims} />
           </div>
         )}
 
+        {/* Dimensions */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-5 shadow-sm">
+          <h3 className="font-bold text-ink mb-5">Suas dimensões</h3>
+          <div className="space-y-5">
+            {dims.map((d) => (
+              <div key={d.key}>
+                <div className="flex justify-between items-baseline mb-1.5">
+                  <span className="font-semibold text-ink">{d.label}</span>
+                  <span className="text-sm font-bold tabular-nums" style={{ color: d.color }}>{d.pct}%</span>
+                </div>
+                <div className="w-full bg-gray-100 rounded-full h-2 mb-1.5">
+                  <div className="h-2 rounded-full transition-all duration-700" style={{ width: `${d.pct}%`, backgroundColor: d.color }} />
+                </div>
+                <p className="text-[13px] text-gray-500">{d.note}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Careers with % match (vocational) */}
+        {careers && careers.length > 0 && (
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-5 shadow-sm">
+            <h3 className="font-bold text-ink mb-1">Carreiras que mais combinam</h3>
+            <p className="text-[13px] text-gray-500 mb-4">Compatibilidade com o seu perfil de interesses.</p>
+            <div className="space-y-3">
+              {careers.map((c) => (
+                <div key={c.name} className="flex items-center gap-3">
+                  <Ring pct={c.match} color="#12A08C" />
+                  <div className="flex-1">
+                    <div className="font-semibold text-ink text-[15px]">{c.name}</div>
+                    <div className="text-xs text-gray-500">{c.match}% de compatibilidade</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Teaser for the deeper report (facets, full career map) */}
+        <div className="bg-slate-50 border border-dashed border-slate-300 rounded-2xl p-5 mb-6 text-center">
+          <Lock className="w-5 h-5 text-slate-400 mx-auto mb-2" />
+          <p className="text-sm text-gray-600">
+            Relatório completo com análise por facetas, pontos fortes e plano de desenvolvimento em breve.
+          </p>
+        </div>
+
         <div className="space-y-3">
-          <button
-            onClick={onBack}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-          >
+          <button onClick={onBack} className="w-full bg-brand text-white py-3.5 px-4 rounded-xl hover:bg-brand-dark transition-colors font-semibold">
             Voltar ao início
           </button>
-          <button
-            onClick={onRetake}
-            className="w-full bg-gray-200 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors font-medium flex items-center justify-center gap-2"
-          >
-            <RotateCcw className="w-4 h-4" />
-            Refazer teste
+          <button onClick={onRetake} className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-xl hover:bg-gray-200 transition-colors font-medium flex items-center justify-center gap-2">
+            <RotateCcw className="w-4 h-4" /> Refazer teste
           </button>
         </div>
       </div>

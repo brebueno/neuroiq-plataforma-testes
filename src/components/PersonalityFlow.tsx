@@ -2,7 +2,7 @@ import { useState } from 'react';
 import LikertTest from './LikertTest';
 import Funnel from './Funnel';
 import DimensionResult from './DimensionResult';
-import { bigFiveItems, scoreBigFive } from '../data/bigFive';
+import { sampleBigFive, scoreBigFive } from '../data/bigFive';
 
 interface PersonalityFlowProps {
   onExit: () => void;
@@ -12,10 +12,14 @@ type Stage = 'quiz' | 'funnel' | 'result';
 
 export default function PersonalityFlow({ onExit }: PersonalityFlowProps) {
   const [stage, setStage] = useState<Stage>('quiz');
+  // Sample a fresh, facet-balanced subset for THIS session — retaking never
+  // shows the same set of questions. Scored against the exact items answered.
+  const [items, setItems] = useState(() => sampleBigFive(2));
   const [result, setResult] = useState<ReturnType<typeof scoreBigFive> | null>(null);
 
   const restart = () => {
     setResult(null);
+    setItems(sampleBigFive(2));
     setStage('quiz');
   };
 
@@ -23,10 +27,10 @@ export default function PersonalityFlow({ onExit }: PersonalityFlowProps) {
     return (
       <LikertTest
         title="Teste de Personalidade"
-        items={bigFiveItems}
+        items={items}
         onExit={onExit}
         onComplete={(answers) => {
-          setResult(scoreBigFive(answers));
+          setResult(scoreBigFive(answers, items));
           setStage('funnel');
         }}
       />
@@ -54,9 +58,10 @@ export default function PersonalityFlow({ onExit }: PersonalityFlowProps) {
   if (stage === 'result' && result) {
     return (
       <DimensionResult
-        title="Seu Perfil de Personalidade"
-        headline={`Traço dominante: ${result.headline}`}
-        subtitle="Modelo Big Five (Cinco Grandes Fatores)"
+        title="Seu perfil de personalidade"
+        headline={result.headline}
+        heroNote={`Seu traço mais forte é ${result.headline.toLowerCase()}.`}
+        subtitle="Modelo Big Five · IPIP-NEO"
         dims={result.dims}
         onRetake={restart}
         onBack={onExit}

@@ -48,7 +48,7 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({ onSelectLevel }) => {
       title: "Celestial",
       description: "Abstract mathematical relationships across dimensions",
       icon: Sparkles,
-      color: "from-purple-600 to-indigo-900",
+      color: "from-purple-600 to-teal-900",
       difficulty: "Celestial"
     },
     {
@@ -71,7 +71,7 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({ onSelectLevel }) => {
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">{storedData.highScore}</div>
+            <div className="text-2xl font-bold text-teal-600">{storedData.highScore}</div>
             <div className="text-sm text-gray-600">High Score</div>
           </div>
           <div className="text-center">
@@ -150,8 +150,8 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({ onSelectLevel }) => {
         <h3 className="text-lg font-semibold text-gray-800 mb-4">How to Play</h3>
         <div className="grid md:grid-cols-3 gap-6 text-sm text-gray-600">
           <div className="flex items-start gap-3">
-            <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-              <span className="text-blue-600 font-bold text-xs">1</span>
+            <div className="w-6 h-6 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span className="text-teal-600 font-bold text-xs">1</span>
             </div>
             <div>
               <p className="font-medium text-gray-700 mb-1">Study the Pattern</p>
@@ -160,8 +160,8 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({ onSelectLevel }) => {
           </div>
           
           <div className="flex items-start gap-3">
-            <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-              <span className="text-blue-600 font-bold text-xs">2</span>
+            <div className="w-6 h-6 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span className="text-teal-600 font-bold text-xs">2</span>
             </div>
             <div>
               <p className="font-medium text-gray-700 mb-1">Find the Missing Piece</p>
@@ -170,8 +170,8 @@ const LevelSelection: React.FC<LevelSelectionProps> = ({ onSelectLevel }) => {
           </div>
           
           <div className="flex items-start gap-3">
-            <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-              <span className="text-blue-600 font-bold text-xs">3</span>
+            <div className="w-6 h-6 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span className="text-teal-600 font-bold text-xs">3</span>
             </div>
             <div>
               <p className="font-medium text-gray-700 mb-1">Choose Your Answer</p>

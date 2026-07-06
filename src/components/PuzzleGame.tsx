@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Check, X, ArrowRight, Clock, Brain } from 'lucide-react';
+import { Check, X, Clock, Brain } from 'lucide-react';
 import { Level, Puzzle, QuestionResult } from '../types/game';
 import { generatePuzzle } from '../utils/puzzleGenerator';
 import { calculateQuestionIQ, getIQClassification } from '../utils/iqCalculator';
@@ -22,7 +22,7 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({ level, puzzleIndex, onAnswer })
   const [questionIQ, setQuestionIQ] = useState<number>(0);
 
   useEffect(() => {
-    const newPuzzle = generatePuzzle(level, puzzleIndex);
+    const newPuzzle = generatePuzzle(level);
     setPuzzle(newPuzzle);
     setSelectedAnswer(null);
     setShowResult(false);
@@ -67,7 +67,7 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({ level, puzzleIndex, onAnswer })
   if (!puzzle) {
     return (
       <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
       </div>
     );
   }
@@ -76,7 +76,7 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({ level, puzzleIndex, onAnswer })
     <div className="max-w-4xl mx-auto">
       <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
         <h2 className="text-xl font-semibold text-gray-800 mb-6 text-center">
-          What comes next in the pattern?
+          O que vem a seguir no padrão?
         </h2>
         
         {/* Matrix Display */}
@@ -86,7 +86,7 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({ level, puzzleIndex, onAnswer })
               key={index}
               className={`aspect-square border-2 rounded-lg flex items-center justify-center ${
                 index === 8 
-                  ? 'border-dashed border-blue-300 bg-blue-50' 
+                  ? 'border-dashed border-teal-300 bg-teal-50' 
                   : 'border-gray-300 bg-gray-50'
               }`}
             >
@@ -94,7 +94,7 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({ level, puzzleIndex, onAnswer })
                 <PatternDisplay pattern={pattern} size={80} />
               )}
               {index === 8 && (
-                <div className="text-3xl text-blue-400 font-bold">?</div>
+                <div className="text-3xl text-teal-400 font-bold">?</div>
               )}
             </div>
           ))}
@@ -104,7 +104,7 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({ level, puzzleIndex, onAnswer })
       {/* Answer Options */}
       <div className="bg-white rounded-2xl shadow-xl p-8">
         <h3 className="text-lg font-semibold text-gray-800 mb-6 text-center">
-          Choose the correct answer:
+          Escolha a resposta certa:
         </h3>
         
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-md mx-auto">
@@ -120,7 +120,7 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({ level, puzzleIndex, onAnswer })
                     : 'border-red-500 bg-red-50'
                   : showResult && index === puzzle.correctAnswer
                     ? 'border-green-500 bg-green-50'
-                    : 'border-gray-300 bg-gray-50 hover:border-blue-300 hover:bg-blue-50'
+                    : 'border-gray-300 bg-gray-50 hover:border-teal-300 hover:bg-teal-50'
               } ${showResult ? 'cursor-default' : 'cursor-pointer'}`}
             >
               <div className="relative">
@@ -156,21 +156,21 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({ level, puzzleIndex, onAnswer })
               {isCorrect ? (
                 <>
                   <Check className="w-5 h-5" />
-                  <span className="font-medium">Correct!</span>
+                  <span className="font-medium">Certo!</span>
                 </>
               ) : (
                 <>
                   <X className="w-5 h-5" />
-                  <span className="font-medium">Incorrect</span>
+                  <span className="font-medium">Errado</span>
                 </>
               )}
             </div>
             
             {/* Question IQ Display */}
             <div className="flex items-center justify-center gap-4 text-sm">
-              <div className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full">
+              <div className="flex items-center gap-1 px-3 py-1 bg-teal-100 text-teal-800 rounded-full">
                 <Brain className="w-4 h-4" />
-                <span className="font-medium">IQ: {questionIQ}</span>
+                <span className="font-medium">QI: {questionIQ}</span>
                 <span className="text-xs">({getIQClassification(questionIQ)})</span>
               </div>
               
