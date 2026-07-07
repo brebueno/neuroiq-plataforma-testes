@@ -28,7 +28,8 @@ export default async function handler(req, res) {
     return;
   }
 
-  const stripe = new Stripe(secret);
+  // Cliente fetch: evita StripeConnectionError no runtime serverless da Vercel.
+  const stripe = new Stripe(secret, { httpClient: Stripe.createFetchHttpClient() });
   const origin = req.headers.origin || (req.headers.host ? `https://${req.headers.host}` : '');
   const trialDays = Number(process.env.STRIPE_TRIAL_DAYS ?? 7);
   const email = req.body && typeof req.body === 'object' ? req.body.email : undefined;

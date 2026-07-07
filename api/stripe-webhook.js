@@ -50,7 +50,7 @@ export default async function handler(req, res) {
     return;
   }
 
-  const stripe = new Stripe(secret);
+  const stripe = new Stripe(secret, { httpClient: Stripe.createFetchHttpClient() });
   const sig = req.headers['stripe-signature'];
 
   let event;
