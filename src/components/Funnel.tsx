@@ -25,17 +25,31 @@ const OFFER = {
 };
 
 /**
- * DEMO CHECKOUT.
- * To take real money, replace `fakePay()` with a call to YOUR backend that
- * creates a Stripe Checkout Session and redirects to it. The Stripe SECRET key
- * lives only on the backend — never in this frontend file.
+ * Calls the serverless endpoint to create a real Stripe Checkout Session and
+ * returns the hosted checkout URL. Returns null if Stripe isn't configured yet
+ * (e.g. local `npm run dev` without `vercel dev`), so we can fall back to demo.
+ * The Stripe SECRET key lives only on the backend — never in this file.
  */
-const fakePay = () => new Promise<void>((resolve) => setTimeout(resolve, 1800));
+async function startCheckout(email: string): Promise<string | null> {
+  try {
+    const res = await fetch('/api/create-checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.url ?? null;
+  } catch {
+    return null;
+  }
+}
 
 type Stage = 'tease' | 'paywall' | 'processing';
 
 export default function Funnel({ headline, lockedLabel, lockedValue, bullets, onUnlock, onBack, initialStage = 'tease' }: FunnelProps) {
   const [stage, setStage] = useState<Stage>(initialStage);
+  const [email, setEmail] = useState('');
 
   // ---------- TEASE: result is ready, but locked ----------
   if (stage === 'tease') {
@@ -89,8 +103,13 @@ export default function Funnel({ headline, lockedLabel, lockedValue, bullets, on
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
     setStage('processing');
-    await fakePay(); // ← swap for real Stripe call
-    onUnlock();
+    const url = await startCheckout(email);
+    if (url) {
+      window.location.href = url; // → Stripe hosted checkout
+    } else {
+      // Stripe not wired locally → demo unlock so the flow still works.
+      onUnlock();
+    }
   };
 
   return (
@@ -121,37 +140,15 @@ export default function Funnel({ headline, lockedLabel, lockedValue, bullets, on
           </span>
         </div>
 
-        <div className="text-[11px] text-center text-gray-400 mb-3">
-          ⚠️ Checkout de demonstração — conecte seu Stripe no back-end pra cobrar de verdade
-        </div>
         <form onSubmit={handlePay} className="space-y-3">
           <input
             required
-            placeholder="E-mail"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Seu melhor e-mail"
             type="email"
             className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
           />
-          <div className="relative">
-            <CreditCard className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              required
-              placeholder="Número do cartão"
-              inputMode="numeric"
-              className="w-full border border-gray-300 rounded-lg pl-9 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <input
-              required
-              placeholder="MM/AA"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
-            />
-            <input
-              required
-              placeholder="CVV"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
-            />
-          </div>
           <button
             type="submit"
             disabled={stage === 'processing'}
@@ -160,12 +157,12 @@ export default function Funnel({ headline, lockedLabel, lockedValue, bullets, on
             {stage === 'processing' ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Processando...
+                Redirecionando...
               </>
             ) : (
               <>
-                Pagar {OFFER.currency}
-                {OFFER.trialPrice} e ver resultado
+                <CreditCard className="w-5 h-5" />
+                Ir para o pagamento seguro
               </>
             )}
           </button>
@@ -173,7 +170,7 @@ export default function Funnel({ headline, lockedLabel, lockedValue, bullets, on
 
         <div className="flex items-center justify-center gap-1.5 mt-4 text-xs text-gray-400">
           <Lock className="w-3 h-3" />
-          Pagamento seguro e criptografado
+          Cartão processado com segurança pela Stripe
         </div>
       </div>
     </div>
