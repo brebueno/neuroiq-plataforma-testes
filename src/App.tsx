@@ -10,6 +10,7 @@ import CareerFlow from './components/CareerFlow';
 import QuestionView from './components/QuestionView';
 import IQResult from './components/IQResult';
 import ResultsPreview from './components/ResultsPreview';
+import PaymentReturn from './components/PaymentReturn';
 import { Question } from './quiz/types';
 import { buildQuiz, TYPE_LABEL } from './quiz/build';
 import { GameState, Level, QuestionResult } from './types/game';
@@ -61,25 +62,13 @@ function App() {
     return <ResultsPreview />;
   }
 
-  // Return from Stripe Checkout. ⚠️ This only reads a URL flag — it is NOT proof
-  // of payment. Before launch, gate real access with a Stripe WEBHOOK that marks
-  // the customer as paid server-side (anyone can type ?paid=1 today).
-  if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('paid') === '1') {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-[#F2F7FD] to-white flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-          <div className="text-5xl mb-4">🎉</div>
-          <h1 className="text-2xl font-extrabold text-ink mb-2">Pagamento confirmado!</h1>
-          <p className="text-gray-600 mb-6">Seu acesso foi liberado. Bem-vindo(a) ao clube.</p>
-          <button
-            onClick={() => (window.location.href = '/')}
-            className="w-full bg-brand text-white py-3.5 rounded-xl hover:bg-brand-dark transition-colors font-semibold"
-          >
-            Começar
-          </button>
-        </div>
-      </div>
-    );
+  // Return from Stripe Checkout — PaymentReturn verifies the session server-side
+  // (asks Stripe) before granting access, so ?paid=1 alone can't unlock.
+  if (typeof window !== 'undefined') {
+    const sp = new URLSearchParams(window.location.search);
+    if (sp.get('session_id') || sp.get('paid') === '1') {
+      return <PaymentReturn />;
+    }
   }
 
   const startTest = (newMode: Mode, newPlan: PlannedQuestion[]) => {
