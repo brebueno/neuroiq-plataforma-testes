@@ -48,7 +48,7 @@ export default async function handler(req, res) {
       customer_email: email || undefined,
       allow_promotion_codes: true,
       // Embedded Checkout (Stripe Elements): o pagamento roda DENTRO da página.
-      ui_mode: 'embedded',
+      ui_mode: 'embedded_page',
       return_url: `${origin}/?session_id={CHECKOUT_SESSION_ID}`,
     });
     res.status(200).json({ clientSecret: session.client_secret });
