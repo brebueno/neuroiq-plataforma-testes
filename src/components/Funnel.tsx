@@ -20,7 +20,7 @@ const OFFER = {
   currency: 'R$',
   trialPrice: '9,90',
   trialDays: 7,
-  renewalPrice: '159,90',
+  renewalPrice: '159,00',
   renewalPeriod: 'mês',
 };
 

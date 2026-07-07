@@ -4,7 +4,7 @@ import { Logo } from './Logo';
 const BRAND = 'QIMind';
 
 // Pricing — edit in ONE place (must match Funnel.tsx OFFER).
-const PRICE = { trial: 'R$9,90', renewal: 'R$159,90', period: 'mês' };
+const PRICE = { trial: 'R$9,90', renewal: 'R$159,00', period: 'mês' };
 
 interface LandingProps {
   onStartIQ: () => void;
