@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Lock, Check, ShieldCheck, CreditCard, Loader2 } from 'lucide-react';
+import { Lock, Check, ShieldCheck } from 'lucide-react';
+import StripeCheckout from './StripeCheckout';
 
 interface FunnelProps {
   headline?: string;
@@ -12,9 +13,8 @@ interface FunnelProps {
 }
 
 /**
- * OFFER CONFIG — edit these to change your pricing.
- * The renewal terms MUST be shown clearly before payment (they are, below).
- * This keeps chargebacks low and payment processors happy.
+ * OFFER CONFIG — edit these to change your pricing (must match the Stripe prices).
+ * A renovação é mostrada CLARAMENTE antes do pagamento (evita chargeback).
  */
 const OFFER = {
   currency: 'R$',
@@ -24,32 +24,10 @@ const OFFER = {
   renewalPeriod: 'mês',
 };
 
-/**
- * Calls the serverless endpoint to create a real Stripe Checkout Session and
- * returns the hosted checkout URL. Returns null if Stripe isn't configured yet
- * (e.g. local `npm run dev` without `vercel dev`), so we can fall back to demo.
- * The Stripe SECRET key lives only on the backend — never in this file.
- */
-async function startCheckout(email: string): Promise<string | null> {
-  try {
-    const res = await fetch('/api/create-checkout-session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data?.url ?? null;
-  } catch {
-    return null;
-  }
-}
-
-type Stage = 'tease' | 'paywall' | 'processing';
+type Stage = 'tease' | 'paywall';
 
 export default function Funnel({ headline, lockedLabel, lockedValue, bullets, onUnlock, onBack, initialStage = 'tease' }: FunnelProps) {
   const [stage, setStage] = useState<Stage>(initialStage);
-  const [email, setEmail] = useState('');
 
   // ---------- TEASE: result is ready, but locked ----------
   if (stage === 'tease') {
@@ -99,19 +77,7 @@ export default function Funnel({ headline, lockedLabel, lockedValue, bullets, on
     );
   }
 
-  // ---------- PAYWALL: offer + checkout ----------
-  const handlePay = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStage('processing');
-    const url = await startCheckout(email);
-    if (url) {
-      window.location.href = url; // → Stripe hosted checkout
-    } else {
-      // Stripe not wired locally → demo unlock so the flow still works.
-      onUnlock();
-    }
-  };
-
+  // ---------- PAYWALL: offer + Stripe Elements (embedded checkout) ----------
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#F2F7FD] to-white flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
@@ -140,37 +106,15 @@ export default function Funnel({ headline, lockedLabel, lockedValue, bullets, on
           </span>
         </div>
 
-        <form onSubmit={handlePay} className="space-y-3">
-          <input
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Seu melhor e-mail"
-            type="email"
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
-          />
-          <button
-            type="submit"
-            disabled={stage === 'processing'}
-            className="w-full bg-green-600 text-white py-4 px-4 rounded-xl hover:bg-green-700 transition-colors font-semibold text-lg shadow-lg flex items-center justify-center gap-2 disabled:opacity-70"
-          >
-            {stage === 'processing' ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Redirecionando...
-              </>
-            ) : (
-              <>
-                <CreditCard className="w-5 h-5" />
-                Ir para o pagamento seguro
-              </>
-            )}
-          </button>
-        </form>
+        {/* Stripe Elements — pagamento embutido, sem sair da página */}
+        <StripeCheckout onDemoUnlock={onUnlock} />
 
-        <div className="flex items-center justify-center gap-1.5 mt-4 text-xs text-gray-400">
+        <button onClick={onBack} className="w-full mt-4 text-gray-400 hover:text-gray-600 text-sm">
+          Agora não, voltar
+        </button>
+        <div className="flex items-center justify-center gap-1.5 mt-3 text-xs text-gray-400">
           <Lock className="w-3 h-3" />
-          Cartão processado com segurança pela Stripe
+          Pagamento processado com segurança pela Stripe
         </div>
       </div>
     </div>

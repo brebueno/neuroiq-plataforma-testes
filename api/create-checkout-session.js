@@ -47,10 +47,11 @@ export default async function handler(req, res) {
       subscription_data: trialDays > 0 ? { trial_period_days: trialDays } : undefined,
       customer_email: email || undefined,
       allow_promotion_codes: true,
-      success_url: `${origin}/?paid=1&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/?canceled=1`,
+      // Embedded Checkout (Stripe Elements): o pagamento roda DENTRO da página.
+      ui_mode: 'embedded',
+      return_url: `${origin}/?session_id={CHECKOUT_SESSION_ID}`,
     });
-    res.status(200).json({ url: session.url });
+    res.status(200).json({ clientSecret: session.client_secret });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : 'Erro ao criar sessão' });
   }
