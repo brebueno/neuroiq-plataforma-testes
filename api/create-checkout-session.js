@@ -28,9 +28,8 @@ export default async function handler(req, res) {
     return;
   }
 
-  // apiVersion fixa (estável): a conta está numa versão preview que quebra o
-  // Embedded Checkout. Fetch client evita StripeConnectionError na Vercel.
-  const stripe = new Stripe(secret, { apiVersion: '2024-06-20', httpClient: Stripe.createFetchHttpClient() });
+  // Fetch client evita StripeConnectionError na Vercel.
+  const stripe = new Stripe(secret, { httpClient: Stripe.createFetchHttpClient() });
   const origin = req.headers.origin || (req.headers.host ? `https://${req.headers.host}` : '');
   const trialDays = Number(process.env.STRIPE_TRIAL_DAYS ?? 7);
   const email = req.body && typeof req.body === 'object' ? req.body.email : undefined;
@@ -48,11 +47,10 @@ export default async function handler(req, res) {
       subscription_data: trialDays > 0 ? { trial_period_days: trialDays } : undefined,
       customer_email: email || undefined,
       allow_promotion_codes: true,
-      // Checkout hospedado (redirect) — confiável e tolerante à versão da API.
-      success_url: `${origin}/?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/?canceled=1`,
+      ui_mode: 'embedded_page',
+      return_url: `${origin}/?session_id={CHECKOUT_SESSION_ID}`,
     });
-    res.status(200).json({ url: session.url });
+    res.status(200).json({ clientSecret: session.client_secret });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : 'Erro ao criar sessão' });
   }
