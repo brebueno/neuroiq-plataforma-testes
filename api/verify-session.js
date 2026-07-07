@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     return;
   }
 
-  const stripe = new Stripe(secret, { httpClient: Stripe.createFetchHttpClient() });
+  const stripe = new Stripe(secret, { apiVersion: '2024-06-20', httpClient: Stripe.createFetchHttpClient() });
   try {
     const s = await stripe.checkout.sessions.retrieve(sessionId);
     // 'complete' covers paid sessions AND subscriptions that started on a trial

@@ -28,8 +28,9 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Cliente fetch: evita StripeConnectionError no runtime serverless da Vercel.
-  const stripe = new Stripe(secret, { httpClient: Stripe.createFetchHttpClient() });
+  // apiVersion fixa (estável): a conta está numa versão preview que quebra o
+  // Embedded Checkout. Fetch client evita StripeConnectionError na Vercel.
+  const stripe = new Stripe(secret, { apiVersion: '2024-06-20', httpClient: Stripe.createFetchHttpClient() });
   const origin = req.headers.origin || (req.headers.host ? `https://${req.headers.host}` : '');
   const trialDays = Number(process.env.STRIPE_TRIAL_DAYS ?? 7);
   const email = req.body && typeof req.body === 'object' ? req.body.email : undefined;
@@ -48,7 +49,7 @@ export default async function handler(req, res) {
       customer_email: email || undefined,
       allow_promotion_codes: true,
       // Embedded Checkout (Stripe Elements): o pagamento roda DENTRO da página.
-      ui_mode: 'embedded_page',
+      ui_mode: 'embedded',
       return_url: `${origin}/?session_id={CHECKOUT_SESSION_ID}`,
     });
     res.status(200).json({ clientSecret: session.client_secret });
