@@ -1,15 +1,16 @@
 import Stripe from 'stripe';
 
-// Vercel serverless function: creates a Stripe Checkout Session (subscription).
-// The SECRET key NEVER lives in the frontend or the repo — only here, read from
-// Vercel's environment variables (Settings → Environment Variables).
+// Vercel serverless function: cria uma Stripe Checkout Session (assinatura).
+// A chave SECRETA nunca fica no frontend nem no repo — só aqui, via env var da
+// Vercel (Settings → Environment Variables).
 //
-// Required env vars on Vercel:
-//   STRIPE_SECRET_KEY   -> your (rotated!) sk_live_... or rk_live_... key
-//   STRIPE_PRICE_ID     -> the recurring Price id (e.g. price_...), R$159,90/mês
-// Optional:
-//   STRIPE_TRIAL_DAYS   -> free-trial length in days (default 7). See note below
-//                          about charging the R$9,90 trial fee.
+// MODELO "entrada paga": R$7 agora (7 dias) → R$159/mês depois.
+//   - STRIPE_PRICE_TRIAL   -> preço AVULSO (one-time) de R$7,00 (cobrado no checkout)
+//   - STRIPE_PRICE_MONTHLY -> preço RECORRENTE de R$159,00/mês
+//   - STRIPE_TRIAL_DAYS    -> dias de trial no recorrente (default 7). Como há um
+//                             item avulso, o R$7 é cobrado agora e o R$159 só no
+//                             fim do trial.
+// Env obrigatória: STRIPE_SECRET_KEY + STRIPE_PRICE_MONTHLY (trial é opcional).
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -18,10 +19,11 @@ export default async function handler(req, res) {
   }
 
   const secret = process.env.STRIPE_SECRET_KEY;
-  const priceId = process.env.STRIPE_PRICE_ID;
-  if (!secret || !priceId) {
+  const priceMonthly = process.env.STRIPE_PRICE_MONTHLY;
+  const priceTrial = process.env.STRIPE_PRICE_TRIAL; // opcional (one-time R$7)
+  if (!secret || !priceMonthly) {
     res.status(500).json({
-      error: 'Stripe não configurado. Defina STRIPE_SECRET_KEY e STRIPE_PRICE_ID nas Environment Variables da Vercel.',
+      error: 'Stripe não configurado. Defina STRIPE_SECRET_KEY e STRIPE_PRICE_MONTHLY nas Environment Variables da Vercel.',
     });
     return;
   }
@@ -31,13 +33,16 @@ export default async function handler(req, res) {
   const trialDays = Number(process.env.STRIPE_TRIAL_DAYS ?? 7);
   const email = req.body && typeof req.body === 'object' ? req.body.email : undefined;
 
+  // Item recorrente sempre; item avulso (entrada de R$7) quando configurado.
+  const lineItems = [{ price: priceMonthly, quantity: 1 }];
+  if (priceTrial) lineItems.unshift({ price: priceTrial, quantity: 1 });
+
   try {
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
-      line_items: [{ price: priceId, quantity: 1 }],
-      // NOTE: this gives a FREE trial (R$0) for `trialDays`, then charges the
-      // recurring price. To charge the R$9,90 trial fee upfront, drop the trial
-      // and add a one-time line item, or model it as a discounted first invoice.
+      line_items: lineItems,
+      // Trial no recorrente: o R$159 só é cobrado após `trialDays`. O item avulso
+      // (R$7) entra na 1ª fatura e é cobrado agora, no checkout.
       subscription_data: trialDays > 0 ? { trial_period_days: trialDays } : undefined,
       customer_email: email || undefined,
       allow_promotion_codes: true,

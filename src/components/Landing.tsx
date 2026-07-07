@@ -1,6 +1,7 @@
 import { Brain, GraduationCap, Gamepad2, Puzzle, Check, Star, ArrowRight, User, Briefcase } from 'lucide-react';
+import { Logo } from './Logo';
 
-const BRAND = 'NeuroIQ';
+const BRAND = 'QIMind';
 
 // Pricing — edit in ONE place (must match Funnel.tsx OFFER).
 const PRICE = { trial: 'R$9,90', renewal: 'R$159,90', period: 'mês' };
@@ -119,8 +120,7 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
       <header className="border-b border-slate-100 sticky top-0 bg-white/90 backdrop-blur z-10">
         <div className="container mx-auto px-4 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-brand to-[#2F6BEB]" />
-            <span className="text-lg font-extrabold">Neuro<span className="text-brand">IQ</span></span>
+            <Logo className="h-8" />
           </div>
           <div className="flex gap-2.5">
             <button onClick={onStartIQ} className="text-sm font-semibold px-4 py-2 rounded-lg border border-slate-200 hover:border-brand transition-colors">
@@ -353,8 +353,7 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
       <footer className="border-t border-slate-100 py-10">
         <div className="container mx-auto px-4 text-center text-sm text-slate-400">
           <div className="flex items-center justify-center gap-2 mb-3">
-            <span className="w-5 h-5 rounded-md bg-gradient-to-br from-brand to-[#2F6BEB]" />
-            <span className="font-extrabold text-ink">Neuro<span className="text-brand">IQ</span></span>
+            <Logo className="h-7" />
           </div>
           <button onClick={onPractice} className="hover:text-slate-600 underline">
             Modo treino (praticar por nível)
