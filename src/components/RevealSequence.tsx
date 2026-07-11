@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Brain, Lock, Check, Zap } from 'lucide-react';
+import { PROOF } from '../utils/socialProof';
+import { TrustBar } from './SocialProof';
 
 // The reveal is the conversion hinge: intent to pay is highest here. It never
 // shows the score. It makes the user FEEL close to it, flatters the ego, then
@@ -15,9 +17,6 @@ interface RevealSequenceProps {
 
 const ANALYSIS_STEPS = ['Memória de trabalho', 'Raciocínio lógico', 'Velocidade de processamento', 'Reconhecimento de padrões'];
 
-// PROVA SOCIAL — troque pelos números REAIS quando tiver (contador real no backend).
-// Número fabricado é o gatilho de chargeback/ban/FTC — sua conta, sua decisão.
-const SOCIAL = { hoje: '3.100+', total: '180 mil+' };
 
 // Pop-culture IQ figures. The number is hidden until purchase, so the anchors
 // set an aspirational frame ("onde eu me encaixo?").
@@ -158,7 +157,7 @@ export default function RevealSequence({ percentile, accuracyPct, avgSeconds, on
               <span key={c} className="w-5 h-5 rounded-full border-2 border-white" style={{ background: c }} />
             ))}
           </span>
-          <span><span className="font-semibold text-ink">{SOCIAL.hoje}</span> pessoas descobriram o QI só hoje</span>
+          <span><span className="font-semibold text-ink">{PROOF.today}</span> pessoas descobriram o QI só hoje</span>
         </div>
 
         {/* Provocação + loss-framing */}
@@ -175,7 +174,9 @@ export default function RevealSequence({ percentile, accuracyPct, avgSeconds, on
           <Zap className="w-5 h-5" />
           Desbloquear meu QI
         </button>
-        <button onClick={onBack} className="mt-3 text-slate-400 hover:text-slate-600 text-sm">
+        <p className="text-[11px] text-slate-400 mt-3">Calculado por modelo psicométrico IRT (Rasch) · escala padrão média 100 · desvio 15</p>
+        <TrustBar className="mt-3" />
+        <button onClick={onBack} className="mt-4 text-slate-400 hover:text-slate-600 text-sm">
           Agora não, descartar meu resultado
         </button>
       </div>

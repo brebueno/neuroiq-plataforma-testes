@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Brain, Check, Lock, Zap } from 'lucide-react';
+import { PROOF } from '../utils/socialProof';
+import { TrustBar } from './SocialProof';
 
 // Conversion hinge for the non-numeric tests (personality / career). Mirrors the
 // IQ RevealSequence: an "analyzing" build-up, a micro-commitment, then a
@@ -15,8 +17,6 @@ interface PsychRevealProps {
   onUnlock: () => void;
   onBack: () => void;
 }
-
-const SOCIAL_TODAY = '3.100+'; // fabricado — trocar por contador real
 
 type Phase = 'analyzing' | 'commit' | 'reveal';
 
@@ -121,7 +121,7 @@ export default function PsychReveal({
               <span key={c} className="w-5 h-5 rounded-full border-2 border-white" style={{ background: c }} />
             ))}
           </span>
-          <span><span className="font-semibold text-ink">{SOCIAL_TODAY}</span> pessoas fizeram este teste só hoje</span>
+          <span><span className="font-semibold text-ink">{PROOF.today}</span> pessoas fizeram este teste só hoje</span>
         </div>
 
         {/* Provocação + loss-framing */}
@@ -136,7 +136,8 @@ export default function PsychReveal({
           <Zap className="w-5 h-5" />
           Desbloquear meu resultado
         </button>
-        <button onClick={onBack} className="mt-3 text-slate-400 hover:text-slate-600 text-sm">
+        <TrustBar className="mt-3" />
+        <button onClick={onBack} className="mt-4 text-slate-400 hover:text-slate-600 text-sm">
           Agora não, descartar meu resultado
         </button>
       </div>

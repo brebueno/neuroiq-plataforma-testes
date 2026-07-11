@@ -4,6 +4,7 @@ import LevelSelection from './components/LevelSelection';
 import PuzzleGame from './components/PuzzleGame';
 import Funnel from './components/Funnel';
 import RevealSequence from './components/RevealSequence';
+import EmailGate from './components/EmailGate';
 import Landing from './components/Landing';
 import PersonalityFlow from './components/PersonalityFlow';
 import CareerFlow from './components/CareerFlow';
@@ -55,6 +56,8 @@ function App() {
   const [isNewBestIQ, setIsNewBestIQ] = useState(false);
   const [paid, setPaid] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  const [email, setEmail] = useState('');
+  const [emailCaptured, setEmailCaptured] = useState(false);
   const [activeTest, setActiveTest] = useState<'personality' | 'career' | null>(null);
 
   // DEV preview: open /#preview to see the 3 result screens with sample data.
@@ -77,6 +80,7 @@ function App() {
     setQuestions([]);
     setPaid(false);
     setRevealed(false);
+    setEmailCaptured(false);
     setGameState({
       currentLevel: newPlan[0]?.level ?? null,
       currentPuzzle: 0,
@@ -98,6 +102,7 @@ function App() {
     setQuestions(qs);
     setPaid(false);
     setRevealed(false);
+    setEmailCaptured(false);
     setGameState({
       currentLevel: (qs[0]?.difficulty ?? 1) as Level,
       currentPuzzle: 0,
@@ -163,6 +168,7 @@ function App() {
     setQuestions([]);
     setPaid(false);
     setRevealed(false);
+    setEmailCaptured(false);
     setGameState({
       currentLevel: null,
       currentPuzzle: 0,
@@ -197,6 +203,16 @@ function App() {
       ? gameState.timeSpent.reduce((a, b) => a + b, 0) / gameState.timeSpent.length
       : 20;
 
+    // Captura o e-mail antes do reveal (recupera o lead mesmo sem pagar).
+    if (!emailCaptured) {
+      return (
+        <EmailGate
+          onSubmit={(e) => { setEmail(e); setEmailCaptured(true); }}
+          onBack={backToMenu}
+        />
+      );
+    }
+
     // The ego reveal plays the tease; the paywall follows.
     if (!revealed) {
       return (
@@ -213,6 +229,7 @@ function App() {
     return (
       <Funnel
         initialStage="paywall"
+        email={email}
         headline="Teste de QI concluído — veja seu resultado!"
         lockedLabel="Seu QI"
         lockedValue={String(gameState.iq)}

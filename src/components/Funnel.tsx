@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Lock, Check, ShieldCheck } from 'lucide-react';
 import StripeCheckout from './StripeCheckout';
 import { LiveActivity, TrustBar } from './SocialProof';
+import { PROOF } from '../utils/socialProof';
 
 interface FunnelProps {
   headline?: string;
@@ -11,6 +12,7 @@ interface FunnelProps {
   onUnlock: () => void;
   onBack: () => void;
   initialStage?: Stage; // start at 'paywall' when a richer reveal already played the tease
+  email?: string; // captured before the reveal — prefills Stripe checkout
 }
 
 /**
@@ -27,7 +29,7 @@ const OFFER = {
 
 type Stage = 'tease' | 'paywall';
 
-export default function Funnel({ headline, lockedLabel, lockedValue, bullets, onUnlock, onBack, initialStage = 'tease' }: FunnelProps) {
+export default function Funnel({ headline, lockedLabel, lockedValue, bullets, onUnlock, onBack, initialStage = 'tease', email }: FunnelProps) {
   const [stage, setStage] = useState<Stage>(initialStage);
 
   // ---------- TEASE: result is ready, but locked ----------
@@ -83,8 +85,9 @@ export default function Funnel({ headline, lockedLabel, lockedValue, bullets, on
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#F2F7FD] to-white flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
-        <h2 className="text-2xl font-bold text-gray-800 text-center mb-1">Desbloqueie seu resultado</h2>
-        <p className="text-gray-500 text-center text-sm mb-6">A um passo do seu relatório completo</p>
+        <h2 className="text-2xl font-bold text-gray-800 text-center mb-1">Seu número já está calculado.</h2>
+        <p className="text-gray-500 text-center text-sm mb-4">Falta um passo pra você ver onde caiu.</p>
+        <p className="text-center text-xs text-slate-500 mb-6"><span className="font-semibold text-ink">{PROOF.today}</span> pessoas desbloquearam o resultado só hoje</p>
 
         <div className="border-2 border-brand rounded-xl p-5 mb-5 bg-brand-light/50">
           <div className="flex items-baseline justify-center gap-1 mb-1">
@@ -108,8 +111,16 @@ export default function Funnel({ headline, lockedLabel, lockedValue, bullets, on
           </span>
         </div>
 
+        {/* Garantia — reversão de risco no ponto de fricção */}
+        <div className="flex items-start gap-2 bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-5 text-xs text-emerald-900">
+          <Check className="w-4 h-4 flex-shrink-0 mt-0.5 text-emerald-600" />
+          <span>
+            <strong>Garantia de 7 dias.</strong> Desbloqueie, veja seu número e explore tudo. Se achar que não valeu os {OFFER.currency}{OFFER.trialPrice}, devolvemos cada centavo — e você fica com o resultado. Sem formulário, sem perguntas.
+          </span>
+        </div>
+
         {/* Stripe Elements — pagamento embutido, sem sair da página */}
-        <StripeCheckout onDemoUnlock={onUnlock} />
+        <StripeCheckout onDemoUnlock={onUnlock} email={email} />
 
         <button onClick={onBack} className="w-full mt-4 text-gray-400 hover:text-gray-600 text-sm">
           Agora não, voltar

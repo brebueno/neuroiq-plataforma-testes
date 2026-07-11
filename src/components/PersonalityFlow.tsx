@@ -2,6 +2,7 @@ import { useState } from 'react';
 import LikertTest from './LikertTest';
 import Funnel from './Funnel';
 import PsychReveal from './PsychReveal';
+import EmailGate from './EmailGate';
 import DimensionResult from './DimensionResult';
 import { sampleBigFive, scoreBigFive } from '../data/bigFive';
 
@@ -9,7 +10,7 @@ interface PersonalityFlowProps {
   onExit: () => void;
 }
 
-type Stage = 'quiz' | 'reveal' | 'paywall' | 'result';
+type Stage = 'quiz' | 'email' | 'reveal' | 'paywall' | 'result';
 
 export default function PersonalityFlow({ onExit }: PersonalityFlowProps) {
   const [stage, setStage] = useState<Stage>('quiz');
@@ -17,6 +18,7 @@ export default function PersonalityFlow({ onExit }: PersonalityFlowProps) {
   // shows the same set of questions. Scored against the exact items answered.
   const [items, setItems] = useState(() => sampleBigFive(2));
   const [result, setResult] = useState<ReturnType<typeof scoreBigFive> | null>(null);
+  const [email, setEmail] = useState('');
 
   const restart = () => {
     setResult(null);
@@ -32,10 +34,14 @@ export default function PersonalityFlow({ onExit }: PersonalityFlowProps) {
         onExit={onExit}
         onComplete={(answers) => {
           setResult(scoreBigFive(answers, items));
-          setStage('reveal');
+          setStage('email');
         }}
       />
     );
+  }
+
+  if (stage === 'email') {
+    return <EmailGate onSubmit={(e) => { setEmail(e); setStage('reveal'); }} onBack={onExit} />;
   }
 
   if (stage === 'reveal' && result) {
@@ -58,6 +64,7 @@ export default function PersonalityFlow({ onExit }: PersonalityFlowProps) {
     return (
       <Funnel
         initialStage="paywall"
+        email={email}
         headline="Perfil de personalidade concluído!"
         lockedLabel="Traço dominante"
         lockedValue={result.headline}

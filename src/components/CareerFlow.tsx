@@ -2,6 +2,7 @@ import { useState } from 'react';
 import LikertTest from './LikertTest';
 import Funnel from './Funnel';
 import PsychReveal from './PsychReveal';
+import EmailGate from './EmailGate';
 import DimensionResult from './DimensionResult';
 import { sampleRiasec, scoreRiasec } from '../data/riasec';
 
@@ -9,13 +10,14 @@ interface CareerFlowProps {
   onExit: () => void;
 }
 
-type Stage = 'quiz' | 'reveal' | 'paywall' | 'result';
+type Stage = 'quiz' | 'email' | 'reveal' | 'paywall' | 'result';
 
 export default function CareerFlow({ onExit }: CareerFlowProps) {
   const [stage, setStage] = useState<Stage>('quiz');
   // Fresh, RIASEC-balanced subset per session — no repetition on retake.
   const [items, setItems] = useState(() => sampleRiasec(6));
   const [result, setResult] = useState<ReturnType<typeof scoreRiasec> | null>(null);
+  const [email, setEmail] = useState('');
 
   const restart = () => {
     setResult(null);
@@ -31,10 +33,14 @@ export default function CareerFlow({ onExit }: CareerFlowProps) {
         onExit={onExit}
         onComplete={(answers) => {
           setResult(scoreRiasec(answers, items));
-          setStage('reveal');
+          setStage('email');
         }}
       />
     );
+  }
+
+  if (stage === 'email') {
+    return <EmailGate onSubmit={(e) => { setEmail(e); setStage('reveal'); }} onBack={onExit} />;
   }
 
   if (stage === 'reveal' && result) {
@@ -57,6 +63,7 @@ export default function CareerFlow({ onExit }: CareerFlowProps) {
     return (
       <Funnel
         initialStage="paywall"
+        email={email}
         headline="Teste vocacional concluído!"
         lockedLabel="Seu código vocacional"
         lockedValue={result.headline}

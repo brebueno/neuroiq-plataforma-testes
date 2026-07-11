@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Check, Star } from 'lucide-react';
+import { PROOF } from '../utils/socialProof';
 
 // Prova social simulada (live-activity + avaliações). Números/nomes são
 // fabricados — trocar por dados reais quando houver contador no backend.
@@ -64,10 +65,10 @@ export function TrustBar({ className = '' }: { className?: string }) {
         <span className="inline-flex text-amber-400">
           {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />)}
         </span>
-        <b className="text-ink">4,8/5</b>
+        <b className="text-ink">{PROOF.rating}/{PROOF.ratingOutOf}</b>
       </span>
-      <span>187.000+ testes feitos</span>
-      <span>12.480+ avaliações</span>
+      <span>{PROOF.testsTaken} testes feitos</span>
+      <span>{PROOF.reviews} avaliações</span>
     </div>
   );
 }
