@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import LikertTest from './LikertTest';
 import Funnel from './Funnel';
+import PsychReveal from './PsychReveal';
 import DimensionResult from './DimensionResult';
 import { sampleBigFive, scoreBigFive } from '../data/bigFive';
 
@@ -8,7 +9,7 @@ interface PersonalityFlowProps {
   onExit: () => void;
 }
 
-type Stage = 'quiz' | 'funnel' | 'result';
+type Stage = 'quiz' | 'reveal' | 'paywall' | 'result';
 
 export default function PersonalityFlow({ onExit }: PersonalityFlowProps) {
   const [stage, setStage] = useState<Stage>('quiz');
@@ -31,22 +32,39 @@ export default function PersonalityFlow({ onExit }: PersonalityFlowProps) {
         onExit={onExit}
         onComplete={(answers) => {
           setResult(scoreBigFive(answers, items));
-          setStage('funnel');
+          setStage('reveal');
         }}
       />
     );
   }
 
-  if (stage === 'funnel' && result) {
+  if (stage === 'reveal' && result) {
+    return (
+      <PsychReveal
+        analyzing={['Cruzando suas 5 dimensões', 'Comparando com milhares de perfis', 'Isolando seu traço dominante', 'Montando pontos fortes e cegos']}
+        commitQuestion="Antes de revelar: as pessoas costumam te entender de verdade?"
+        commitOptions={['Quase nunca', 'Às vezes']}
+        teaseHeadline="Seu traço dominante ficou mais forte que a média."
+        teaseSub="Já calculamos seu perfil nas 5 dimensões. Falta um clique."
+        lockedLabel="Traço dominante"
+        provocation="A maioria vai a vida inteira sem entender por que age como age — e repete os mesmos erros. Você está a um clique de saber."
+        onUnlock={() => setStage('paywall')}
+        onBack={onExit}
+      />
+    );
+  }
+
+  if (stage === 'paywall' && result) {
     return (
       <Funnel
-        headline="Perfil pronto — descubra sua personalidade!"
+        initialStage="paywall"
+        headline="Perfil de personalidade concluído!"
         lockedLabel="Traço dominante"
         lockedValue={result.headline}
         bullets={[
-          'Seu perfil completo nas 5 dimensões',
-          'Traço dominante e o que ele significa',
-          'Seus pontos fortes e pontos de atenção',
+          'Seu perfil completo nas 5 dimensões (Big Five)',
+          'Seu traço dominante e o que ele revela sobre você',
+          'Seus pontos fortes — e os pontos cegos que te sabotam',
           'Relatório detalhado em PDF',
         ]}
         onUnlock={() => setStage('result')}

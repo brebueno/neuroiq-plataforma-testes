@@ -15,22 +15,57 @@ export function calculateQuestionIQ(level: Level, correct: boolean): number {
   return Math.max(65, 72 + level * 2);
 }
 
+// Item difficulty (b) on a logit scale, by level. Calibrated so an average
+// test-taker (ability θ=0, i.e. IQ 100) has the intended chance of a correct
+// answer: L1 ≈ 90%, L2 ≈ 80%, L3 ≈ 65%, L4 ≈ 50%, L5 ≈ 33%, L6 ≈ 20%.
+const ITEM_DIFFICULTY: Record<Level, number> = {
+  1: -2.2,
+  2: -1.4,
+  3: -0.6,
+  4: 0.0,
+  5: 0.7,
+  6: 1.4,
+};
+
 /**
- * Overall IQ from the actual per-question results.
- * Each question is worth points equal to its difficulty level (1..6), so
- * getting HARD questions right matters far more than easy ones. The weighted
- * ratio is mapped onto a realistic IQ range (~60 up to ~150) with a mild
- * curve so a "got the easy ones" run lands near the average of 100.
+ * Overall IQ from the actual per-question results — norm-referenced, not an
+ * arbitrary curve.
+ *
+ * Uses a 1-parameter IRT (Rasch) model: P(correct) = 1 / (1 + e^-(θ - b)),
+ * where b is the item difficulty and θ the person's latent ability. We estimate
+ * θ by maximum a-posteriori (grid search + a weak N(0,1.6) prior so a perfect or
+ * empty run doesn't diverge), then map ability to the standard IQ scale
+ * (mean 100, SD 15): IQ = 100 + 15·θ. Because each item contributes according
+ * to its difficulty, a heterogeneous mix of question types produces a stable,
+ * comparable score.
  */
 export function calculateIQFromResults(results: { level: Level; correct: boolean }[]): number {
   if (results.length === 0) return 100;
 
-  const maxPoints = results.reduce((sum, r) => sum + r.level, 0);
-  const earned = results.reduce((sum, r) => sum + (r.correct ? r.level : 0), 0);
-  const raw = maxPoints > 0 ? earned / maxPoints : 0;
+  const bs = results.map((r) => ITEM_DIFFICULTY[r.level] ?? 0);
+  const xs = results.map((r) => (r.correct ? 1 : 0));
 
-  // 0 -> 60, ~0.3 -> ~96, 0.5 -> ~113, 1 -> 150
-  const iq = 60 + Math.pow(raw, 0.75) * 90;
+  const prob = (theta: number, b: number) => 1 / (1 + Math.exp(-(theta - b)));
+  const PRIOR_SD = 1.6;
+
+  const logPosterior = (theta: number): number => {
+    let ll = 0;
+    for (let i = 0; i < bs.length; i++) {
+      const p = Math.min(1 - 1e-6, Math.max(1e-6, prob(theta, bs[i])));
+      ll += xs[i] ? Math.log(p) : Math.log(1 - p);
+    }
+    ll += -(theta * theta) / (2 * PRIOR_SD * PRIOR_SD); // weak prior, shrinks extremes
+    return ll;
+  };
+
+  let bestLL = -Infinity;
+  let bestTheta = 0;
+  for (let t = -3.5; t <= 3.5; t += 0.02) {
+    const ll = logPosterior(t);
+    if (ll > bestLL) { bestLL = ll; bestTheta = t; }
+  }
+
+  const iq = 100 + 15 * bestTheta;
   return Math.max(55, Math.min(155, Math.round(iq)));
 }
 

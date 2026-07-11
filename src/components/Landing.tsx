@@ -1,5 +1,6 @@
 import { Brain, GraduationCap, Gamepad2, Puzzle, Check, Star, ArrowRight, User, Briefcase } from 'lucide-react';
 import { Logo } from './Logo';
+import { LiveActivity } from './SocialProof';
 
 const BRAND = 'QIMind';
 
@@ -75,7 +76,7 @@ const steps = [
 ];
 
 const tests = [
-  { type: 'iq' as const, icon: Brain, title: 'Teste de QI', time: '~15 min', q: '35 perguntas', desc: 'É aqui que a maioria descobre que estava se subestimando a vida toda.', cta: 'Descobrir meu QI', popular: true },
+  { type: 'iq' as const, icon: Brain, title: 'Teste de QI', time: '~15 min', q: '30 questões', desc: 'É aqui que a maioria descobre que estava se subestimando a vida toda.', cta: 'Descobrir meu QI', popular: true },
   { type: 'personality' as const, icon: User, title: 'Personalidade', time: '~7 min', q: '60 perguntas', desc: 'Entenda por que você pensa e reage do jeito que reage.', cta: 'Fazer o teste', popular: false },
   { type: 'career' as const, icon: Briefcase, title: 'Vocacional', time: '~8 min', q: '36 perguntas', desc: 'Descubra pra que tipo de trabalho o seu cérebro foi feito.', cta: 'Fazer o teste', popular: false },
 ];
@@ -140,8 +141,8 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
             <h1 className="text-[clamp(30px,4.4vw,50px)] font-extrabold leading-[1.05] tracking-tight text-balance">
               Você é mais inteligente do que <span className="text-[#2F6BEB]">te disseram.</span>
             </h1>
-            <p className="text-[17px] text-slate-500 mt-4 max-w-[40ch]">
-              A maioria das pessoas se subestima a vida inteira. Faça o teste de QI do {BRAND}, veja seu número real e onde você cai na curva. Desbloqueie seu resultado por {PRICE.trial}.
+            <p className="text-[17px] text-slate-500 mt-4 max-w-[42ch]">
+              A maioria se subestima a vida inteira. Em ~15 minutos, o {BRAND} pondera cada resposta pela <strong className="text-ink">dificuldade real</strong> e cruza <strong className="text-ink">5 tipos de raciocínio</strong> — e te entrega seu número honesto, não um "parabéns" genérico. Resultado na hora, por {PRICE.trial}.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 mt-7">
               <button
@@ -173,6 +174,34 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
           <p className="text-center text-slate-400 text-[11.5px] mt-3.5 max-w-[60ch] mx-auto">
             O {BRAND} não tem relação comercial com as organizações de mídia apresentadas. As referências servem apenas para reconhecer conteúdo editorial independente.
           </p>
+        </div>
+      </section>
+
+      {/* Unique mechanism — the "reason why" the number is believable */}
+      <section className="py-16 md:py-[72px] border-b border-slate-100">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <div className="text-center mb-10">
+            <div className="inline-block text-xs font-bold tracking-widest text-brand uppercase mb-3">Por que o número do {BRAND} é diferente</div>
+            <h2 className="text-[clamp(24px,3vw,33px)] font-extrabold text-balance">
+              A maioria dos testes só conta acertos. Por isso o número mente.
+            </h2>
+            <p className="text-slate-500 max-w-[56ch] mx-auto mt-3">
+              Acertar 30 questões fáceis não é a mesma coisa que acertar 10 difíceis — mas o teste comum trata igual. O {BRAND} faz diferente:
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5">
+            {[
+              { n: '01', title: 'Ponderação por dificuldade', desc: 'Cada resposta vale conforme o quão difícil a questão realmente é. Acertar as difíceis pesa mais — como o seu cérebro merece.' },
+              { n: '02', title: '5 tipos de raciocínio cruzados', desc: 'Matrizes, séries, analogias, lógica verbal e o "diferentão". O número sai do cruzamento — não de um talento só.' },
+              { n: '03', title: 'Perfil, não só um dígito', desc: 'Você vê onde seu cérebro é forte de verdade e onde tropeça. É um mapa, não uma nota seca.' },
+            ].map((m) => (
+              <div key={m.n} className="bg-white border border-slate-200 rounded-2xl p-6">
+                <div className="text-2xl font-extrabold text-brand/30 mb-2">{m.n}</div>
+                <h3 className="font-bold text-lg mb-2">{m.title}</h3>
+                <p className="text-[13.5px] text-slate-500 leading-relaxed">{m.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -306,15 +335,26 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
           </div>
           <div className="max-w-sm mx-auto bg-white rounded-[18px] shadow-[0_24px_60px_-34px_rgba(18,32,59,0.4)] border border-slate-200 p-7">
             <div className="text-xs font-bold tracking-widest text-brand uppercase mb-2.5">Acesso completo</div>
+            {/* Ancoragem honesta: valor real da plataforma vs. o que você paga hoje */}
+            <div className="flex items-baseline gap-2 mb-1">
+              <span className="text-slate-400 line-through text-lg">{PRICE.renewal}/{PRICE.period}</span>
+              <span className="bg-brand-light text-brand text-[11px] font-bold px-2 py-0.5 rounded-full">hoje</span>
+            </div>
             <div className="flex items-baseline gap-1.5 mb-1">
-              <span className="text-4xl font-extrabold">{PRICE.trial}</span>
-              <span className="text-slate-500 text-sm">· pra desbloquear hoje</span>
+              <span className="text-5xl font-extrabold">{PRICE.trial}</span>
+              <span className="text-slate-500 text-sm">· desbloqueia agora + 7 dias</span>
             </div>
             <p className="text-[13px] text-slate-500 mb-5">
-              Depois, {PRICE.renewal}/{PRICE.period} pela plataforma completa e todos os testes. Você vê o valor antes de pagar e cancela quando quiser, em 1 clique.
+              A plataforma completa vale {PRICE.renewal}/{PRICE.period}. Hoje você abre tudo por {PRICE.trial}. Depois renova por {PRICE.renewal}/{PRICE.period} — você vê o valor antes de pagar e <strong className="text-ink">cancela em 1 clique</strong>.
             </p>
-            <ul className="space-y-2.5 mb-6">
-              {['Seu QI exato, classificação e percentil', 'Os três testes: QI, personalidade e vocacional', 'Plataforma de treino cerebral com exercícios e cursos', 'Cancele quando quiser, sem enrolação'].map((it) => (
+            <ul className="space-y-2.5 mb-5">
+              {[
+                'Seu QI exato, classificação e percentil na curva',
+                'Seu perfil por 5 tipos de raciocínio (onde você é forte)',
+                'Certificado do resultado em PDF',
+                'Os 3 testes: QI, personalidade e vocacional',
+                'Plataforma de treino cerebral: +150 puzzles e cursos',
+              ].map((it) => (
                 <li key={it} className="flex items-start gap-2 text-sm">
                   <Check className="w-4 h-4 text-brand flex-shrink-0 mt-0.5" />
                   {it}
@@ -327,6 +367,9 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
             >
               Desbloquear por {PRICE.trial}
             </button>
+            <p className="text-center text-[12px] text-slate-400 mt-3">
+              Sem pegadinha na fatura · cancele quando quiser, em 1 clique
+            </p>
           </div>
         </div>
       </section>
@@ -361,6 +404,7 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
           <p className="mt-4">Teste para fins recreativos e educativos. © 2026 {BRAND}. Todos os direitos reservados.</p>
         </div>
       </footer>
+      <LiveActivity />
     </div>
   );
 }

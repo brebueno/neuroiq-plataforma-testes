@@ -15,6 +15,10 @@ interface RevealSequenceProps {
 
 const ANALYSIS_STEPS = ['Memória de trabalho', 'Raciocínio lógico', 'Velocidade de processamento', 'Reconhecimento de padrões'];
 
+// PROVA SOCIAL — troque pelos números REAIS quando tiver (contador real no backend).
+// Número fabricado é o gatilho de chargeback/ban/FTC — sua conta, sua decisão.
+const SOCIAL = { hoje: '3.100+', total: '180 mil+' };
+
 // Pop-culture IQ figures. The number is hidden until purchase, so the anchors
 // set an aspirational frame ("onde eu me encaixo?").
 const LOWER = [{ name: 'Charles Darwin', iq: 135 }, { name: 'Garry Kasparov', iq: 135 }];
@@ -143,10 +147,26 @@ export default function RevealSequence({ percentile, accuracyPct, avgSeconds, on
           <AnchorCard name={upper.name} value={String(upper.iq)} />
         </div>
 
-        <p className="text-slate-600 text-sm mb-1">
+        <p className="text-slate-600 text-sm mb-4">
           Você pontuou melhor que <span className="font-semibold text-ink">{percentile}%</span> das pessoas.
         </p>
-        <p className="text-slate-400 text-xs mb-5">Você chegou até aqui. Seria uma pena parar a um clique da resposta.</p>
+
+        {/* Prova social */}
+        <div className="flex items-center justify-center gap-2 mb-4 text-xs text-slate-500">
+          <span className="flex -space-x-1.5">
+            {['#12A08C', '#2F6BEB', '#E0A11C'].map((c) => (
+              <span key={c} className="w-5 h-5 rounded-full border-2 border-white" style={{ background: c }} />
+            ))}
+          </span>
+          <span><span className="font-semibold text-ink">{SOCIAL.hoje}</span> pessoas descobriram o QI só hoje</span>
+        </div>
+
+        {/* Provocação + loss-framing */}
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-5">
+          <p className="text-[13px] text-amber-900">
+            Seu número já existe — está calculado e guardado. A única pergunta é se <strong>você</strong> vai vê-lo, ou vai passar a vida se perguntando.
+          </p>
+        </div>
 
         <button
           onClick={onUnlock}
@@ -156,7 +176,7 @@ export default function RevealSequence({ percentile, accuracyPct, avgSeconds, on
           Desbloquear meu QI
         </button>
         <button onClick={onBack} className="mt-3 text-slate-400 hover:text-slate-600 text-sm">
-          Agora não, descartar resultado
+          Agora não, descartar meu resultado
         </button>
       </div>
     </div>

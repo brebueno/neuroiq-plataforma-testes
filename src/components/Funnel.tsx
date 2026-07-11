@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Lock, Check, ShieldCheck } from 'lucide-react';
 import StripeCheckout from './StripeCheckout';
+import { LiveActivity, TrustBar } from './SocialProof';
 
 interface FunnelProps {
   headline?: string;
@@ -73,6 +74,7 @@ export default function Funnel({ headline, lockedLabel, lockedValue, bullets, on
             Não, obrigado — descartar resultado
           </button>
         </div>
+        <LiveActivity />
       </div>
     );
   }
@@ -116,7 +118,10 @@ export default function Funnel({ headline, lockedLabel, lockedValue, bullets, on
           <Lock className="w-3 h-3" />
           Pagamento processado com segurança pela Stripe
         </div>
+
+        <TrustBar className="mt-4 pt-4 border-t border-slate-100" />
       </div>
+      <LiveActivity />
     </div>
   );
 }

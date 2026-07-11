@@ -31,10 +31,13 @@ export interface Pattern {
   shapes: Shape[];
 }
 
+export type FillStyle = 'solid' | 'hollow' | 'hatch' | 'dots';
+
 export interface Shape {
   type: 'circle' | 'square' | 'triangle' | 'diamond' | 'cross' | 'star';
   size: 'small' | 'medium' | 'large';
   color: 'black' | 'gray' | 'white';
+  fill?: FillStyle;
   rotation?: number;
   position?: { x: number; y: number };
 }

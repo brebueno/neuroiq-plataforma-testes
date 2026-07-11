@@ -285,7 +285,7 @@ function App() {
               <h1 className="text-4xl font-bold text-gray-800">Teste de QI</h1>
             </div>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              35 perguntas de reconhecimento de padrões, em dificuldade crescente. Descubra sua pontuação, classificação e percentil.
+              30 questões de raciocínio — padrões, séries, analogias e lógica — em dificuldade crescente. Descubra sua pontuação, classificação e percentil.
             </p>
           </div>
 
@@ -296,7 +296,7 @@ function App() {
               className="w-full bg-teal-600 text-white py-5 px-6 rounded-2xl hover:bg-teal-700 transition-colors font-semibold text-lg shadow-xl flex items-center justify-center gap-3"
             >
               <Zap className="w-6 h-6" />
-              Começar teste completo (35 perguntas)
+              Começar teste completo (30 questões)
             </button>
             <p className="text-center text-gray-500 text-sm mt-3">
               Leva ~15 minutos · sem pressão de tempo · pense com calma

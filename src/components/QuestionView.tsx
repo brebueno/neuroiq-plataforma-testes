@@ -12,7 +12,12 @@ interface Props {
   onAnswer: (result: QuestionResult) => void;
 }
 
-const RESULT_DELAY = 1600;
+const RESULT_DELAY = 2200;
+
+// Provocação ancorada na dificuldade real da questão (correlaciona com a taxa de
+// acerto esperada). Não é número fabricado do nada: dificuldade 5 é genuinamente
+// rara de acertar. Ajuste fino se tiver estatística real por questão.
+const RARITY: Record<number, number> = { 1: 86, 2: 68, 3: 51, 4: 34, 5: 19 };
 
 export default function QuestionView({ question, index, onAnswer }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
@@ -39,6 +44,7 @@ export default function QuestionView({ question, index, onAnswer }: Props) {
   };
 
   const isCorrect = selected === question.correctAnswer;
+  const rarity = RARITY[question.difficulty as number] ?? 50;
 
   // ---- shared option cell styling ----
   const optClass = (i: number, base: string) => {
@@ -141,6 +147,21 @@ export default function QuestionView({ question, index, onAnswer }: Props) {
           </div>
         )}
       </div>
+
+      {/* ---- provocação + comparação social (toast fixo no topo, sempre visível) ---- */}
+      {showResult && (
+        <div
+          className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 rounded-xl px-5 py-3 text-sm md:text-[15px] font-semibold text-center shadow-[0_12px_30px_-10px_rgba(18,32,59,0.45)] max-w-[92vw] ${
+            isCorrect
+              ? 'bg-emerald-600 text-white'
+              : 'bg-slate-800 text-white'
+          }`}
+        >
+          {isCorrect
+            ? `Só ${rarity}% das pessoas acertam essa — e você acertou. 🔥`
+            : `Essa derruba ${100 - rarity}% de quem tenta. Seu relatório mostra onde seu raciocínio tropeça.`}
+        </div>
+      )}
     </div>
   );
 }

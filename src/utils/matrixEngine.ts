@@ -1,4 +1,4 @@
-import { Level, Puzzle, Pattern, Shape } from '../types/game';
+import { Level, Puzzle, Pattern, Shape, FillStyle } from '../types/game';
 import { pick, pickK, shuffle, chance } from './rng';
 
 // ---------------------------------------------------------------------------
@@ -29,6 +29,7 @@ const TYPES: ShapeType[] = ['circle', 'square', 'triangle', 'diamond', 'cross', 
 const ASYM: ShapeType[] = ['triangle', 'diamond', 'cross', 'star']; // rotation is only visible on these
 const SIZES: Size[] = ['small', 'medium', 'large'];
 const COLORS: Color[] = ['black', 'gray', 'white'];
+const FILLS: FillStyle[] = ['solid', 'hollow', 'hatch', 'dots'];
 const ROTATIONS = [0, 45, 90, 135];
 
 // A cell's content, before it becomes SVG shapes. count 0 = empty cell.
@@ -36,6 +37,7 @@ interface Spec {
   type: ShapeType;
   size: Size;
   color: Color;
+  fill?: FillStyle;
   rotation: number;
   count: number;
 }
@@ -52,11 +54,11 @@ const positionsFor = (count: number): { x: number; y: number }[] => {
 
 const specToPattern = (s: Spec): Pattern => ({
   shapes: positionsFor(s.count).map((p) => ({
-    type: s.type, size: s.size, color: s.color, rotation: s.rotation, position: p,
+    type: s.type, size: s.size, color: s.color, fill: s.fill ?? 'solid', rotation: s.rotation, position: p,
   })),
 });
 
-const specKey = (s: Spec) => `${s.type}|${s.size}|${s.color}|${s.rotation}|${s.count}`;
+const specKey = (s: Spec) => `${s.type}|${s.size}|${s.color}|${s.fill ?? 'solid'}|${s.rotation}|${s.count}`;
 
 const patternKey = (p: Pattern) =>
   p.shapes
@@ -75,24 +77,27 @@ interface Built {
 // --------------------------- attribute-rule modes --------------------------
 // Covers rule families 1–3, applied to any visual attribute.
 
-type Attr = 'type' | 'size' | 'color' | 'rotation' | 'count';
+type Attr = 'type' | 'size' | 'color' | 'rotation' | 'count' | 'fill';
 type Rule = 'constant' | 'progression' | 'dist3';
+type AttrVal = ShapeType | Size | Color | number | FillStyle;
 
-const valuePool = (attr: Attr, asym: boolean): (ShapeType | Size | Color | number)[] => {
+const valuePool = (attr: Attr, asym: boolean): AttrVal[] => {
   switch (attr) {
     case 'type': return pickK(asym ? ASYM : TYPES, 3);
     case 'size': return [...SIZES];
     case 'color': return shuffle([...COLORS]);
     case 'rotation': return pickK(ROTATIONS, 3);
     case 'count': return [1, 2, 3];
+    case 'fill': return pickK(FILLS, 3);
   }
 };
 
-const applyAttr = (s: Spec, attr: Attr, v: ShapeType | Size | Color | number) => {
+const applyAttr = (s: Spec, attr: Attr, v: AttrVal) => {
   if (attr === 'type') s.type = v as ShapeType;
   else if (attr === 'size') s.size = v as Size;
   else if (attr === 'color') s.color = v as Color;
   else if (attr === 'rotation') s.rotation = v as number;
+  else if (attr === 'fill') s.fill = v as FillStyle;
   else s.count = v as number;
 };
 
@@ -103,7 +108,7 @@ const idxFor = (rule: Rule, r: number, c: number, len: number): number => {
 };
 
 function buildAttributeMode(numAttrs: number, rules: Rule[], allowRotation: boolean): Built {
-  const attrPool: Attr[] = ['type', 'size', 'color', 'count', ...(allowRotation ? (['rotation'] as Attr[]) : [])];
+  const attrPool: Attr[] = ['type', 'size', 'color', 'count', 'fill', ...(allowRotation ? (['rotation'] as Attr[]) : [])];
   let attrs = pickK(attrPool, numAttrs);
   // size + count together get visually cramped — keep count, drop size.
   if (attrs.includes('size') && attrs.includes('count')) attrs = attrs.filter((a) => a !== 'size');
@@ -139,7 +144,7 @@ function buildAttributeMode(numAttrs: number, rules: Rule[], allowRotation: bool
 
 // Strongest distractors change exactly one varying attribute; then top up with
 // perturbations of any attribute so there are always enough options.
-function buildAttributeDistractors(answer: Spec, plans: { attr: Attr; values: (ShapeType | Size | Color | number)[] }[]): Spec[] {
+function buildAttributeDistractors(answer: Spec, plans: { attr: Attr; values: AttrVal[] }[]): Spec[] {
   const seen = new Set<string>([specKey(answer)]);
   const out: Spec[] = [];
   const add = (s: Spec) => {
@@ -160,14 +165,15 @@ function buildAttributeDistractors(answer: Spec, plans: { attr: Attr; values: (S
     }
   });
 
-  const allAttrs: Attr[] = ['type', 'size', 'color', 'rotation', 'count'];
+  const allAttrs: Attr[] = ['type', 'size', 'color', 'rotation', 'count', 'fill'];
   let guard = 0;
   while (out.length < 5 && guard < 200) {
     guard++;
     const d = { ...answer };
     const attr = pick(allAttrs);
-    const pool: (ShapeType | Size | Color | number)[] =
-      attr === 'type' ? TYPES : attr === 'size' ? SIZES : attr === 'color' ? COLORS : attr === 'rotation' ? ROTATIONS : [1, 2, 3];
+    const pool: AttrVal[] =
+      attr === 'type' ? TYPES : attr === 'size' ? SIZES : attr === 'color' ? COLORS
+      : attr === 'rotation' ? ROTATIONS : attr === 'fill' ? FILLS : [1, 2, 3];
     applyAttr(d, attr, pick(pool));
     add(d);
   }
@@ -264,26 +270,99 @@ function buildAdditionMode(subtract: boolean): Built {
   return { cells, answer: setToPattern(answerSet), distractors };
 }
 
+// ------------------------ compound: figure inside figure -------------------
+// Classic "figura dentro de figura" — an outer outline frame + an inner shape,
+// each varying by its own rule. This is what the hard Raven/ICAR items look
+// like, and it adds real visual depth beyond single-shape cells.
+
+const OUTER_TYPES: ShapeType[] = ['square', 'circle', 'diamond', 'triangle'];
+const INNER_TYPES: ShapeType[] = ['circle', 'square', 'triangle', 'star', 'cross', 'diamond'];
+type CAttr = 'outer' | 'inner' | 'innerFill';
+
+interface CompoundSpec {
+  outer: ShapeType;
+  inner: ShapeType;
+  innerFill: FillStyle;
+}
+
+const compoundToPattern = (s: CompoundSpec): Pattern => ({
+  shapes: [
+    { type: s.outer, size: 'large', color: 'black', fill: 'hollow', rotation: 0, position: { x: 0.5, y: 0.5 } },
+    { type: s.inner, size: 'small', color: 'black', fill: s.innerFill, rotation: 0, position: { x: 0.5, y: 0.5 } },
+  ],
+});
+
+const compoundKey = (s: CompoundSpec) => `${s.outer}|${s.inner}|${s.innerFill}`;
+
+const applyC = (s: CompoundSpec, a: CAttr, v: ShapeType | FillStyle) => {
+  if (a === 'outer') s.outer = v as ShapeType;
+  else if (a === 'inner') s.inner = v as ShapeType;
+  else s.innerFill = v as FillStyle;
+};
+
+const cPool = (a: CAttr): (ShapeType | FillStyle)[] =>
+  a === 'outer' ? pickK(OUTER_TYPES, 3) : a === 'inner' ? pickK(INNER_TYPES, 3) : pickK(FILLS, 3);
+
+function buildCompoundMode(): Built {
+  const attrs = pickK(['outer', 'inner', 'innerFill'] as CAttr[], chance(0.5) ? 3 : 2);
+  const base: CompoundSpec = { outer: pick(OUTER_TYPES), inner: pick(INNER_TYPES), innerFill: 'solid' };
+  const plans = attrs.map((a) => ({ a, rule: pick(['progression', 'dist3', 'constant'] as Rule[]), values: cPool(a) }));
+
+  const specAt = (r: number, c: number): CompoundSpec => {
+    const s = { ...base };
+    plans.forEach((pl) => applyC(s, pl.a, pl.values[idxFor(pl.rule, r, c, pl.values.length)]));
+    return s;
+  };
+  const cellSpecs: CompoundSpec[][] = [0, 1, 2].map((r) => [0, 1, 2].map((c) => specAt(r, c)));
+  const answer = cellSpecs[2][2];
+
+  const seen = new Set<string>([compoundKey(answer)]);
+  const distractors: CompoundSpec[] = [];
+  const add = (s: CompoundSpec) => {
+    const k = compoundKey(s);
+    if (distractors.length < 5 && !seen.has(k)) { seen.add(k); distractors.push(s); }
+  };
+  plans.forEach((pl) => {
+    const wrong = pl.values.filter((v) => { const p = { ...answer }; applyC(p, pl.a, v); return compoundKey(p) !== compoundKey(answer); });
+    if (wrong.length) { const d = { ...answer }; applyC(d, pl.a, pick(wrong)); add(d); }
+  });
+  let guard = 0;
+  while (distractors.length < 5 && guard++ < 120) {
+    const d = { ...answer };
+    const a = pick(['outer', 'inner', 'innerFill'] as CAttr[]);
+    applyC(d, a, a === 'outer' ? pick(OUTER_TYPES) : a === 'inner' ? pick(INNER_TYPES) : pick(FILLS));
+    add(d);
+  }
+  return {
+    cells: cellSpecs.map((row) => row.map(compoundToPattern)),
+    answer: compoundToPattern(answer),
+    distractors: distractors.map(compoundToPattern),
+  };
+}
+
 // --------------------------------- assembly --------------------------------
 
 function buildForLevel(level: Level): Built {
   switch (level) {
     case 1: return buildAttributeMode(1, ['constant', 'progression'], false);
     case 2: return buildAttributeMode(1, ['progression', 'dist3'], false);
-    case 3: return buildAttributeMode(2, ['progression', 'dist3'], false);
-    case 4:
-      return chance(0.5)
-        ? buildAttributeMode(2, ['progression', 'dist3'], true)
-        : buildDist2Mode();
+    case 3: return chance(0.3) ? buildCompoundMode() : buildAttributeMode(2, ['progression', 'dist3'], false);
+    case 4: {
+      const r = Math.random();
+      if (r < 0.35) return buildCompoundMode();
+      return chance(0.5) ? buildAttributeMode(2, ['progression', 'dist3'], true) : buildDist2Mode();
+    }
     case 5: {
       const r = Math.random();
-      if (r < 0.6) return buildAttributeMode(3, ['progression', 'dist3', 'constant'], true);
-      return r < 0.8 ? buildDist2Mode() : buildAdditionMode(false);
+      if (r < 0.32) return buildCompoundMode();
+      if (r < 0.7) return buildAttributeMode(3, ['progression', 'dist3', 'constant'], true);
+      return r < 0.85 ? buildDist2Mode() : buildAdditionMode(false);
     }
     case 6: {
       const r = Math.random();
-      if (r < 0.4) return buildAttributeMode(3, ['progression', 'dist3', 'constant'], true);
-      if (r < 0.7) return buildAdditionMode(chance(0.5));
+      if (r < 0.3) return buildCompoundMode();
+      if (r < 0.55) return buildAttributeMode(3, ['progression', 'dist3', 'constant'], true);
+      if (r < 0.8) return buildAdditionMode(chance(0.5));
       return buildDist2Mode();
     }
     default: return buildAttributeMode(1, ['progression'], false);
