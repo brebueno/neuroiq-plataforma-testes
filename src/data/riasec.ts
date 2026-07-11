@@ -1,4 +1,4 @@
-// RIASEC / Holland Codes — interesses vocacionais. Banco ampliado para 60 itens
+// RIASEC / Holland Codes, interesses vocacionais. Banco ampliado para 60 itens
 // (10 por escala) escritos em pt-BR natural. A cada sessão sorteamos um
 // subconjunto equilibrado (ver sampleRiasec), então refazer o teste não repete
 // as mesmas perguntas, mantendo 6 escalas sempre equilibradas.

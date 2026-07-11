@@ -1,6 +1,6 @@
 // Small random helpers shared by the puzzle engine.
 // Kept dependency-free and centralized so every generator draws variety the
-// same way — and so we can swap in a seeded PRNG later without touching callers.
+// same way, and so we can swap in a seeded PRNG later without touching callers.
 
 export const randInt = (n: number): number => Math.floor(Math.random() * n);
 

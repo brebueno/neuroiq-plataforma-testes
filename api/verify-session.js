@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 
 // Tamper-proof unlock: the frontend calls this on return from Checkout with the
-// session_id. We ask STRIPE directly whether that session actually completed —
+// session_id. We ask STRIPE directly whether that session actually completed, 
 // so a user can't just type ?paid=1 to unlock. No database needed for this
 // immediate check (the webhook handles ongoing subscription state).
 

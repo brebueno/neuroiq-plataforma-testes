@@ -1,4 +1,4 @@
-// QIMind logo — lupa (descoberta) + ponto âmbar (o insight/recompensa) + wordmark.
+// QIMind logo, lupa (descoberta) + ponto âmbar (o insight/recompensa) + wordmark.
 // Assets originais em Downloads/QIMind-design/logo. Inline p/ escalar via className.
 
 export function Logo({ className = 'h-8' }: { className?: string }) {

@@ -30,7 +30,7 @@ const PatternDisplay: React.FC<PatternDisplayProps> = ({ pattern, size }) => {
 
     const shapeSize = sizeMap[shape.size];
 
-    // Fill/texture — solid, hollow (outline), hatch (diagonal lines) or dots.
+    // Fill/texture, solid, hollow (outline), hatch (diagonal lines) or dots.
     // This is what makes each cell look distinct and "real-test"-like.
     const fillStyle = shape.fill ?? 'solid';
     const baseColor = COLOR_MAP[shape.color];

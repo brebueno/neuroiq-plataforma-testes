@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Loader2, Check, X } from 'lucide-react';
 
 // Shown when the user returns from Stripe Checkout. It calls the server, which
-// asks Stripe whether the session actually completed — so access is only
+// asks Stripe whether the session actually completed, so access is only
 // granted on a real, verified payment (not by faking ?paid=1 in the URL).
 
 type State = 'checking' | 'ok' | 'failed';
@@ -14,7 +14,7 @@ export default function PaymentReturn() {
     const params = new URLSearchParams(window.location.search);
     const sessionId = params.get('session_id');
     if (!sessionId) {
-      // No session id (e.g. local demo redirect) — nothing to verify.
+      // No session id (e.g. local demo redirect), nothing to verify.
       setState('ok');
       return;
     }

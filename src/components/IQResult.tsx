@@ -55,7 +55,7 @@ export default function IQResult({
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#F2F7FD] to-white py-10 px-4">
       <div className="max-w-md mx-auto">
-        {/* Hero — the number */}
+        {/* Hero, the number */}
         <div className="bg-white border border-slate-200 rounded-2xl p-7 mb-5 text-center shadow-sm">
           <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-teal-600 mb-3">
             <Brain className="w-4 h-4" /> Seu resultado

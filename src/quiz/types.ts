@@ -1,13 +1,13 @@
 import { Pattern } from '../types/game';
 
 // A question in the IQ test. Multiple TYPES share this shape so the test can
-// interleave them — matrix, number/letter series, odd-one-out, analogy — which
+// interleave them, matrix, number/letter series, odd-one-out, analogy, which
 // is what real multi-type IQ tests (ICAR/WAIS) do to kill monotony.
 export type QType = 'matrix' | 'series' | 'oddone' | 'analogy' | 'verbal-analogy' | 'verbal-oddone';
 
 export interface Question {
   type: QType;
-  difficulty: number; // 1..6 — used as the scoring weight (maps to Level)
+  difficulty: number; // 1..6, used as the scoring weight (maps to Level)
   prompt: string;
   optionKind: 'pattern' | 'text';
   options: (Pattern | string)[];

@@ -65,7 +65,7 @@ function App() {
     return <ResultsPreview />;
   }
 
-  // Return from Stripe Checkout — PaymentReturn verifies the session server-side
+  // Return from Stripe Checkout, PaymentReturn verifies the session server-side
   // (asks Stripe) before granting access, so ?paid=1 alone can't unlock.
   if (typeof window !== 'undefined') {
     const sp = new URLSearchParams(window.location.search);
@@ -230,7 +230,7 @@ function App() {
       <Funnel
         initialStage="paywall"
         email={email}
-        headline="Teste de QI concluído — veja seu resultado!"
+        headline="Teste de QI concluído, veja seu resultado!"
         lockedLabel="Seu QI"
         lockedValue={String(gameState.iq)}
         bullets={[
@@ -302,11 +302,11 @@ function App() {
               <h1 className="text-4xl font-bold text-gray-800">Teste de QI</h1>
             </div>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              30 questões de raciocínio — padrões, séries, analogias e lógica — em dificuldade crescente. Descubra sua pontuação, classificação e percentil.
+              30 questões de raciocínio, padrões, séries, analogias e lógica, em dificuldade crescente. Descubra sua pontuação, classificação e percentil.
             </p>
           </div>
 
-          {/* Primary CTA — the full test */}
+          {/* Primary CTA, the full test */}
           <div className="max-w-md mx-auto mb-10">
             <button
               onClick={startFullTest}
@@ -320,7 +320,7 @@ function App() {
             </p>
           </div>
 
-          {/* Secondary — practice by difficulty */}
+          {/* Secondary, practice by difficulty */}
           <div className="text-center mb-4">
             <h2 className="text-lg font-semibold text-gray-700">Ou pratique um nível de dificuldade</h2>
           </div>

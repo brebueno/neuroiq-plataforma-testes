@@ -3,7 +3,7 @@ import { Check, Star } from 'lucide-react';
 import { PROOF } from '../utils/socialProof';
 
 // Prova social simulada (live-activity + avaliações). Números/nomes são
-// fabricados — trocar por dados reais quando houver contador no backend.
+// fabricados, trocar por dados reais quando houver contador no backend.
 const NAMES = [
   'Camila', 'Lucas', 'Ana', 'Rafael', 'Juliana', 'Bruno', 'Fernanda', 'Diego',
   'Patrícia', 'Thiago', 'Mariana', 'Gustavo', 'Larissa', 'Rodrigo', 'Beatriz',
@@ -17,7 +17,7 @@ const ACTIONS = ['desbloqueou o resultado', 'descobriu o próprio QI', 'acabou o
 
 const rand = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
-// Toast fixo de atividade recente — reaparece em intervalos.
+// Toast fixo de atividade recente, reaparece em intervalos.
 export function LiveActivity() {
   const [item, setItem] = useState<{ name: string; city: string; action: string; mins: number } | null>(null);
   const [visible, setVisible] = useState(false);

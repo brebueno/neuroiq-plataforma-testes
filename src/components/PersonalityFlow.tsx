@@ -14,7 +14,7 @@ type Stage = 'quiz' | 'email' | 'reveal' | 'paywall' | 'result';
 
 export default function PersonalityFlow({ onExit }: PersonalityFlowProps) {
   const [stage, setStage] = useState<Stage>('quiz');
-  // Sample a fresh, facet-balanced subset for THIS session — retaking never
+  // Sample a fresh, facet-balanced subset for THIS session, retaking never
   // shows the same set of questions. Scored against the exact items answered.
   const [items, setItems] = useState(() => sampleBigFive(2));
   const [result, setResult] = useState<ReturnType<typeof scoreBigFive> | null>(null);
@@ -53,7 +53,7 @@ export default function PersonalityFlow({ onExit }: PersonalityFlowProps) {
         teaseHeadline="Seu traço dominante ficou mais forte que a média."
         teaseSub="Já calculamos seu perfil nas 5 dimensões. Falta um clique."
         lockedLabel="Traço dominante"
-        provocation="A maioria vai a vida inteira sem entender por que age como age — e repete os mesmos erros. Você está a um clique de saber."
+        provocation="A maioria vai a vida inteira sem entender por que age como age, e repete os mesmos erros. Você está a um clique de saber."
         onUnlock={() => setStage('paywall')}
         onBack={onExit}
       />
@@ -71,7 +71,7 @@ export default function PersonalityFlow({ onExit }: PersonalityFlowProps) {
         bullets={[
           'Seu perfil completo nas 5 dimensões (Big Five)',
           'Seu traço dominante e o que ele revela sobre você',
-          'Seus pontos fortes — e os pontos cegos que te sabotam',
+          'Seus pontos fortes, e os pontos cegos que te sabotam',
           'Relatório detalhado em PDF',
         ]}
         onUnlock={() => setStage('result')}

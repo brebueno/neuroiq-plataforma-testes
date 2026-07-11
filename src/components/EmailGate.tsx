@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Mail, ArrowRight } from 'lucide-react';
 
-// Captura de e-mail ANTES do reveal — recupera o lead mesmo quem não paga
+// Captura de e-mail ANTES do reveal, recupera o lead mesmo quem não paga
 // (sequência de abandono). Enquadrado como benefício ("pra receber o
 // certificado"), não pedágio. Dispara /api/lead (stub pro ESP/CRM).
 interface EmailGateProps {
@@ -15,7 +15,7 @@ export default function EmailGate({ onSubmit, onBack }: EmailGateProps) {
 
   const submit = () => {
     if (!valid) return;
-    // Lead capture — não bloqueia o fluxo se falhar.
+    // Lead capture, não bloqueia o fluxo se falhar.
     try {
       void fetch('/api/lead', {
         method: 'POST',

@@ -9,15 +9,15 @@ import { pick, pickK, shuffle, chance } from './rng';
 // way. This engine implements the five rule families that real Raven-style
 // matrices are built from (Carpenter, Just & Shell, 1990):
 //
-//   1. Constant in a row       — attribute fixed along a row, changes by row
-//   2. Progression             — attribute steps left→right across columns
-//   3. Distribution of three   — 3 values, each appears once per row & column
-//   4. Distribution of two     — 2 values + a blank, distributed per row
-//   5. Figure addition/subtr.  — cell 3 = cell 1 (∪ / \) cell 2
+//   1. Constant in a row, attribute fixed along a row, changes by row
+//   2. Progression, attribute steps left→right across columns
+//   3. Distribution of three, 3 values, each appears once per row & column
+//   4. Distribution of two, 2 values + a blank, distributed per row
+//   5. Figure addition/subtr., cell 3 = cell 1 (∪ / \) cell 2
 //
 // Difficulty scales with how many attributes vary at once. Because a puzzle is
 // composed from {rule family × attribute × stacking × geometry}, the space of
-// structurally distinct puzzles is effectively unbounded — retaking the test
+// structurally distinct puzzles is effectively unbounded, retaking the test
 // never shows the same reasoning twice.
 // ---------------------------------------------------------------------------
 
@@ -110,7 +110,7 @@ const idxFor = (rule: Rule, r: number, c: number, len: number): number => {
 function buildAttributeMode(numAttrs: number, rules: Rule[], allowRotation: boolean): Built {
   const attrPool: Attr[] = ['type', 'size', 'color', 'count', 'fill', ...(allowRotation ? (['rotation'] as Attr[]) : [])];
   let attrs = pickK(attrPool, numAttrs);
-  // size + count together get visually cramped — keep count, drop size.
+  // size + count together get visually cramped, keep count, drop size.
   if (attrs.includes('size') && attrs.includes('count')) attrs = attrs.filter((a) => a !== 'size');
 
   const rotationUsed = attrs.includes('rotation');
@@ -271,7 +271,7 @@ function buildAdditionMode(subtract: boolean): Built {
 }
 
 // ------------------------ compound: figure inside figure -------------------
-// Classic "figura dentro de figura" — an outer outline frame + an inner shape,
+// Classic "figura dentro de figura", an outer outline frame + an inner shape,
 // each varying by its own rule. This is what the hard Raven/ICAR items look
 // like, and it adds real visual depth beyond single-shape cells.
 

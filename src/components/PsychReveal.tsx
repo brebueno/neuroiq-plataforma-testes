@@ -103,7 +103,7 @@ export default function PsychReveal({
         <h2 className="text-2xl font-extrabold text-ink mb-1 text-balance">{teaseHeadline}</h2>
         <p className="text-slate-500 text-sm mb-6">{teaseSub}</p>
 
-        {/* Curiosity gap — the result exists but is locked */}
+        {/* Curiosity gap, the result exists but is locked */}
         <div className="relative bg-brand-light rounded-xl p-6 mb-5 overflow-hidden">
           <div className="select-none blur-md">
             <div className="text-xs text-brand mb-1 uppercase tracking-wide">{lockedLabel}</div>

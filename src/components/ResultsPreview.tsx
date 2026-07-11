@@ -7,7 +7,7 @@ import { sampleBigFive, scoreBigFive } from '../data/bigFive';
 import { sampleRiasec, scoreRiasec } from '../data/riasec';
 
 // DEV-ONLY preview harness. Open http://localhost:5173/#preview to see the
-// three result screens rendered with sample data — no need to run the funnel.
+// three result screens rendered with sample data, no need to run the funnel.
 // Not wired into the product flow; safe to delete.
 
 type Tab = 'iq' | 'personality' | 'career';

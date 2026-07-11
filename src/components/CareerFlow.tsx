@@ -14,7 +14,7 @@ type Stage = 'quiz' | 'email' | 'reveal' | 'paywall' | 'result';
 
 export default function CareerFlow({ onExit }: CareerFlowProps) {
   const [stage, setStage] = useState<Stage>('quiz');
-  // Fresh, RIASEC-balanced subset per session — no repetition on retake.
+  // Fresh, RIASEC-balanced subset per session, no repetition on retake.
   const [items, setItems] = useState(() => sampleRiasec(6));
   const [result, setResult] = useState<ReturnType<typeof scoreRiasec> | null>(null);
   const [email, setEmail] = useState('');
@@ -52,7 +52,7 @@ export default function CareerFlow({ onExit }: CareerFlowProps) {
         teaseHeadline="Seu código vocacional aponta pra caminhos que talvez você nunca considerou."
         teaseSub="Já cruzamos seus 6 interesses com o modelo RIASEC. Falta um clique."
         lockedLabel="Seu código vocacional"
-        provocation="Muita gente descobre tarde demais que estava na profissão errada — anos e dinheiro perdidos. Você não precisa ser mais um."
+        provocation="Muita gente descobre tarde demais que estava na profissão errada, anos e dinheiro perdidos. Você não precisa ser mais um."
         onUnlock={() => setStage('paywall')}
         onBack={onExit}
       />

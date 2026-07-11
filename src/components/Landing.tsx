@@ -5,7 +5,7 @@ import { PROOF } from '../utils/socialProof';
 
 const BRAND = 'QIMind';
 
-// Pricing — edit in ONE place (must match Funnel.tsx OFFER).
+// Pricing, edit in ONE place (must match Funnel.tsx OFFER).
 const PRICE = { trial: 'R$9,90', renewal: 'R$159,00', period: 'mês' };
 
 interface LandingProps {
@@ -15,7 +15,7 @@ interface LandingProps {
   onPractice: () => void;
 }
 
-// IQ bell-curve for the hero — the brand signature and scientific anchor.
+// IQ bell-curve for the hero, the brand signature and scientific anchor.
 function BellCurve() {
   const W = 460;
   const H = 250;
@@ -87,15 +87,15 @@ const skills = [
 ];
 
 const included = [
-  'O número exato que mede a sua inteligência — e a faixa da curva onde 98% das pessoas nunca chegam.',
+  'O número exato que mede a sua inteligência, e a faixa da curva onde 98% das pessoas nunca chegam.',
   'Por que você provavelmente foi rotulado errado na escola (e o que o seu cérebro faz melhor que a média).',
-  'O tipo de raciocínio em que você é secretamente forte — aquele que ninguém nunca reconheceu.',
-  'Onde o seu cérebro tropeça — e por que isso não tem nada a ver com inteligência.',
+  'O tipo de raciocínio em que você é secretamente forte, aquele que ninguém nunca reconheceu.',
+  'Onde o seu cérebro tropeça, e por que isso não tem nada a ver com inteligência.',
   'O certificado que você vai querer mostrar exatamente pra pessoa que duvidou de você.',
 ];
 
 const reviews = [
-  { name: 'Camila R., 34', place: 'Campinas', text: 'Passei a vida achando que era só esforçada. Fiz com medo de tirar 90. Tirei 127 — percentil 96. Chorei.' },
+  { name: 'Camila R., 34', place: 'Campinas', text: 'Passei a vida achando que era só esforçada. Fiz com medo de tirar 90. Tirei 127, percentil 96. Chorei.' },
   { name: 'Diogo M., 29', place: 'Porto', text: 'Me chamaram de burro na escola, larguei os estudos. 15 anos depois o QIMind me deu 118. Voltei a estudar no mês seguinte.' },
   { name: 'Aline F., 41', place: 'Salvador', text: 'Fiz pra provar que não valia a pena. Deu 131, "muito superior". Estava me subestimando havia 20 anos.' },
 ];
@@ -141,7 +141,7 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
               Você é mais inteligente do que <span className="text-[#2F6BEB]">te fizeram acreditar.</span>
             </h1>
             <p className="text-[17px] text-slate-500 mt-4 max-w-[42ch]">
-              Alguém, em algum momento, te fez achar que você era "esforçado, não inteligente". Estava errado — e a maioria carrega esse erro a vida inteira. Em ~15 minutos você vê seu número real, calculado com honestidade. Não um "parabéns" genérico. Resultado na hora, por {PRICE.trial}.
+              Alguém, em algum momento, te fez achar que você era "esforçado, não inteligente". Estava errado, e a maioria carrega esse erro a vida inteira. Em ~15 minutos você vê seu número real, calculado com honestidade. Não um "parabéns" genérico. Resultado na hora, por {PRICE.trial}.
             </p>
             <p className="text-[13px] text-slate-400 mt-2">{PROOF.testsTaken} brasileiros já viram o próprio número.</p>
             <div className="flex flex-col sm:flex-row gap-3 mt-7">
@@ -163,7 +163,7 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
         </div>
       </section>
 
-      {/* Proof strip — prova própria e verificável (não logo emprestado) */}
+      {/* Proof strip, prova própria e verificável (não logo emprestado) */}
       <section className="py-6 border-b border-slate-100">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-center gap-x-[clamp(14px,3.5vw,40px)] gap-y-2 flex-wrap text-[13px] font-semibold text-slate-500">
@@ -185,7 +185,7 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
             Cada ano sem saber é mais um ano se subestimando.
           </h2>
           <p className="text-slate-500 text-[15px]">
-            A pessoa que te chamou de "esforçado, não inteligente" — o professor, o chefe, alguém da sua família — errou. Mas enquanto você não vê o número, a dúvida dela continua sendo a sua. <span className="text-ink font-semibold">{PROOF.testsTaken} pessoas já encerraram essa pergunta.</span> Leva 15 minutos e custa {PRICE.trial}.
+            A pessoa que te chamou de "esforçado, não inteligente", o professor, o chefe, alguém da sua família, errou. Mas enquanto você não vê o número, a dúvida dela continua sendo a sua. <span className="text-ink font-semibold">{PROOF.testsTaken} pessoas já encerraram essa pergunta.</span> Leva 15 minutos e custa {PRICE.trial}.
           </p>
           <button
             onClick={onStartIQ}
@@ -196,7 +196,7 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
         </div>
       </section>
 
-      {/* Unique mechanism — the "reason why" the number is believable */}
+      {/* Unique mechanism, the "reason why" the number is believable */}
       <section className="py-16 md:py-[72px] border-b border-slate-100">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center mb-10">
@@ -205,13 +205,13 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
               A maioria dos testes só conta acertos. Por isso te dão um número mais baixo do que você merece.
             </h2>
             <p className="text-slate-500 max-w-[56ch] mx-auto mt-3">
-              Acertar 30 questões fáceis não é a mesma coisa que acertar 10 difíceis — mas o teste comum trata igual. O {BRAND} faz diferente:
+              Acertar 30 questões fáceis não é a mesma coisa que acertar 10 difíceis, mas o teste comum trata igual. O {BRAND} faz diferente:
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { n: '01', title: 'Ponderação por dificuldade (modelo IRT/Rasch)', desc: 'Usamos o mesmo modelo estatístico — Teoria de Resposta ao Item — que universidades usam pra calibrar provas oficiais. As fáceis ~90% acertam, as difíceis ~20%. Seu número vem do padrão das respostas, não da quantidade. Por isso é comparável e estável — um teste grátis que só conta acertos nunca vai ser.' },
-              { n: '02', title: '5 tipos de raciocínio cruzados', desc: 'Matrizes, séries, analogias, lógica verbal e o "diferentão". O número sai do cruzamento — não de um talento só.' },
+              { n: '01', title: 'Ponderação por dificuldade (modelo IRT/Rasch)', desc: 'Usamos o mesmo modelo estatístico, Teoria de Resposta ao Item, que universidades usam pra calibrar provas oficiais. As fáceis ~90% acertam, as difíceis ~20%. Seu número vem do padrão das respostas, não da quantidade. Por isso é comparável e estável, um teste grátis que só conta acertos nunca vai ser.' },
+              { n: '02', title: '5 tipos de raciocínio cruzados', desc: 'Matrizes, séries, analogias, lógica verbal e o "diferentão". O número sai do cruzamento, não de um talento só.' },
               { n: '03', title: 'Perfil, não só um dígito', desc: 'Você vê onde seu cérebro é forte de verdade e onde tropeça. É um mapa, não uma nota seca.' },
             ].map((m) => (
               <div key={m.n} className="bg-white border border-slate-200 rounded-2xl p-6">
@@ -354,7 +354,7 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
           </div>
           <div className="max-w-sm mx-auto bg-white rounded-[18px] shadow-[0_24px_60px_-34px_rgba(18,32,59,0.4)] border border-slate-200 p-7">
             <div className="text-xs font-bold tracking-widest text-brand uppercase mb-2.5">Diagnóstico Cognitivo Completo QIMind</div>
-            {/* Value stack — âncora no valor de entrega, não no próprio preço */}
+            {/* Value stack, âncora no valor de entrega, não no próprio preço */}
             <ul className="space-y-2 mb-4">
               {[
                 { t: 'Seu Laudo de QI: número exato, classificação e percentil', v: 'R$149' },
@@ -380,17 +380,17 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
               <span className="text-slate-500 text-sm">· desbloqueia tudo + 7 dias</span>
             </div>
             <p className="text-[12.5px] text-slate-500 mb-4">
-              <strong className="text-ink">Por que só {PRICE.trial}?</strong> Porque a gente sabe que, quando você vê seu número e começa a treinar, você fica. Cobrar caro na entrada só afastaria quem mais precisa ver isso. Depois renova por {PRICE.renewal}/{PRICE.period} — você vê antes de pagar e <strong className="text-ink">cancela em 1 clique</strong>.
+              <strong className="text-ink">Por que só {PRICE.trial}?</strong> Porque a gente sabe que, quando você vê seu número e começa a treinar, você fica. Cobrar caro na entrada só afastaria quem mais precisa ver isso. Depois renova por {PRICE.renewal}/{PRICE.period}, você vê antes de pagar e <strong className="text-ink">cancela em 1 clique</strong>.
             </p>
             <div className="flex items-start gap-2 bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-5 text-xs text-emerald-900">
               <Check className="w-4 h-4 flex-shrink-0 mt-0.5 text-emerald-600" />
-              <span><strong>Garantia "número honesto" — 7 dias.</strong> Se achar que não é mais revelador que qualquer teste grátis, devolvemos seus {PRICE.trial} — e você fica com o resultado mesmo assim. O risco é todo nosso.</span>
+              <span><strong>Garantia "número honesto", 7 dias.</strong> Se achar que não é mais revelador que qualquer teste grátis, devolvemos seus {PRICE.trial}, e você fica com o resultado mesmo assim. O risco é todo nosso.</span>
             </div>
             <button
               onClick={onStartIQ}
               className="w-full bg-brand text-white py-3.5 rounded-[10px] font-semibold hover:bg-brand-dark transition-colors"
             >
-              Quero ver o meu número — {PRICE.trial}
+              Quero ver o meu número por {PRICE.trial}
             </button>
           </div>
         </div>

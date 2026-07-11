@@ -14,7 +14,7 @@ interface DimensionResultProps {
   onBack: () => void;
 }
 
-// RIASEC / radar hexagon — plots all 6 interest scores on their axes.
+// RIASEC / radar hexagon, plots all 6 interest scores on their axes.
 function Hexagon({ dims }: { dims: DimensionScore[] }) {
   const size = 240;
   const cx = size / 2;

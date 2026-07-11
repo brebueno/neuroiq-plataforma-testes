@@ -13,7 +13,7 @@ import { generateVerbalAnalogy, generateVerbalOddOne } from './verbal';
 type Slot = 'matrix' | 'num' | 'letter' | 'oddone' | 'analogy' | 'vanalogy' | 'voddone';
 
 // Interleaved so no two neighbours share a format, and VISUAL / VERBAL /
-// NUMERIC alternate — this is what kills the "every question looks the same"
+// NUMERIC alternate, this is what kills the "every question looks the same"
 // feeling. Matrix stays the largest single block (best marker of g), but no
 // longer dominates. Difficulty ramps 1 → 6 across the test.
 const PLAN: [Slot, number][] = [

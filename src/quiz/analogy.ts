@@ -2,7 +2,7 @@ import { Question } from './types';
 import { Spec, cell, specKey, SHAPES, COLORS, SIZES } from './shapes';
 import { pick, shuffle } from '../utils/rng';
 
-// Figural analogy A : B :: C : ?  — B = T(A), the answer = T(C). A single,
+// Figural analogy A : B :: C : ?, B = T(A), the answer = T(C). A single,
 // clear transformation, a "2x2 matrix" that feels different from a 3x3.
 
 type TName = 'rotate' | 'grow' | 'recolor' | 'count' | 'morph';

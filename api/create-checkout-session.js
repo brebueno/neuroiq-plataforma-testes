@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 
 // Vercel serverless function: cria uma Stripe Checkout Session (assinatura).
-// A chave SECRETA nunca fica no frontend nem no repo — só aqui, via env var da
+// A chave SECRETA nunca fica no frontend nem no repo, só aqui, via env var da
 // Vercel (Settings → Environment Variables).
 //
 // MODELO "entrada paga": R$7 agora (7 dias) → R$159/mês depois.

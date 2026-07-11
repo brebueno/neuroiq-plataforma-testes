@@ -28,7 +28,7 @@ const ITEM_DIFFICULTY: Record<Level, number> = {
 };
 
 /**
- * Overall IQ from the actual per-question results — norm-referenced, not an
+ * Overall IQ from the actual per-question results, norm-referenced, not an
  * arbitrary curve.
  *
  * Uses a 1-parameter IRT (Rasch) model: P(correct) = 1 / (1 + e^-(θ - b)),

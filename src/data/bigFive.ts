@@ -1,7 +1,7 @@
-// Big Five (Five Factor Model) — banco de 120 itens do IPIP-NEO-120 (John A.
+// Big Five (Five Factor Model), banco de 120 itens do IPIP-NEO-120 (John A.
 // Johnson), traduzido para pt-BR. Domínio público. 5 domínios × 30 facetas × 4
 // itens. A cada sessão sorteamos um subconjunto equilibrado (ver sampleBigFive),
-// então refazer o teste nunca traz exatamente as mesmas perguntas — mas o
+// então refazer o teste nunca traz exatamente as mesmas perguntas, mas o
 // equilíbrio entre dimensões é mantido, preservando a validade do resultado.
 //
 // `dim` já está no polo POSITIVO do traço exibido (O/C/E/A/ES); itens de

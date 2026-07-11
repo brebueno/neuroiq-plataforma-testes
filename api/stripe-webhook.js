@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 
-// Stripe webhook — keeps subscription state in sync over time (renewals,
+// Stripe webhook, keeps subscription state in sync over time (renewals,
 // cancellations, failed payments). Stripe requires the RAW request body to
 // verify the signature, so body parsing is disabled here.
 //

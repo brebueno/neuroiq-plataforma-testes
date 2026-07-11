@@ -158,7 +158,7 @@ export default function QuestionView({ question, index, onAnswer }: Props) {
           }`}
         >
           {isCorrect
-            ? `Só ${rarity}% das pessoas acertam essa — e você acertou. 🔥`
+            ? `Só ${rarity}% das pessoas acertam essa, e você acertou. 🔥`
             : `Essa derruba ${100 - rarity}% de quem tenta. Seu relatório mostra onde seu raciocínio tropeça.`}
         </div>
       )}

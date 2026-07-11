@@ -12,11 +12,11 @@ interface FunnelProps {
   onUnlock: () => void;
   onBack: () => void;
   initialStage?: Stage; // start at 'paywall' when a richer reveal already played the tease
-  email?: string; // captured before the reveal — prefills Stripe checkout
+  email?: string; // captured before the reveal, prefills Stripe checkout
 }
 
 /**
- * OFFER CONFIG — edit these to change your pricing (must match the Stripe prices).
+ * OFFER CONFIG, edit these to change your pricing (must match the Stripe prices).
  * A renovação é mostrada CLARAMENTE antes do pagamento (evita chargeback).
  */
 const OFFER = {
@@ -39,10 +39,10 @@ export default function Funnel({ headline, lockedLabel, lockedValue, bullets, on
         <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
           <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
             <Check className="w-4 h-4" />
-            {headline || 'Teste concluído — seu resultado está pronto!'}
+            {headline || 'Teste concluído, seu resultado está pronto!'}
           </div>
 
-          {/* Blurred value — the curiosity gap */}
+          {/* Blurred value, the curiosity gap */}
           <div className="relative bg-brand-light rounded-xl p-8 mb-6 overflow-hidden">
             <div className="select-none blur-md">
               <div className="text-sm text-brand mb-1">{lockedLabel}</div>
@@ -73,7 +73,7 @@ export default function Funnel({ headline, lockedLabel, lockedValue, bullets, on
             Desbloquear meu resultado →
           </button>
           <button onClick={onBack} className="mt-3 text-gray-400 hover:text-gray-600 text-sm">
-            Não, obrigado — descartar resultado
+            Não, obrigado. Descartar resultado
           </button>
         </div>
         <LiveActivity />
@@ -111,15 +111,15 @@ export default function Funnel({ headline, lockedLabel, lockedValue, bullets, on
           </span>
         </div>
 
-        {/* Garantia — reversão de risco no ponto de fricção */}
+        {/* Garantia, reversão de risco no ponto de fricção */}
         <div className="flex items-start gap-2 bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-5 text-xs text-emerald-900">
           <Check className="w-4 h-4 flex-shrink-0 mt-0.5 text-emerald-600" />
           <span>
-            <strong>Garantia de 7 dias.</strong> Desbloqueie, veja seu número e explore tudo. Se achar que não valeu os {OFFER.currency}{OFFER.trialPrice}, devolvemos cada centavo — e você fica com o resultado. Sem formulário, sem perguntas.
+            <strong>Garantia de 7 dias.</strong> Desbloqueie, veja seu número e explore tudo. Se achar que não valeu os {OFFER.currency}{OFFER.trialPrice}, devolvemos cada centavo, e você fica com o resultado. Sem formulário, sem perguntas.
           </span>
         </div>
 
-        {/* Stripe Elements — pagamento embutido, sem sair da página */}
+        {/* Stripe Elements, pagamento embutido, sem sair da página */}
         <StripeCheckout onDemoUnlock={onUnlock} email={email} />
 
         <button onClick={onBack} className="w-full mt-4 text-gray-400 hover:text-gray-600 text-sm">

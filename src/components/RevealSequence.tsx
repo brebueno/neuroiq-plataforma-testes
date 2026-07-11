@@ -120,7 +120,7 @@ export default function RevealSequence({ percentile, accuracyPct, avgSeconds, on
         </h2>
         <p className="text-slate-500 text-sm mb-6">Sua pontuação já foi calculada. Falta um clique pra você ver.</p>
 
-        {/* Percentile flattery — no score revealed */}
+        {/* Percentile flattery, no score revealed */}
         <div className="grid grid-cols-2 gap-3 mb-6">
           <div className="bg-slate-50 rounded-xl p-4">
             <div className="text-2xl font-extrabold text-ink">{accuracyPct}%</div>
@@ -132,7 +132,7 @@ export default function RevealSequence({ percentile, accuracyPct, avgSeconds, on
           </div>
         </div>
 
-        {/* Genius anchoring — YOU hidden between two famous minds */}
+        {/* Genius anchoring, YOU hidden between two famous minds */}
         <p className="text-sm text-slate-500 mb-3">Pra você ter uma ideia de onde caiu:</p>
         <div className="grid grid-cols-3 gap-2 mb-5 items-end">
           <AnchorCard name={lower.name} value={String(lower.iq)} />
@@ -163,7 +163,7 @@ export default function RevealSequence({ percentile, accuracyPct, avgSeconds, on
         {/* Provocação + loss-framing */}
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-5">
           <p className="text-[13px] text-amber-900">
-            Seu número já existe — está calculado e guardado. A única pergunta é se <strong>você</strong> vai vê-lo, ou vai passar a vida se perguntando.
+            Seu número já existe, está calculado e guardado. A única pergunta é se <strong>você</strong> vai vê-lo, ou vai passar a vida se perguntando.
           </p>
         </div>
 
