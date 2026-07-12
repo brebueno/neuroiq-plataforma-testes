@@ -12,6 +12,7 @@ import CareerFlow from './components/CareerFlow';
 import QuestionView from './components/QuestionView';
 import IQResult from './components/IQResult';
 import ResultsPreview from './components/ResultsPreview';
+import DevScreens from './components/DevScreens';
 import PaymentReturn from './components/PaymentReturn';
 import { Question } from './quiz/types';
 import { buildQuiz, TYPE_LABEL } from './quiz/build';
@@ -71,6 +72,11 @@ function App() {
   // DEV preview: open /#preview to see the 3 result screens with sample data.
   if (typeof window !== 'undefined' && window.location.hash === '#preview') {
     return <ResultsPreview />;
+  }
+
+  // DEV: /#screens = índice com TODAS as telas (landing, onboarding, reveal, paywall, resultado, plataforma).
+  if (route === '#screens') {
+    return <DevScreens />;
   }
 
   // Plataforma de treino cognitivo (o entregável de LTV pós-compra).
