@@ -173,9 +173,9 @@ const REVIEWS = [
   { iq: 118, name: 'Diogo M., 29', place: 'Porto Alegre', text: 'Me chamaram de burro na escola, larguei os estudos. 15 anos depois o QIMind me deu 118. Voltei a estudar no mês seguinte.' },
   { iq: 131, name: 'Aline F., 41', place: 'Salvador', text: 'Fiz pra provar que não valia a pena. Deu 131, "muito superior". Estava me subestimando havia 20 anos.' },
   { iq: 122, name: 'Rafael T., 37', place: 'Curitiba', text: 'O que me pegou foi a trilha. Todo dia um vídeo e um treino. Bati 40 dias de streak sem perceber.' },
-  { iq: 115, name: 'Juliana P., 26', place: 'Recife', text: 'Achei que ia ser mais um teste bobo. O perfil de raciocínio mostrou onde eu era forte de verdade. Fez sentido pela primeira vez.' },
+  { iq: 103, name: 'Patrícia N., 38', place: 'Recife', text: 'Tirei 103, nada de recorde. Mas o mapa de raciocínio mostrou que sou muito acima em analogia, e isso explicou coisas do meu trabalho que eu nunca tinha entendido.' },
   { iq: 134, name: 'Marcos V., 45', place: 'Belo Horizonte', text: 'Meu Índice de Treino saiu de 100 e passou de 120 em dois meses. Ver o número subir vicia, no bom sentido.' },
-  { iq: 120, name: 'Beatriz L., 31', place: 'Fortaleza', text: 'O certificado eu mandei pro meu pai, que sempre disse que eu não me aplicava. Ele não respondeu, mas eu já tinha ganhado.' },
+  { iq: 97, name: 'Eduardo B., 44', place: 'Goiânia', text: 'Achei que ia confirmar que sou mediano mesmo. Deu 97. Mas o perfil mostrou onde eu realmente sou forte, e isso valeu mais que o número.' },
   { iq: 126, name: 'Thiago S., 33', place: 'Brasília', text: 'Cálculo mental, N-back, memória. Parece jogo mas é treino sério. Meu foco no trabalho mudou de patamar.' },
   { iq: 129, name: 'Renata C., 39', place: 'São Paulo', text: 'Fiz o teste no ônibus, vi 129 e não acreditei. Refiz em casa com calma. Mesmo número. Agora eu sei.' },
 ];
@@ -184,7 +184,7 @@ function ReviewCard({ r }: { r: (typeof REVIEWS)[number] }) {
   return (
     <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-[0_2px_10px_-6px_rgba(18,32,59,0.18)]">
       <div className="flex items-center justify-between mb-3">
-        <span className="inline-flex items-center gap-0.5 bg-[#00B67A] text-white px-1.5 py-1 rounded">
+        <span className="inline-flex items-center gap-0.5 bg-brand text-white px-1.5 py-1 rounded">
           {[...Array(5)].map((_, i) => <Star key={i} className="w-3 h-3 fill-white text-white" />)}
         </span>
         <span className="font-display text-lg font-bold text-brand tabular-nums leading-none">QI {r.iq}</span>

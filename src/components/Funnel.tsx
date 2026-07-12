@@ -70,7 +70,7 @@ export default function Funnel({ headline, lockedLabel, lockedValue, bullets, on
             onClick={() => setStage('paywall')}
             className="w-full bg-brand text-white py-4 px-4 rounded-xl hover:bg-brand-dark transition-colors font-semibold text-lg shadow-lg"
           >
-            Desbloquear meu resultado →
+            Ver meu número real →
           </button>
           <button onClick={onBack} className="mt-3 text-gray-400 hover:text-gray-600 text-sm">
             Não, obrigado. Descartar resultado
@@ -115,7 +115,7 @@ export default function Funnel({ headline, lockedLabel, lockedValue, bullets, on
         <div className="flex items-start gap-2 bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-5 text-xs text-emerald-900">
           <Check className="w-4 h-4 flex-shrink-0 mt-0.5 text-emerald-600" />
           <span>
-            <strong>Garantia de 7 dias.</strong> Desbloqueie, veja seu número e explore tudo. Se achar que não valeu os {OFFER.currency}{OFFER.trialPrice}, devolvemos cada centavo, e você fica com o resultado. Sem formulário, sem perguntas.
+            <strong>Garantia de 5 dias.</strong> Acesso completo pra testar tudo, com 2 dias de sobra antes de qualquer renovação. Se achar que não valeu os {OFFER.currency}{OFFER.trialPrice}, devolvemos cada centavo, e você fica com o resultado. Sem formulário, sem perguntas.
           </span>
         </div>
 

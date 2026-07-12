@@ -116,7 +116,7 @@ export default function RevealSequence({ percentile, accuracyPct, avgSeconds, on
         </div>
 
         <h2 className="text-2xl font-extrabold text-ink mb-1 text-balance">
-          E ele é mais alto do que você imaginava.
+          {percentile >= 55 ? 'E ele é mais alto do que você imaginava.' : 'E ele revela mais do que você esperava.'}
         </h2>
         <p className="text-slate-500 text-sm mb-6">Sua pontuação já foi calculada. Falta um clique pra você ver.</p>
 
@@ -172,7 +172,7 @@ export default function RevealSequence({ percentile, accuracyPct, avgSeconds, on
           className="w-full bg-brand text-white py-4 px-4 rounded-xl hover:bg-brand-dark transition-colors font-semibold text-lg shadow-[0_10px_26px_-8px_rgba(18,160,140,0.6)] flex items-center justify-center gap-2"
         >
           <Zap className="w-5 h-5" />
-          Desbloquear meu QI
+          Ver meu número real
         </button>
         <p className="text-[11px] text-slate-400 mt-3">Calculado por modelo psicométrico IRT (Rasch) · escala padrão média 100 · desvio 15</p>
         <TrustBar className="mt-3" />

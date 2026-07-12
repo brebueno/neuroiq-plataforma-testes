@@ -30,7 +30,10 @@ export default async function handler(req, res) {
 
   // Fetch client evita StripeConnectionError na Vercel.
   const stripe = new Stripe(secret, { httpClient: Stripe.createFetchHttpClient() });
-  const origin = req.headers.origin || (req.headers.host ? `https://${req.headers.host}` : '');
+  // SEGURANÇA: em produção defina PUBLIC_APP_URL (ex: https://qimind.app) pra NÃO
+  // confiar no header Origin/Host (evita open redirect no return_url pós-pagamento).
+  const rawOrigin = req.headers.origin || (req.headers.host ? `https://${req.headers.host}` : '');
+  const origin = process.env.PUBLIC_APP_URL || rawOrigin;
   const trialDays = Number(process.env.STRIPE_TRIAL_DAYS ?? 7);
   const email = req.body && typeof req.body === 'object' ? req.body.email : undefined;
 
@@ -52,6 +55,7 @@ export default async function handler(req, res) {
     });
     res.status(200).json({ clientSecret: session.client_secret });
   } catch (err) {
-    res.status(500).json({ error: err instanceof Error ? err.message : 'Erro ao criar sessão' });
+    console.error('[create-checkout-session]', err);
+    res.status(500).json({ error: 'Não foi possível iniciar o pagamento. Tente novamente.' });
   }
 }

@@ -11,12 +11,15 @@ export default async function handler(req, res) {
   }
   try {
     const { email, event } = req.body || {};
-    if (!email || typeof email !== 'string') {
+    // Valida formato antes de aceitar (evita log/ESP injection e lixo na base).
+    const validEmail = typeof email === 'string' && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) && email.length <= 254;
+    if (!validEmail) {
       res.status(400).json({ error: 'email required' });
       return;
     }
+    const safeEvent = typeof event === 'string' ? event.replace(/[^\w-]/g, '').slice(0, 40) : 'unknown';
     // eslint-disable-next-line no-console
-    console.log('[lead]', event || 'unknown', email);
+    console.log('[lead]', safeEvent, email);
     res.status(200).json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: 'lead capture failed' });

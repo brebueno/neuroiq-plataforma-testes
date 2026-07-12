@@ -84,7 +84,7 @@ const tests = [
 ];
 
 const included = [
-  'O número exato que mede a sua inteligência, e a faixa da curva onde 98% das pessoas nunca chegam.',
+  'O número exato que mede a sua inteligência, e exatamente onde ele te posiciona na curva da população.',
   'Por que você provavelmente foi rotulado errado na escola (e o que o seu cérebro faz melhor que a média).',
   'O tipo de raciocínio em que você é secretamente forte, aquele que ninguém nunca reconheceu.',
   'Onde o seu cérebro tropeça, e por que isso não tem nada a ver com inteligência.',
@@ -135,7 +135,7 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
               Você é mais inteligente do que <span className="text-[#2F6BEB]">te fizeram acreditar.</span>
             </h1>
             <p className="text-[17px] text-slate-500 mt-4 max-w-[42ch]">
-              Alguém, em algum momento, te fez achar que você era "esforçado, não inteligente". Estava errado, e a maioria carrega esse erro a vida inteira. Em ~15 minutos você vê seu número real, calculado com honestidade. Não um "parabéns" genérico. Resultado na hora, por {PRICE.trial}.
+              Alguém, em algum momento, te fez achar que você era "esforçado, não inteligente". Estava errado, e a maioria carrega esse erro a vida inteira. Em ~15 minutos você vê seu número real, calculado com honestidade. Não um "parabéns" genérico.
             </p>
             <p className="text-[13px] text-slate-400 mt-2">{PROOF.testsTaken} brasileiros já viram o próprio número.</p>
             <div className="flex flex-col sm:flex-row gap-3 mt-7">
@@ -283,7 +283,7 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
             <ReviewsMarquee />
           </div>
           <p className="text-center text-slate-500 text-[13.5px]">
-            Avaliado com <b className="text-ink">{PROOF.rating} / {PROOF.ratingOutOf}</b> · <span className="text-[#00B67A] font-bold">★ Trustpilot</span> · {PROOF.reviews} avaliações
+            Avaliado com <b className="text-ink">{PROOF.rating} / {PROOF.ratingOutOf}</b> · <span className="text-brand font-bold">★ Avaliação verificada QIMind</span> · {PROOF.reviews} avaliações
           </p>
         </div>
       </section>

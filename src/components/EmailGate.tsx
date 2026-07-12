@@ -53,7 +53,7 @@ export default function EmailGate({ onSubmit, onBack }: EmailGateProps) {
         >
           Ver meu resultado <ArrowRight className="w-5 h-5" />
         </button>
-        <p className="text-[11px] text-slate-400 mt-3">Sem spam. Só o seu resultado e novidades da plataforma.</p>
+        <p className="text-[11px] text-slate-400 mt-3">Sem spam. Só o link do seu resultado.</p>
         <button onClick={onBack} className="mt-3 text-slate-400 hover:text-slate-600 text-sm">Voltar</button>
       </div>
     </div>

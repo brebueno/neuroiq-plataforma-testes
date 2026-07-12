@@ -37,13 +37,13 @@ export default function StripeCheckout({ email, onDemoUnlock }: Props) {
   if (error) {
     return (
       <div className="bg-red-50 text-red-600 p-4 rounded-xl text-center">
-        <p className="mb-4">Erro ao carregar o pagamento. Tente novamente mais tarde.</p>
-        <button
-          onClick={onDemoUnlock}
-          className="bg-red-600 text-white px-4 py-2 rounded-lg"
-        >
-          Usar fallback local
-        </button>
+        <p className="mb-2">Erro ao carregar o pagamento. Recarregue a página ou tente novamente em instantes.</p>
+        {/* Fallback SÓ em desenvolvimento, senão libera acesso pago de graça em produção. */}
+        {import.meta.env.DEV && (
+          <button onClick={onDemoUnlock} className="mt-2 bg-red-600 text-white px-4 py-2 rounded-lg">
+            [DEV] Usar fallback local
+          </button>
+        )}
       </div>
     );
   }

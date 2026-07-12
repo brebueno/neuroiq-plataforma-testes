@@ -70,12 +70,13 @@ function App() {
   }, []);
 
   // DEV preview: open /#preview to see the 3 result screens with sample data.
-  if (typeof window !== 'undefined' && window.location.hash === '#preview') {
+  // Gated por import.meta.env.DEV, não vai no bundle de produção.
+  if (import.meta.env.DEV && typeof window !== 'undefined' && window.location.hash === '#preview') {
     return <ResultsPreview />;
   }
 
   // DEV: /#screens = índice com TODAS as telas (landing, onboarding, reveal, paywall, resultado, plataforma).
-  if (route === '#screens') {
+  if (import.meta.env.DEV && route === '#screens') {
     return <DevScreens />;
   }
 
