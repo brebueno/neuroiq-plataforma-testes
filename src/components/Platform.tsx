@@ -9,6 +9,7 @@ import DigitSpan from '../training/DigitSpan';
 import NBack from '../training/NBack';
 import { loadTraining, recordExercise, toggleHabit, todayHabits, markWatched, TrainingData } from '../utils/training';
 import { loadGameData } from '../utils/localStorage';
+import { loadTestProfile, deriveFocus } from '../utils/profile';
 import { Logo } from './Logo';
 
 interface Props { onExit: () => void; }
@@ -214,10 +215,25 @@ const card = 'bg-white border border-slate-200 rounded-2xl shadow-sm';
 
 // ---------- HOJE ----------
 function HomeTab({ data, onTrain, go }: { data: TrainingData; onTrain: (k: ExKey) => void; go: (t: Tab) => void }) {
-  const next = EXERCISES.find((e) => !data.todayDone.includes(e.key)) ?? EXERCISES[0];
+  const profile = loadTestProfile();
+  const focus = profile ? deriveFocus(profile) : null;
+  // A "sessão de hoje" começa pelo exercício que ataca o ponto fraco do teste
+  // (se ainda não foi feito hoje); depois cai no fluxo normal.
+  const recommended = focus && !data.todayDone.includes(focus.ex) ? EXERCISES.find((e) => e.key === focus.ex) : null;
+  const next = recommended ?? EXERCISES.find((e) => !data.todayDone.includes(e.key)) ?? EXERCISES[0];
   const done = data.todayDone.length;
   return (
     <div className="space-y-4">
+      {focus && (
+        <div className="rounded-2xl p-5 shadow-sm bg-gradient-to-br from-brand to-brand-dark text-white">
+          <div className="flex items-center gap-1.5 text-[12px] text-white/80"><Sparkles className="w-3.5 h-3.5" /> Seu plano personalizado</div>
+          <p className="text-[15px] mt-2 leading-snug">
+            Seu teste mostrou força em <b>{focus.strongest.label.toLowerCase()}</b>. O maior espaço pra crescer está em <b>{focus.area}</b>, e é por aí que sua jornada começa.
+          </p>
+          <p className="text-[13px] text-white/85 mt-2">Separamos o exercício certo pra isso, logo abaixo.</p>
+        </div>
+      )}
+
       <div className="flex items-center gap-3 bg-gradient-to-r from-amber-50 to-white border border-amber-200 rounded-2xl p-4">
         <Flame className={`w-9 h-9 ${data.streak > 0 ? 'text-amber-500' : 'text-slate-300'}`} />
         <div className="flex-1">
@@ -227,7 +243,7 @@ function HomeTab({ data, onTrain, go }: { data: TrainingData; onTrain: (k: ExKey
       </div>
 
       <div className={`${card} p-5`}>
-        <div className="text-xs uppercase tracking-widest text-brand mb-1">Sua sessão de hoje</div>
+        <div className="text-xs uppercase tracking-widest text-brand mb-1">{recommended ? 'Recomendado pra você' : 'Sua sessão de hoje'}</div>
         <div className="flex items-center gap-3 mt-2">
           <span className="w-11 h-11 rounded-xl bg-brand-light grid place-items-center"><next.icon className="w-6 h-6 text-brand" /></span>
           <div className="flex-1"><div className="font-bold text-ink">{next.label}</div><div className="text-[12px] text-slate-500">{next.desc}</div></div>

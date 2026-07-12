@@ -1,4 +1,5 @@
 import { RotateCcw, Brain, Award, Lock, Download } from 'lucide-react';
+import { saveTestProfile } from '../utils/profile';
 
 interface TypeScore {
   type: string;
@@ -173,7 +174,13 @@ export default function IQResult({
         </p>
 
         <div className="space-y-3">
-          <button onClick={() => { window.location.hash = '#plataforma'; }} className="w-full bg-brand text-white py-3.5 rounded-xl hover:bg-brand-dark transition-colors font-semibold flex items-center justify-center gap-2">
+          <button
+            onClick={() => {
+              saveTestProfile({ iq, percentile, classification, byType: items.map((i) => ({ type: i.type ?? '', label: i.label, pct: i.pct })) });
+              window.location.hash = '#plataforma';
+            }}
+            className="w-full bg-brand text-white py-3.5 rounded-xl hover:bg-brand-dark transition-colors font-semibold flex items-center justify-center gap-2"
+          >
             <Brain className="w-5 h-5" /> Treinar meu cérebro na plataforma
           </button>
           <button onClick={onRetry} className="w-full bg-gray-100 text-gray-700 py-3 rounded-xl hover:bg-gray-200 transition-colors font-medium flex items-center justify-center gap-2">
