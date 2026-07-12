@@ -173,11 +173,14 @@ export default function IQResult({
         </p>
 
         <div className="space-y-3">
-          <button onClick={onBack} className="w-full bg-brand text-white py-3.5 rounded-xl hover:bg-brand-dark transition-colors font-semibold">
-            Voltar ao início
+          <button onClick={() => { window.location.hash = '#plataforma'; }} className="w-full bg-brand text-white py-3.5 rounded-xl hover:bg-brand-dark transition-colors font-semibold flex items-center justify-center gap-2">
+            <Brain className="w-5 h-5" /> Treinar meu cérebro na plataforma
           </button>
           <button onClick={onRetry} className="w-full bg-gray-100 text-gray-700 py-3 rounded-xl hover:bg-gray-200 transition-colors font-medium flex items-center justify-center gap-2">
             <RotateCcw className="w-4 h-4" /> {retryLabel}
+          </button>
+          <button onClick={onBack} className="w-full text-gray-400 py-2 text-sm hover:text-gray-600 transition-colors">
+            Voltar ao início
           </button>
         </div>
       </div>

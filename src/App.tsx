@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Brain, RotateCcw, Zap } from 'lucide-react';
+import Platform from './components/Platform';
 import LevelSelection from './components/LevelSelection';
 import PuzzleGame from './components/PuzzleGame';
 import Funnel from './components/Funnel';
@@ -59,10 +60,22 @@ function App() {
   const [email, setEmail] = useState('');
   const [emailCaptured, setEmailCaptured] = useState(false);
   const [activeTest, setActiveTest] = useState<'personality' | 'career' | null>(null);
+  const [route, setRoute] = useState(typeof window !== 'undefined' ? window.location.hash : '');
+
+  useEffect(() => {
+    const onHash = () => setRoute(window.location.hash);
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
 
   // DEV preview: open /#preview to see the 3 result screens with sample data.
   if (typeof window !== 'undefined' && window.location.hash === '#preview') {
     return <ResultsPreview />;
+  }
+
+  // Plataforma de treino cognitivo (o entregável de LTV pós-compra).
+  if (route === '#plataforma') {
+    return <Platform onExit={() => { window.location.hash = ''; }} />;
   }
 
   // Return from Stripe Checkout, PaymentReturn verifies the session server-side
