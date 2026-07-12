@@ -1,7 +1,9 @@
-import { Brain, GraduationCap, Gamepad2, Puzzle, Check, Star, ArrowRight, User, Briefcase } from 'lucide-react';
+import { Brain, Check, Star, ArrowRight, User, Briefcase } from 'lucide-react';
 import { Logo } from './Logo';
 import { LiveActivity } from './SocialProof';
 import { PROOF } from '../utils/socialProof';
+import { Platform3D } from './landing/Platform3D';
+import { PlatformShowcase } from './landing/Showcase';
 
 const BRAND = 'QIMind';
 
@@ -80,12 +82,6 @@ const tests = [
   { type: 'career' as const, icon: Briefcase, title: 'Vocacional', time: '~8 min', q: '36 perguntas', desc: 'Descubra pra que tipo de trabalho o seu cérebro foi feito.', cta: 'Fazer o teste', popular: false },
 ];
 
-const skills = [
-  { icon: GraduationCap, title: 'Jornada do Cérebro', items: ['Trilha guiada passo a passo', 'Um conteúdo, um treino', 'Desbloqueia conforme avança'] },
-  { icon: Gamepad2, title: 'Treino com streak diário', items: ['Cálculo, memória e N-back', 'Dificuldade adaptativa', 'Seu índice evolui todo dia'] },
-  { icon: Puzzle, title: 'Biblioteca de neurociência', items: ['+60 vídeos com base científica', 'Eslen, Roberta Ekuni e mais', 'Novos toda semana'] },
-];
-
 const included = [
   'O número exato que mede a sua inteligência, e a faixa da curva onde 98% das pessoas nunca chegam.',
   'Por que você provavelmente foi rotulado errado na escola (e o que o seu cérebro faz melhor que a média).',
@@ -134,10 +130,13 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
       </header>
 
       {/* Hero */}
-      <section className="bg-gradient-to-b from-[#F2F7FD] to-white">
-        <div className="container mx-auto px-4 py-14 md:py-[72px] grid md:grid-cols-2 gap-10 items-center">
+      <section className="relative bg-gradient-to-b from-[#F2F7FD] to-white overflow-hidden">
+        {/* glows ambientes */}
+        <div className="pointer-events-none absolute -top-52 -right-40 w-[680px] h-[680px] rounded-full opacity-70" style={{ background: 'radial-gradient(circle, rgba(18,160,140,0.16), transparent 62%)' }} />
+        <div className="pointer-events-none absolute -bottom-60 -left-52 w-[620px] h-[620px] rounded-full opacity-60" style={{ background: 'radial-gradient(circle, rgba(47,107,235,0.12), transparent 64%)' }} />
+        <div className="container mx-auto px-4 py-14 md:py-[72px] grid md:grid-cols-2 gap-10 items-center relative">
           <div>
-            <h1 className="text-[clamp(30px,4.4vw,50px)] font-extrabold leading-[1.05] tracking-tight text-balance">
+            <h1 className="font-display text-[clamp(30px,4.4vw,50px)] font-bold leading-[1.05] tracking-tight text-balance">
               Você é mais inteligente do que <span className="text-[#2F6BEB]">te fizeram acreditar.</span>
             </h1>
             <p className="text-[17px] text-slate-500 mt-4 max-w-[42ch]">
@@ -159,7 +158,7 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
               </button>
             </div>
           </div>
-          <BellCurve />
+          <Platform3D />
         </div>
       </section>
 
@@ -201,7 +200,7 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center mb-10">
             <div className="inline-block text-xs font-bold tracking-widest text-brand uppercase mb-3">Por que o número do {BRAND} é diferente</div>
-            <h2 className="text-[clamp(24px,3vw,33px)] font-extrabold text-balance">
+            <h2 className="font-display tracking-tight text-[clamp(24px,3vw,33px)] font-bold text-balance">
               A maioria dos testes só conta acertos. Por isso te dão um número mais baixo do que você merece.
             </h2>
             <p className="text-slate-500 max-w-[56ch] mx-auto mt-3">
@@ -221,6 +220,10 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
               </div>
             ))}
           </div>
+          <div className="max-w-xl mx-auto mt-10">
+            <BellCurve />
+            <p className="text-center text-[12.5px] text-slate-400 mt-2">A curva normal do QI (média 100, desvio 15). Seu resultado marca exatamente onde você cai nela.</p>
+          </div>
         </div>
       </section>
 
@@ -228,7 +231,7 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
       <section id="tests" className="py-16 md:py-[72px]">
         <div className="container mx-auto px-4">
           <div className="text-center mb-10">
-            <h2 className="text-[clamp(24px,3vw,33px)] font-extrabold mb-2">Três testes. Uma resposta sobre você.</h2>
+            <h2 className="font-display tracking-tight text-[clamp(24px,3vw,33px)] font-bold mb-2">Três testes. Uma resposta sobre você.</h2>
             <p className="text-slate-500 max-w-[52ch] mx-auto">Comece pelo QI. É o que mais gente faz, e o que mais surpreende.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto">
@@ -259,7 +262,7 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
       <section className="bg-[#F2F7FD] py-16 md:py-[72px]">
         <div className="container mx-auto px-4">
           <div className="text-center mb-10">
-            <h2 className="text-[clamp(24px,3vw,33px)] font-extrabold mb-2">Como funciona</h2>
+            <h2 className="font-display tracking-tight text-[clamp(24px,3vw,33px)] font-bold mb-2">Como funciona</h2>
             <p className="text-slate-500 max-w-[52ch] mx-auto">Três passos até o número que você sempre quis saber.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
@@ -278,7 +281,7 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
       <section className="py-16 md:py-[72px]">
         <div className="container mx-auto px-4">
           <div className="text-center mb-10">
-            <h2 className="text-[clamp(24px,3vw,33px)] font-extrabold mb-2 text-balance">Gente normal que descobriu não ter nada de mediano.</h2>
+            <h2 className="font-display tracking-tight text-[clamp(24px,3vw,33px)] font-bold mb-2 text-balance">Gente normal que descobriu não ter nada de mediano.</h2>
             <p className="text-slate-500 max-w-[52ch] mx-auto">{PROOF.testsTaken} pessoas já pararam de adivinhar e foram ver o número.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-5 max-w-4xl mx-auto mb-6">
@@ -300,39 +303,14 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
         </div>
       </section>
 
-      {/* Skills / content platform (the subscription value) */}
-      <section className="bg-[#F2F7FD] py-16 md:py-[72px]">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-10">
-            <h2 className="text-[clamp(24px,3vw,33px)] font-extrabold mb-2">Uma plataforma pra treinar o cérebro, não só um número.</h2>
-            <p className="text-slate-500 max-w-[52ch] mx-auto">O acesso completo abre uma biblioteca inteira de treino cognitivo.</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto">
-            {skills.map((sk) => (
-              <div key={sk.title} className="bg-white border border-slate-200 rounded-2xl p-6">
-                <div className="w-11 h-11 rounded-xl grid place-items-center bg-brand-light mb-4">
-                  <sk.icon className="w-5 h-5 text-brand" />
-                </div>
-                <h3 className="font-bold text-lg mb-3">{sk.title}</h3>
-                <ul className="space-y-2">
-                  {sk.items.map((it) => (
-                    <li key={it} className="flex items-start gap-2 text-sm text-slate-500">
-                      <Check className="w-4 h-4 text-brand flex-shrink-0 mt-0.5" />
-                      {it}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Plataforma por dentro (mockups reais do produto) */}
+      <PlatformShowcase />
 
       {/* What you get */}
       <section className="py-16 md:py-[72px]">
         <div className="container mx-auto px-4 max-w-2xl">
           <div className="text-center mb-10">
-            <h2 className="text-[clamp(24px,3vw,33px)] font-extrabold text-balance">Não é um "parabéns" genérico. É o seu resultado.</h2>
+            <h2 className="font-display tracking-tight text-[clamp(24px,3vw,33px)] font-bold text-balance">Não é um "parabéns" genérico. É o seu resultado.</h2>
           </div>
           <ul className="space-y-3">
             {included.map((it) => (
@@ -349,7 +327,7 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
       <section id="pricing" className="bg-[#F2F7FD] py-16 md:py-[72px]">
         <div className="container mx-auto px-4">
           <div className="text-center mb-10">
-            <h2 className="text-[clamp(24px,3vw,33px)] font-extrabold mb-2">Desbloqueie seu resultado por {PRICE.trial}.</h2>
+            <h2 className="font-display tracking-tight text-[clamp(24px,3vw,33px)] font-bold mb-2">Desbloqueie seu resultado por {PRICE.trial}.</h2>
             <p className="text-slate-500 max-w-[52ch] mx-auto">Acesso completo aos três testes e à plataforma de treino cerebral.</p>
           </div>
           <div className="max-w-sm mx-auto bg-white rounded-[18px] shadow-[0_24px_60px_-34px_rgba(18,32,59,0.4)] border border-slate-200 p-7">
@@ -400,7 +378,7 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
       {/* FAQ */}
       <section className="py-16 md:py-[72px]">
         <div className="container mx-auto px-4 max-w-2xl">
-          <h2 className="text-[clamp(24px,3vw,33px)] font-extrabold text-center mb-10">Perguntas frequentes</h2>
+          <h2 className="font-display tracking-tight text-[clamp(24px,3vw,33px)] font-bold text-center mb-10">Perguntas frequentes</h2>
           <div className="space-y-3">
             {faqs.map((f) => (
               <details key={f.q} className="border border-slate-200 rounded-xl p-4 group">
