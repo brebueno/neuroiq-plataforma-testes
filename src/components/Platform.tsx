@@ -458,6 +458,89 @@ function TestsTab({ bestIQ, onStartTest }: { bestIQ: number; onStartTest?: (t: '
 }
 
 // ---------- APRENDER ----------
+// Jornada como rede neural: neurônios (nós) ligados por sinapses curvas que
+// ACENDEM/brilham conforme você conclui cada passo; o nó atual pulsa (disparando).
+function NeuralJourney({ firstOpen, onTrain, onPlay }: { firstOpen: number; onTrain: (k: ExKey) => void; onPlay: (v: { t: string; yt: string }) => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [w, setW] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ap = () => setW(el.clientWidth);
+    ap();
+    const ro = new ResizeObserver(ap);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const flat = CURRICULUM.flatMap((mod) => mod.steps.map((s, si) => ({ ...s, mod: mod.m, first: si === 0 })));
+  const ROW = 122;
+  const PAD = 48;
+  const R = 27;
+  const lanes = [0.5, 0.77, 0.5, 0.23]; // onda orgânica (centro, direita, centro, esquerda)
+  const cw = w || 320;
+  const pos = (i: number) => ({ x: cw * lanes[i % lanes.length], y: PAD + i * ROW });
+  const H = PAD + flat.length * ROW;
+
+  return (
+    <div ref={ref} className="relative" style={{ height: H }}>
+      <svg className="absolute inset-0" width={cw} height={H} style={{ overflow: 'visible' }}>
+        <defs>
+          <filter id="synGlow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="3.2" result="b" />
+            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+        </defs>
+        {flat.map((_, i) => {
+          if (i === 0) return null;
+          const a = pos(i - 1);
+          const b = pos(i);
+          const my = (a.y + b.y) / 2;
+          const d = `M${a.x} ${a.y} C ${a.x} ${my}, ${b.x} ${my}, ${b.x} ${b.y}`;
+          const lit = i <= firstOpen; // sinapse "formada" até o passo atual
+          return <path key={i} d={d} fill="none" stroke={lit ? '#12A08C' : '#e2e8f0'} strokeWidth={lit ? 3 : 2.5} strokeLinecap="round" filter={lit ? 'url(#synGlow)' : undefined} opacity={lit ? 0.85 : 1} />;
+        })}
+      </svg>
+
+      {flat.map((s, i) => {
+        const { x, y } = pos(i);
+        const done = i < firstOpen;
+        const current = i === firstOpen;
+        const locked = i > firstOpen;
+        const isVideo = s.kind === 'video';
+        const on = done || current;
+        return (
+          <div key={i} className="absolute" style={{ left: x, top: y, transform: 'translate(-50%,-50%)' }}>
+            {s.first && (
+              <span className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-bold text-brand bg-brand-light px-2 py-0.5 rounded-full" style={{ top: -R - 22 }}>{s.mod}</span>
+            )}
+            {current && (
+              <span className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] font-bold text-white bg-brand px-2 py-0.5 rounded-full z-10" style={{ top: -16 }}>continuar</span>
+            )}
+            <button
+              disabled={locked}
+              onClick={() => { if (locked) return; if (s.ex) onTrain(s.ex); else if (s.yt) onPlay({ t: s.t, yt: s.yt }); }}
+              className="relative grid place-items-center rounded-full transition-transform hover:scale-110 disabled:hover:scale-100"
+              style={{
+                width: R * 2,
+                height: R * 2,
+                background: on ? 'radial-gradient(circle at 35% 30%, #2fd0b6, #0C7E6E)' : '#ffffff',
+                color: on ? '#fff' : locked ? '#cbd5e1' : '#12A08C',
+                border: on ? 'none' : `2px solid ${locked ? '#e2e8f0' : '#12A08C'}`,
+                boxShadow: on ? '0 0 0 6px rgba(18,160,140,0.14), 0 10px 22px -6px rgba(18,160,140,0.6)' : '0 4px 10px -4px rgba(18,32,59,0.18)',
+              }}
+            >
+              {current && <span className="absolute inset-0 rounded-full bg-brand/40 animate-ping" />}
+              <span className="relative">{done ? <Check className="w-5 h-5" /> : locked ? <Lock className="w-4 h-4" /> : isVideo ? <Play className="w-4 h-4 fill-current" /> : <Dumbbell className="w-4 h-4" />}</span>
+            </button>
+            <span className={`absolute left-1/2 -translate-x-1/2 w-28 text-center text-[11px] font-medium leading-tight ${locked ? 'text-slate-400' : 'text-ink'}`} style={{ top: R * 2 + 6 }}>{s.t}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function LearnTab({ data, onTrain, onPlay }: { data: TrainingData; onTrain: (k: ExKey) => void; onPlay: (v: { t: string; yt: string }) => void }) {
   const allSteps = CURRICULUM.flatMap((mod) => mod.steps);
   const doneOf = (s: Step) => (s.ex ? data.bestByExercise[s.ex] != null : !!s.yt && data.watched.includes(s.yt));
@@ -466,50 +549,16 @@ function LearnTab({ data, onTrain, onPlay }: { data: TrainingData; onTrain: (k: 
   // Progresso é POSICIONAL (quantos passos antes do cursor), senão exercícios
   // repetidos em módulos diferentes inflavam a barra e ficavam verdes sozinhos.
   const doneN = firstOpen;
-  let gi = -1;
   return (
     <div className="space-y-6">
       <div>
         <h3 className="font-display tracking-tight font-bold text-ink mb-1">Jornada do Cérebro</h3>
-        <p className="text-[12px] text-slate-500 mb-2">Siga na ordem: um conteúdo, um treino. Cada passo desbloqueia o próximo.</p>
+        <p className="text-[12px] text-slate-500 mb-2">Um conteúdo, um treino. Cada conexão acende quando você conclui um passo.</p>
         <div className="flex items-center gap-2 mb-4">
           <div className="flex-1 bg-slate-200 rounded-full h-2"><div className="bg-brand h-2 rounded-full transition-all" style={{ width: `${Math.round((doneN / allSteps.length) * 100)}%` }} /></div>
           <span className="text-xs font-semibold text-slate-500 tabular-nums">{doneN}/{allSteps.length}</span>
         </div>
-        <div className="space-y-3">
-          {CURRICULUM.map((mod) => (
-            <div key={mod.m} className={`${card} p-4`}>
-              <h4 className="font-bold text-ink text-[14px] mb-3">{mod.m}</h4>
-              {mod.steps.map((s, si) => {
-                gi += 1;
-                const idx = gi;
-                const done = idx < firstOpen;
-                const locked = idx > firstOpen;
-                const current = idx === firstOpen;
-                const isVideo = s.kind === 'video';
-                const last = si === mod.steps.length - 1;
-                return (
-                  <div key={si} className="flex gap-3">
-                    <div className="flex flex-col items-center">
-                      <span className={`w-8 h-8 rounded-full grid place-items-center text-xs font-bold flex-shrink-0 ${done ? 'bg-emerald-500 text-white' : current ? 'bg-brand text-white ring-4 ring-brand-light' : locked ? 'bg-slate-100 text-slate-400' : 'bg-brand-light text-brand'}`}>
-                        {done ? <Check className="w-4 h-4" /> : locked ? <Lock className="w-3.5 h-3.5" /> : isVideo ? <Play className="w-3.5 h-3.5" /> : <Dumbbell className="w-3.5 h-3.5" />}
-                      </span>
-                      {!last && <span className={`w-0.5 flex-1 my-1 ${done ? 'bg-emerald-300' : 'bg-slate-200'}`} />}
-                    </div>
-                    <button
-                      disabled={locked}
-                      onClick={() => { if (locked) return; if (s.ex) onTrain(s.ex); else if (s.yt) onPlay({ t: s.t, yt: s.yt }); }}
-                      className={`flex-1 text-left pb-4 min-w-0 ${locked ? 'opacity-50' : ''}`}
-                    >
-                      <div className="font-medium text-ink text-[14px] flex items-center gap-2 flex-wrap">{s.t}{current && <span className="text-[10px] bg-brand text-white px-1.5 py-0.5 rounded-full">continuar</span>}</div>
-                      <div className="text-[11px] text-slate-400">{isVideo ? `Vídeo · ${s.src ?? ''}` : s.ex ? 'Sessão de treino' : `Como treinar · ${s.src ?? ''}`}</div>
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          ))}
-        </div>
+        <NeuralJourney firstOpen={firstOpen} onTrain={onTrain} onPlay={onPlay} />
       </div>
 
       <div>
