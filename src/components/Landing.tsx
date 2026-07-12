@@ -15,6 +15,7 @@ interface LandingProps {
   onStartPersonality: () => void;
   onStartCareer: () => void;
   onPractice: () => void;
+  onEnter: () => void; // "Entrar" = usuário que volta, vai pra plataforma
 }
 
 // IQ bell-curve for the hero, the brand signature and scientific anchor.
@@ -98,7 +99,7 @@ const faqs = [
   { q: 'Como cancelo?', a: 'Em menos de um minuto, direto nas configurações da conta. Você mantém o acesso até o fim do período já pago.' },
 ];
 
-export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, onPractice }: LandingProps) {
+export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, onPractice, onEnter }: LandingProps) {
   const scrollToPricing = () => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
   const scrollToTests = () => document.getElementById('tests')?.scrollIntoView({ behavior: 'smooth' });
   const startByType = (type: 'iq' | 'personality' | 'career') =>
@@ -113,7 +114,7 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
             <Logo className="h-8" />
           </div>
           <div className="flex gap-2.5">
-            <button onClick={onStartIQ} className="text-sm font-semibold px-4 py-2 rounded-lg border border-slate-200 hover:border-brand transition-colors">
+            <button onClick={onEnter} className="text-sm font-semibold px-4 py-2 rounded-lg border border-slate-200 hover:border-brand transition-colors">
               Entrar
             </button>
             <button onClick={scrollToTests} className="text-sm font-semibold px-4 py-2 rounded-lg bg-brand text-white shadow-[0_8px_20px_-8px_rgba(18,160,140,0.6)] hover:bg-brand-dark transition-colors">

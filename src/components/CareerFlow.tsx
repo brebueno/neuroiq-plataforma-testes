@@ -91,6 +91,7 @@ export default function CareerFlow({ onExit }: CareerFlowProps) {
         hexagon
         onRetake={restart}
         onBack={onExit}
+        onGoToPlatform={() => { window.location.hash = '#plataforma'; }}
       />
     );
   }

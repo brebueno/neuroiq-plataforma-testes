@@ -12,7 +12,7 @@ import { loadGameData } from '../utils/localStorage';
 import { loadTestProfile, deriveFocus } from '../utils/profile';
 import { Logo } from './Logo';
 
-interface Props { onExit: () => void; }
+interface Props { onExit: () => void; onStartTest?: (t: 'iq' | 'personality' | 'career') => void; }
 type ExKey = 'math' | 'span' | 'nback';
 type Tab = 'hoje' | 'testes' | 'aprender' | 'progresso' | 'comunidade';
 
@@ -272,11 +272,11 @@ function HomeTab({ data, onTrain, go }: { data: TrainingData; onTrain: (k: ExKey
 }
 
 // ---------- TESTES ----------
-function TestsTab({ bestIQ }: { bestIQ: number }) {
+function TestsTab({ bestIQ, onStartTest }: { bestIQ: number; onStartTest?: (t: 'iq' | 'personality' | 'career') => void }) {
   const tests = [
-    { t: 'Teste de QI', d: '30 questões · ~15 min', done: bestIQ > 0 },
-    { t: 'Personalidade (Big Five)', d: 'IPIP-NEO · ~7 min', done: false },
-    { t: 'Vocacional (RIASEC)', d: 'Holland · ~8 min', done: false },
+    { type: 'iq' as const, t: 'Teste de QI', d: '30 questões · ~15 min', done: bestIQ > 0 },
+    { type: 'personality' as const, t: 'Personalidade (Big Five)', d: 'IPIP-NEO · ~7 min', done: false },
+    { type: 'career' as const, t: 'Vocacional (RIASEC)', d: 'Holland · ~8 min', done: false },
   ];
   return (
     <div className="space-y-4">
@@ -289,7 +289,7 @@ function TestsTab({ bestIQ }: { bestIQ: number }) {
         <div key={t.t} className={`${card} p-4 flex items-center gap-3`}>
           <span className="w-10 h-10 rounded-xl bg-brand-light grid place-items-center"><FlaskConical className="w-5 h-5 text-brand" /></span>
           <div className="flex-1"><div className="font-semibold text-ink flex items-center gap-2">{t.t}{t.done && <Check className="w-4 h-4 text-emerald-600" />}</div><div className="text-[12px] text-slate-500">{t.d}</div></div>
-          <button onClick={() => { window.location.hash = ''; }} className="text-brand font-semibold text-sm">{t.done ? 'Refazer' : 'Fazer'}</button>
+          <button onClick={() => onStartTest?.(t.type)} className="text-brand font-semibold text-sm">{t.done ? 'Refazer' : 'Fazer'}</button>
         </div>
       ))}
     </div>
@@ -485,7 +485,7 @@ const NAV: { key: Tab; label: string; icon: typeof HomeIcon }[] = [
 
 const TITLES: Record<Tab, string> = { hoje: 'Hoje', testes: 'Testes', aprender: 'Aprender', progresso: 'Progresso', comunidade: 'Comunidade' };
 
-export default function Platform({ onExit }: Props) {
+export default function Platform({ onExit, onStartTest }: Props) {
   const [data, setData] = useState<TrainingData>(() => loadTraining());
   const [tab, setTab] = useState<Tab>('hoje');
   const [active, setActive] = useState<ExKey | null>(null);
@@ -505,7 +505,7 @@ export default function Platform({ onExit }: Props) {
   const sections = (
     <>
       {tab === 'hoje' && <HomeTab data={data} onTrain={onTrain} go={setTab} />}
-      {tab === 'testes' && <TestsTab bestIQ={bestIQ} />}
+      {tab === 'testes' && <TestsTab bestIQ={bestIQ} onStartTest={onStartTest} />}
       {tab === 'aprender' && <LearnTab data={data} onTrain={onTrain} onPlay={openVideo} />}
       {tab === 'progresso' && <ProgressTab data={data} />}
       {tab === 'comunidade' && <CommunityTab data={data} onToggleHab={onToggleHab} />}

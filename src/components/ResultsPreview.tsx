@@ -79,6 +79,7 @@ export default function ResultsPreview() {
           dims={bf.dims}
           onRetake={noop}
           onBack={noop}
+          onGoToPlatform={noop}
         />
       )}
 
@@ -93,6 +94,7 @@ export default function ResultsPreview() {
           hexagon
           onRetake={noop}
           onBack={noop}
+          onGoToPlatform={noop}
         />
       )}
     </div>

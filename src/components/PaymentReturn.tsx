@@ -71,10 +71,10 @@ export default function PaymentReturn() {
         <h1 className="text-2xl font-extrabold text-ink mb-2">Pagamento confirmado!</h1>
         <p className="text-gray-600 mb-6">Seu acesso foi liberado. Bem-vindo(a) ao clube.</p>
         <button
-          onClick={() => (window.location.href = '/')}
+          onClick={() => (window.location.href = '/#plataforma')}
           className="w-full bg-brand text-white py-3.5 rounded-xl hover:bg-brand-dark transition-colors font-semibold"
         >
-          Começar
+          Entrar na plataforma
         </button>
       </div>
     </div>

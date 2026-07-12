@@ -1,4 +1,4 @@
-import { RotateCcw, Sparkles, Lock } from 'lucide-react';
+import { RotateCcw, Sparkles, Brain } from 'lucide-react';
 import { DimensionScore } from '../data/bigFive';
 import { CareerMatch } from '../data/riasec';
 
@@ -12,6 +12,7 @@ interface DimensionResultProps {
   hexagon?: boolean;
   onRetake: () => void;
   onBack: () => void;
+  onGoToPlatform?: () => void; // CTA pra plataforma (não deixa o resultado num beco)
 }
 
 // RIASEC / radar hexagon, plots all 6 interest scores on their axes.
@@ -78,6 +79,7 @@ export default function DimensionResult({
   hexagon,
   onRetake,
   onBack,
+  onGoToPlatform,
 }: DimensionResultProps) {
   const top = [...dims].sort((a, b) => b.pct - a.pct)[0];
 
@@ -141,20 +143,26 @@ export default function DimensionResult({
           </div>
         )}
 
-        {/* Teaser for the deeper report (facets, full career map) */}
-        <div className="bg-slate-50 border border-dashed border-slate-300 rounded-2xl p-5 mb-6 text-center">
-          <Lock className="w-5 h-5 text-slate-400 mx-auto mb-2" />
-          <p className="text-sm text-gray-600">
-            Relatório completo com análise por facetas, pontos fortes e plano de desenvolvimento em breve.
-          </p>
-        </div>
+        {/* Próximo passo: leva pra plataforma (o que a pessoa desbloqueou) */}
+        {onGoToPlatform && (
+          <div className="bg-gradient-to-br from-brand to-brand-dark text-white rounded-2xl p-5 mb-5 text-center">
+            <p className="text-sm text-white/90">
+              Seu acesso está liberado. Continue na plataforma: trilha guiada, treino diário e biblioteca de neurociência.
+            </p>
+          </div>
+        )}
 
         <div className="space-y-3">
-          <button onClick={onBack} className="w-full bg-brand text-white py-3.5 px-4 rounded-xl hover:bg-brand-dark transition-colors font-semibold">
-            Voltar ao início
-          </button>
+          {onGoToPlatform && (
+            <button onClick={onGoToPlatform} className="w-full bg-brand text-white py-3.5 px-4 rounded-xl hover:bg-brand-dark transition-colors font-semibold flex items-center justify-center gap-2">
+              <Brain className="w-5 h-5" /> Treinar meu cérebro na plataforma
+            </button>
+          )}
           <button onClick={onRetake} className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-xl hover:bg-gray-200 transition-colors font-medium flex items-center justify-center gap-2">
             <RotateCcw className="w-4 h-4" /> Refazer teste
+          </button>
+          <button onClick={onBack} className="w-full text-gray-400 py-2 text-sm hover:text-gray-600 transition-colors">
+            Voltar ao início
           </button>
         </div>
       </div>

@@ -90,6 +90,7 @@ export default function PersonalityFlow({ onExit }: PersonalityFlowProps) {
         dims={result.dims}
         onRetake={restart}
         onBack={onExit}
+        onGoToPlatform={() => { window.location.hash = '#plataforma'; }}
       />
     );
   }

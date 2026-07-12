@@ -79,11 +79,6 @@ function App() {
     return <DevScreens />;
   }
 
-  // Plataforma de treino cognitivo (o entregável de LTV pós-compra).
-  if (route === '#plataforma') {
-    return <Platform onExit={() => { window.location.hash = ''; }} />;
-  }
-
   // Return from Stripe Checkout, PaymentReturn verifies the session server-side
   // (asks Stripe) before granting access, so ?paid=1 alone can't unlock.
   if (typeof window !== 'undefined') {
@@ -200,12 +195,33 @@ function App() {
     setQuestionResults([]);
     setIsNewHighScore(false);
     setIsNewBestIQ(false);
+    setActiveTest(null);
+  };
+
+  // Sai da plataforma pra landing de forma limpa (reseta estado + limpa hash),
+  // senão cai numa tela de resultado obsoleta.
+  const exitPlatform = () => {
+    backToMenu();
+    if (typeof window !== 'undefined') window.location.hash = '';
+  };
+
+  // Inicia um teste a partir da plataforma (limpa o hash e dispara o fluxo certo).
+  const startTestFromPlatform = (t: 'iq' | 'personality' | 'career') => {
+    if (typeof window !== 'undefined') window.location.hash = '';
+    if (t === 'iq') startFullTest();
+    else setActiveTest(t);
   };
 
   const retry = () => {
     if (mode === 'full') startFullTest();
     else if (gameState.currentLevel) startLevel(gameState.currentLevel);
   };
+
+  // ---------- PLATAFORMA (entregável de LTV pós-compra) ----------
+  // Vem depois das funções de estado pra poder resetar corretamente na saída.
+  if (route === '#plataforma') {
+    return <Platform onExit={exitPlatform} onStartTest={startTestFromPlatform} />;
+  }
 
   // ---------- OTHER TESTS (personality / career) ----------
   if (activeTest === 'personality') {
@@ -306,6 +322,7 @@ function App() {
         onStartPersonality={() => setActiveTest('personality')}
         onStartCareer={() => setActiveTest('career')}
         onPractice={() => setMode('menu')}
+        onEnter={() => { window.location.hash = '#plataforma'; }}
       />
     );
   }
@@ -344,6 +361,12 @@ function App() {
             <h2 className="text-lg font-semibold text-gray-700">Ou pratique um nível de dificuldade</h2>
           </div>
           <LevelSelection onSelectLevel={startLevel} />
+
+          <div className="text-center mt-8">
+            <button onClick={backToMenu} className="text-gray-500 hover:text-gray-700 text-sm underline">
+              Voltar ao início
+            </button>
+          </div>
         </div>
       </div>
     );
