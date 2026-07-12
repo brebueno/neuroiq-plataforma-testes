@@ -1,5 +1,5 @@
 // Store local-first do treino cognitivo (streak, Índice de Treino, histórico,
-// hábitos). É o "app score" — NÃO o QI clínico (compliance: vender evolução da
+// hábitos). É o "app score", NÃO o QI clínico (compliance: vender evolução da
 // habilidade/hábito, nunca "seu QI real subiu"). Persistido em localStorage.
 
 const KEY = 'qimind-training-v1';

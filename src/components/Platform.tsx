@@ -109,7 +109,7 @@ const CONTENT: { t: string; a: string; c: string; free: boolean; yt: string; cat
 // sequência). Cada módulo de conteúdo aponta pra um vídeo real da biblioteca.
 // Jornada guiada (mapa): módulos em ordem pedagógica, INTERCALANDO vídeo
 // (teoria) e treino (exercício do app OU vídeo "como treinar" do PhysioBRAIN).
-// Cada passo desbloqueia o próximo — o "sentido de ir avançando".
+// Cada passo desbloqueia o próximo (o "sentido de ir avançando").
 type Step = { t: string; kind: 'video' | 'treino'; ex?: ExKey; yt?: string; src?: string };
 const CURRICULUM: { m: string; steps: Step[] }[] = [
   { m: '1 · Entenda seu cérebro', steps: [

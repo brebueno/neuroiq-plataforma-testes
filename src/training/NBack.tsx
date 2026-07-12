@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 
-// Single N-back (2 atrás) numa grade 3x3 — memória de trabalho (Jaeggi et al.).
+// Single N-back (2 atrás) numa grade 3x3: memória de trabalho (Jaeggi et al.).
 // Marque "Igual" quando a posição atual for igual à de 2 passos atrás.
 // Score 0..100 pela acurácia (acertos + rejeições corretas).
 interface Props {
