@@ -75,14 +75,17 @@ const CONTENT: { t: string; a: string; c: string; free: boolean; yt: string; cat
   { t: 'Ativar seu cérebro — exercício de memória', a: 'PhysioBRAIN', free: false, yt: 'CKDu3xHVuIw', cat: 'Exercícios' },
 ].map((v, i) => ({ ...v, c: PALETTE[i % PALETTE.length] }));
 
-// Trilha de aprendizado (módulos progressivos, estilo Brilliant).
-const TRILHA = [
-  { t: 'Como o cérebro aprende', kind: 'conteúdo' as const },
-  { t: 'Sessão: cálculo mental', kind: 'treino' as const, ex: 'math' as ExKey },
-  { t: 'Memória de trabalho na prática', kind: 'conteúdo' as const },
-  { t: 'Sessão: span de dígitos', kind: 'treino' as const, ex: 'span' as ExKey },
-  { t: 'Atenção e foco', kind: 'conteúdo' as const },
-  { t: 'Sessão: N-back', kind: 'treino' as const, ex: 'nback' as ExKey },
+// Trilha de aprendizado (currículo: conteúdo em vídeo + sessão de treino, em
+// sequência). Cada módulo de conteúdo aponta pra um vídeo real da biblioteca.
+const TRILHA: { t: string; kind: 'conteúdo' | 'treino'; ex?: ExKey; yt?: string; src?: string }[] = [
+  { t: 'Como o cérebro aprende', kind: 'conteúdo', yt: 'aNrLg0nWxxc', src: 'Faculdade Censupeg' },
+  { t: 'Neuroplasticidade: você pode mudar', kind: 'conteúdo', yt: 'uVtYOnwK0K4', src: 'Eslen Delanogare' },
+  { t: 'Sessão: cálculo mental', kind: 'treino', ex: 'math' },
+  { t: 'Como funciona a sua memória', kind: 'conteúdo', yt: 'fglBJm9iOBc', src: 'DP Podcast' },
+  { t: 'Sessão: span de dígitos', kind: 'treino', ex: 'span' },
+  { t: 'Como memorizar (quase) tudo', kind: 'conteúdo', yt: '3vdzghRCprU', src: 'Ciência Todo Dia' },
+  { t: 'Sessão: N-back', kind: 'treino', ex: 'nback' },
+  { t: 'Foco: como parar de procrastinar', kind: 'conteúdo', yt: 'GjKW0iG63NM', src: 'Eslen Delanogare' },
 ];
 
 const LEADERBOARD = [
@@ -231,19 +234,19 @@ function LearnTab({ data, onTrain, onPlay }: { data: TrainingData; onTrain: (k: 
         <div className={`${card} p-2`}>
           {TRILHA.map((m, i) => {
             const isTrain = m.kind === 'treino';
-            const complete = isTrain && m.ex && data.bestByExercise[m.ex] != null;
-            const locked = i > doneCount + 1;
+            const complete = isTrain && m.ex ? data.bestByExercise[m.ex] != null : false;
+            const locked = i > doneCount + 2;
             return (
               <button
-                key={m.t}
+                key={i}
                 disabled={locked}
-                onClick={() => { if (isTrain && m.ex) onTrain(m.ex); }}
+                onClick={() => { if (locked) return; if (isTrain && m.ex) onTrain(m.ex); else if (m.yt) onPlay({ t: m.t, yt: m.yt }); }}
                 className={`w-full flex items-center gap-3 p-3 rounded-xl text-left ${locked ? 'opacity-45' : 'hover:bg-slate-50'} transition-colors`}
               >
-                <span className={`w-8 h-8 rounded-full grid place-items-center flex-shrink-0 text-xs font-bold ${complete ? 'bg-emerald-100 text-emerald-600' : locked ? 'bg-slate-100 text-slate-400' : 'bg-brand-light text-brand'}`}>
-                  {complete ? <Check className="w-4 h-4" /> : locked ? <Lock className="w-3.5 h-3.5" /> : i + 1}
+                <span className={`w-8 h-8 rounded-full grid place-items-center flex-shrink-0 text-xs font-bold ${complete ? 'bg-emerald-100 text-emerald-600' : locked ? 'bg-slate-100 text-slate-400' : isTrain ? 'bg-brand-light text-brand' : 'bg-blue-50 text-blue-600'}`}>
+                  {complete ? <Check className="w-4 h-4" /> : locked ? <Lock className="w-3.5 h-3.5" /> : isTrain ? i + 1 : <Play className="w-3.5 h-3.5" />}
                 </span>
-                <div className="flex-1"><div className="font-medium text-ink text-[14.5px]">{m.t}</div><div className="text-[11px] text-slate-400">{isTrain ? 'Sessão de treino' : 'Conteúdo · vídeo'}</div></div>
+                <div className="flex-1"><div className="font-medium text-ink text-[14.5px]">{m.t}</div><div className="text-[11px] text-slate-400">{isTrain ? 'Sessão de treino' : `Vídeo · ${m.src ?? 'conteúdo'}`}</div></div>
                 {!locked && <ChevronRight className="w-4 h-4 text-slate-400" />}
               </button>
             );
