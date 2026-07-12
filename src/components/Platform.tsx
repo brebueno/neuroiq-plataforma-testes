@@ -37,11 +37,11 @@ const CONTENT: { t: string; a: string; c: string; free: boolean; yt: string; cat
   { t: 'Conheça o seu cérebro', a: 'Minutos Psíquicos', free: true, yt: 'hk37Avkusv0', cat: 'Neurociência' },
   { t: 'O que é um neurônio?', a: 'Minutos Psíquicos', free: false, yt: 'XsLNJSshq34', cat: 'Neurociência' },
   { t: 'Neuroplasticidade: seu cérebro não será o mesmo', a: 'Eslen Delanogare', free: true, yt: 'uVtYOnwK0K4', cat: 'Neurociência' },
-  { t: 'Neurocientista explica o cérebro de forma simples — Eslen', a: 'Cortes do Lutz', free: false, yt: 'RTYV2NMKoAU', cat: 'Neurociência' },
+  { t: 'Neurocientista explica o cérebro de forma simples (Eslen)', a: 'Cortes do Lutz', free: false, yt: 'RTYV2NMKoAU', cat: 'Neurociência' },
   { t: 'Como reprogramar seu cérebro em 8 semanas', a: 'NeuroVox', free: false, yt: 'NWeBTAtAHS8', cat: 'Neurociência' },
   { t: 'A psicologia do filme Divertida Mente', a: 'Minutos Psíquicos', free: false, yt: 'nbnW0vou57M', cat: 'Neurociência' },
   // Memória & aprendizado
-  { t: 'Aprendizado, memória e cognição — Dra. Roberta Ekuni', a: 'Lutz Podcast', free: true, yt: 'hMK51lr5GNM', cat: 'Memória & aprendizado' },
+  { t: 'Aprendizado, memória e cognição · Dra. Roberta Ekuni', a: 'Lutz Podcast', free: true, yt: 'hMK51lr5GNM', cat: 'Memória & aprendizado' },
   { t: 'Como funciona a memorização e a aprendizagem no cérebro', a: 'DP Podcast', free: true, yt: 'fglBJm9iOBc', cat: 'Memória & aprendizado' },
   { t: 'Como memorizar absolutamente tudo', a: 'Ciência Todo Dia', free: false, yt: '3vdzghRCprU', cat: 'Memória & aprendizado' },
   { t: 'Estudar melhor em 72 segundos (com base na ciência)', a: 'Emmanuel Nominato', free: false, yt: 'NFWTzRiHmo0', cat: 'Memória & aprendizado' },
@@ -72,7 +72,37 @@ const CONTENT: { t: string; a: string; c: string; free: boolean; yt: string; cat
   { t: 'TDAH e Ritalina: o que você precisa saber', a: 'Minutos Psíquicos', free: false, yt: 'zl02W9WsbD4', cat: 'Mentalidade' },
   // Exercícios
   { t: '7 exercícios cerebrais para afiar o raciocínio', a: 'Conexão Psíquica', free: true, yt: 'v_AJWMt3ZU4', cat: 'Exercícios' },
-  { t: 'Ativar seu cérebro — exercício de memória', a: 'PhysioBRAIN', free: false, yt: 'CKDu3xHVuIw', cat: 'Exercícios' },
+  { t: 'Ativar seu cérebro: exercício de memória', a: 'PhysioBRAIN', free: false, yt: 'CKDu3xHVuIw', cat: 'Exercícios' },
+  { t: 'Estimule a memória com 1 exercício por dia', a: 'PhysioBRAIN', free: true, yt: '7xCbC75a_Kg', cat: 'Exercícios' },
+  { t: 'Ativar o cérebro · Parte 130', a: 'PhysioBRAIN', free: false, yt: 'mgalWJtI25U', cat: 'Exercícios' },
+  { t: 'Ativar o cérebro · Parte 131', a: 'PhysioBRAIN', free: false, yt: 'aDdyier_HsM', cat: 'Exercícios' },
+  { t: 'Ativar o cérebro · Parte 132', a: 'PhysioBRAIN', free: false, yt: 'bIF9HihGNG8', cat: 'Exercícios' },
+  { t: 'Ativar o cérebro · Parte 133', a: 'PhysioBRAIN', free: false, yt: 'jjlMGWNNYkE', cat: 'Exercícios' },
+  { t: 'Ativar o cérebro · Parte 134', a: 'PhysioBRAIN', free: false, yt: 'Bq2xbv1uTbk', cat: 'Exercícios' },
+  { t: 'Ativar o cérebro · Parte 135', a: 'PhysioBRAIN', free: false, yt: '-GiK92MJU3s', cat: 'Exercícios' },
+  // Curadoria dos canais (Ekuni / Perin / NeuroVox / Eslen Podcast)
+  { t: 'A neurociência da memória', a: 'Dra. Roberta Ekuni', free: true, yt: 'X5MCxXihKLQ', cat: 'Memória & aprendizado' },
+  { t: 'Prática de recordação: a técnica mais subestimada', a: 'Dra. Roberta Ekuni', free: false, yt: '8B3wkObYkCs', cat: 'Memória & aprendizado' },
+  { t: 'A ciência de como memorizar o conteúdo', a: 'Dra. Roberta Ekuni', free: false, yt: 'mdJvJQbHoSk', cat: 'Memória & aprendizado' },
+  { t: 'Como revisar pra realmente aprender', a: 'Dra. Roberta Ekuni', free: false, yt: 'D7o31F4fJ18', cat: 'Memória & aprendizado' },
+  { t: 'Reler não funciona sozinho: o jeito certo', a: 'Dra. Roberta Ekuni', free: false, yt: 'l4NO0HBlJOQ', cat: 'Memória & aprendizado' },
+  { t: 'Como montar um cronograma de estudos que funciona', a: 'Dra. Roberta Ekuni', free: false, yt: 'CiLX0tA2B6o', cat: 'Memória & aprendizado' },
+  { t: 'Como o cérebro toma decisões?', a: 'Fabio Perin', free: false, yt: 'kdj5qPGC9SA', cat: 'Neurociência' },
+  { t: '10 fatores que envelhecem o seu cérebro', a: 'NeuroVox', free: false, yt: '4ZR855kGZeA', cat: 'Neurociência' },
+  { t: 'Como ser mais produtivo (neurocientista explica)', a: 'Fabio Perin', free: true, yt: 'nvnWr7cfC1Q', cat: 'Foco & produtividade' },
+  { t: 'Por isso você não consegue focar', a: 'NeuroVox', free: false, yt: 'XrtXmFbSQ0o', cat: 'Foco & produtividade' },
+  { t: 'O truque do silêncio pra aumentar o foco', a: 'Dra. Roberta Ekuni', free: false, yt: 'mTamzLQe-kY', cat: 'Foco & produtividade' },
+  { t: 'Como substituir hábitos ruins por bons', a: 'Fabio Perin', free: false, yt: 'HKj0nneWVnQ', cat: 'Hábitos' },
+  { t: '9 hábitos que estão destruindo sua mente', a: 'NeuroVox', free: false, yt: '40KjTfuvyto', cat: 'Hábitos' },
+  { t: 'Evite 10 hábitos que acabam com sua saúde mental', a: 'NeuroVox', free: false, yt: '91v4qNOLe6k', cat: 'Hábitos' },
+  { t: 'Mude sua vida em 1 mês com o que funciona', a: 'Eslen Podcast', free: false, yt: 'bEV23c3_4sg', cat: 'Hábitos' },
+  { t: 'É por isso que nada muda na sua vida (neurociência)', a: 'NeuroVox', free: true, yt: 'dyhfFZXf3fE', cat: 'Mentalidade' },
+  { t: '13 maneiras de fortalecer sua mente e resiliência', a: 'NeuroVox', free: false, yt: 'TKaBh_eKBlc', cat: 'Mentalidade' },
+  { t: 'Por que a zona de conforto te deixa desconfortável', a: 'Fabio Perin', free: false, yt: 'AIZBNgNgO38', cat: 'Mentalidade' },
+  { t: 'Estamos vivendo uma epidemia de TDAH?', a: 'Fabio Perin', free: false, yt: 'HmQCNO9ux1k', cat: 'Mentalidade' },
+  { t: 'Como ajudar pessoas com TDAH', a: 'Fabio Perin', free: false, yt: 'JV38z1THZHQ', cat: 'Mentalidade' },
+  { t: 'Aprenda a regular suas emoções', a: 'Eslen Podcast', free: false, yt: 'pdGp7IKJTMc', cat: 'Mentalidade' },
+  { t: 'Entenda a síndrome de burnout', a: 'Eslen Podcast', free: false, yt: '_5k-PX-pI7k', cat: 'Mentalidade' },
 ].map((v, i) => ({ ...v, c: PALETTE[i % PALETTE.length] }));
 
 // Trilha de aprendizado (currículo: conteúdo em vídeo + sessão de treino, em
@@ -209,7 +239,7 @@ function TestsTab({ bestIQ }: { bestIQ: number }) {
     <div className="space-y-4">
       <div className={`${card} p-5 text-center`}>
         <div className="text-xs uppercase tracking-widest text-slate-400">Seu último QI</div>
-        <div className="text-5xl font-extrabold text-brand tabular-nums my-1">{bestIQ || '—'}</div>
+        <div className="text-5xl font-extrabold text-brand tabular-nums my-1">{bestIQ || '··'}</div>
         <p className="text-[12px] text-slate-500">Refaça periodicamente e acompanhe a evolução do seu laudo.</p>
       </div>
       {tests.map((t) => (
@@ -326,7 +356,7 @@ function ProgressTab({ data }: { data: TrainingData }) {
         <ul className="text-[13.5px] text-slate-600 space-y-1.5">
           <li>🔥 Streak de <b className="text-ink">{data.streak}</b> {data.streak === 1 ? 'dia' : 'dias'}. Consistência é o que mais move seu índice.</li>
           {strongest ? <li>💪 Seu ponto mais forte: <b className="text-ink">{strongest.label.toLowerCase()}</b>. Aproveite pra encarar níveis maiores.</li> : <li>▶️ Faça sua primeira sessão pra desbloquear seus insights.</li>}
-          <li>🎯 Falta treinar: <b className="text-ink">{EXERCISES.filter((e) => data.bestByExercise[e.key] == null).map((e) => e.label.toLowerCase()).join(', ') || 'nada — todos treinados!'}</b>.</li>
+          <li>🎯 Falta treinar: <b className="text-ink">{EXERCISES.filter((e) => data.bestByExercise[e.key] == null).map((e) => e.label.toLowerCase()).join(', ') || 'nada, todos treinados!'}</b>.</li>
         </ul>
       </div>
     </div>
@@ -418,7 +448,7 @@ export default function Platform({ onExit }: Props) {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#F2F7FD] to-white lg:flex">
-      {/* Sidebar (desktop) — identidade + navegação */}
+      {/* Sidebar (desktop): identidade e navegação */}
       <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:h-screen lg:sticky lg:top-0 border-r border-slate-200 bg-white px-4 py-6">
         <div className="px-2 mb-8"><Logo className="h-8" /></div>
         <nav className="flex flex-col gap-1">
