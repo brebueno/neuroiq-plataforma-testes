@@ -81,9 +81,9 @@ const tests = [
 ];
 
 const skills = [
-  { icon: GraduationCap, title: 'Cursos em vídeo', items: ['+20 horas de treino', 'Aulas fáceis de seguir', 'No seu ritmo'] },
-  { icon: Gamepad2, title: 'Jogos de treino cerebral', items: ['Memória, lógica e foco', 'Dificuldade progressiva', 'Acompanhe sua evolução'] },
-  { icon: Puzzle, title: 'Mais de 150 puzzles', items: ['Desafios de raciocínio', 'Padrões e estratégia', 'Novos toda semana'] },
+  { icon: GraduationCap, title: 'Jornada do Cérebro', items: ['Trilha guiada passo a passo', 'Um conteúdo, um treino', 'Desbloqueia conforme avança'] },
+  { icon: Gamepad2, title: 'Treino com streak diário', items: ['Cálculo, memória e N-back', 'Dificuldade adaptativa', 'Seu índice evolui todo dia'] },
+  { icon: Puzzle, title: 'Biblioteca de neurociência', items: ['+60 vídeos com base científica', 'Eslen, Roberta Ekuni e mais', 'Novos toda semana'] },
 ];
 
 const included = [
@@ -362,7 +362,8 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
                 { t: 'Teste de Personalidade completo', v: 'R$89' },
                 { t: 'Teste Vocacional completo', v: 'R$89' },
                 { t: 'Certificado oficial em PDF (pra mostrar pra quem duvidou)', v: 'R$49' },
-                { t: 'Plataforma de treino: +150 puzzles + cursos', v: 'R$197' },
+                { t: 'Jornada do Cérebro: trilha guiada + treino com streak', v: 'R$197' },
+                { t: 'Biblioteca de neurociência (+60 vídeos, novos toda semana)', v: 'R$149' },
               ].map((it) => (
                 <li key={it.t} className="flex items-start justify-between gap-3 text-[13.5px]">
                   <span className="flex items-start gap-2"><Check className="w-4 h-4 text-brand flex-shrink-0 mt-0.5" />{it.t}</span>
@@ -372,7 +373,7 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
             </ul>
             <div className="flex items-baseline gap-2 border-t border-slate-100 pt-4 mb-1">
               <span className="text-slate-400 text-sm">Valor total</span>
-              <span className="text-slate-400 line-through">R$672</span>
+              <span className="text-slate-400 line-through">R$821</span>
               <span className="bg-brand-light text-brand text-[11px] font-bold px-2 py-0.5 rounded-full ml-auto">hoje</span>
             </div>
             <div className="flex items-baseline gap-1.5 mb-1">
