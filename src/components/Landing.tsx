@@ -1,9 +1,9 @@
-import { Brain, Check, Star, ArrowRight, User, Briefcase } from 'lucide-react';
+import { Brain, Check, ArrowRight, User, Briefcase } from 'lucide-react';
 import { Logo } from './Logo';
 import { LiveActivity } from './SocialProof';
 import { PROOF } from '../utils/socialProof';
 import { Platform3D } from './landing/Platform3D';
-import { PlatformShowcase } from './landing/Showcase';
+import { PlatformShowcase, ReviewsMarquee } from './landing/Showcase';
 
 const BRAND = 'QIMind';
 
@@ -88,12 +88,6 @@ const included = [
   'O tipo de raciocínio em que você é secretamente forte, aquele que ninguém nunca reconheceu.',
   'Onde o seu cérebro tropeça, e por que isso não tem nada a ver com inteligência.',
   'O certificado que você vai querer mostrar exatamente pra pessoa que duvidou de você.',
-];
-
-const reviews = [
-  { name: 'Camila R., 34', place: 'Campinas', text: 'Passei a vida achando que era só esforçada. Fiz com medo de tirar 90. Tirei 127, percentil 96. Chorei.' },
-  { name: 'Diogo M., 29', place: 'Porto', text: 'Me chamaram de burro na escola, larguei os estudos. 15 anos depois o QIMind me deu 118. Voltei a estudar no mês seguinte.' },
-  { name: 'Aline F., 41', place: 'Salvador', text: 'Fiz pra provar que não valia a pena. Deu 131, "muito superior". Estava me subestimando havia 20 anos.' },
 ];
 
 const faqs = [
@@ -284,18 +278,8 @@ export default function Landing({ onStartIQ, onStartPersonality, onStartCareer, 
             <h2 className="font-display tracking-tight text-[clamp(24px,3vw,33px)] font-bold mb-2 text-balance">Gente normal que descobriu não ter nada de mediano.</h2>
             <p className="text-slate-500 max-w-[52ch] mx-auto">{PROOF.testsTaken} pessoas já pararam de adivinhar e foram ver o número.</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-5 max-w-4xl mx-auto mb-6">
-            {reviews.map((r) => (
-              <div key={r.name} className="bg-white border border-slate-200 rounded-2xl p-5">
-                <div className="inline-flex items-center gap-0.5 bg-[#00B67A] text-white px-2 py-1 rounded mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-3.5 h-3.5 fill-white text-white" />
-                  ))}
-                </div>
-                <p className="text-[14.5px] mb-3">"{r.text}"</p>
-                <p className="text-[12.5px] text-slate-500 font-semibold">{r.name} · {r.place}</p>
-              </div>
-            ))}
+          <div className="mb-6">
+            <ReviewsMarquee />
           </div>
           <p className="text-center text-slate-500 text-[13.5px]">
             Avaliado com <b className="text-ink">{PROOF.rating} / {PROOF.ratingOutOf}</b> · <span className="text-[#00B67A] font-bold">★ Trustpilot</span> · {PROOF.reviews} avaliações

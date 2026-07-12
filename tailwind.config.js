@@ -20,9 +20,14 @@ export default {
           '0%,100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-10px)' },
         },
+        qmMarquee: {
+          from: { transform: 'translateY(0)' },
+          to: { transform: 'translateY(-50%)' },
+        },
       },
       animation: {
         qmFloat: 'qmFloat 6.5s ease-in-out infinite',
+        qmMarquee: 'qmMarquee linear infinite',
       },
     },
   },

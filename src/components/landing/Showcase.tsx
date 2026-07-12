@@ -1,4 +1,4 @@
-import { Flame, TrendingUp, Play, Check, Lock, Dumbbell, ArrowRight } from 'lucide-react';
+import { Flame, TrendingUp, Play, Check, Lock, Dumbbell, Star } from 'lucide-react';
 import { Reveal } from './Reveal';
 
 // "Veja a plataforma por dentro": mockups do produto desenhados em CSS/SVG
@@ -166,6 +166,57 @@ const ROWS = [
     Mock: TreinoMockup,
   },
 ];
+
+// Prova social (autorizada pelo Breno como fabricada). Tom DR emocional.
+const REVIEWS = [
+  { iq: 127, name: 'Camila R., 34', place: 'Campinas', text: 'Passei a vida achando que era só esforçada. Fiz com medo de tirar 90. Tirei 127, percentil 96. Chorei.' },
+  { iq: 118, name: 'Diogo M., 29', place: 'Porto Alegre', text: 'Me chamaram de burro na escola, larguei os estudos. 15 anos depois o QIMind me deu 118. Voltei a estudar no mês seguinte.' },
+  { iq: 131, name: 'Aline F., 41', place: 'Salvador', text: 'Fiz pra provar que não valia a pena. Deu 131, "muito superior". Estava me subestimando havia 20 anos.' },
+  { iq: 122, name: 'Rafael T., 37', place: 'Curitiba', text: 'O que me pegou foi a trilha. Todo dia um vídeo e um treino. Bati 40 dias de streak sem perceber.' },
+  { iq: 115, name: 'Juliana P., 26', place: 'Recife', text: 'Achei que ia ser mais um teste bobo. O perfil de raciocínio mostrou onde eu era forte de verdade. Fez sentido pela primeira vez.' },
+  { iq: 134, name: 'Marcos V., 45', place: 'Belo Horizonte', text: 'Meu Índice de Treino saiu de 100 e passou de 120 em dois meses. Ver o número subir vicia, no bom sentido.' },
+  { iq: 120, name: 'Beatriz L., 31', place: 'Fortaleza', text: 'O certificado eu mandei pro meu pai, que sempre disse que eu não me aplicava. Ele não respondeu, mas eu já tinha ganhado.' },
+  { iq: 126, name: 'Thiago S., 33', place: 'Brasília', text: 'Cálculo mental, N-back, memória. Parece jogo mas é treino sério. Meu foco no trabalho mudou de patamar.' },
+  { iq: 129, name: 'Renata C., 39', place: 'São Paulo', text: 'Fiz o teste no ônibus, vi 129 e não acreditei. Refiz em casa com calma. Mesmo número. Agora eu sei.' },
+];
+
+function ReviewCard({ r }: { r: (typeof REVIEWS)[number] }) {
+  return (
+    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-[0_2px_10px_-6px_rgba(18,32,59,0.18)]">
+      <div className="flex items-center justify-between mb-3">
+        <span className="inline-flex items-center gap-0.5 bg-[#00B67A] text-white px-1.5 py-1 rounded">
+          {[...Array(5)].map((_, i) => <Star key={i} className="w-3 h-3 fill-white text-white" />)}
+        </span>
+        <span className="font-display text-lg font-bold text-brand tabular-nums leading-none">QI {r.iq}</span>
+      </div>
+      <p className="text-[14px] leading-relaxed text-ink/90 mb-3">"{r.text}"</p>
+      <p className="text-[12.5px] text-slate-500 font-semibold">{r.name} · {r.place}</p>
+    </div>
+  );
+}
+
+function MarqueeCol({ items, dur, className = '' }: { items: typeof REVIEWS; dur: number; className?: string }) {
+  return (
+    <div className={className}>
+      <div className="flex flex-col gap-4 animate-qmMarquee motion-reduce:animate-none" style={{ animationDuration: `${dur}s` }}>
+        {[...items, ...items].map((r, i) => <ReviewCard key={i} r={r} />)}
+      </div>
+    </div>
+  );
+}
+
+export function ReviewsMarquee() {
+  const maskStyle = { WebkitMaskImage: 'linear-gradient(to bottom,transparent,#000 11%,#000 88%,transparent)', maskImage: 'linear-gradient(to bottom,transparent,#000 11%,#000 88%,transparent)' } as React.CSSProperties;
+  return (
+    <div className="relative h-[540px] overflow-hidden" style={maskStyle}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto items-start">
+        <MarqueeCol items={REVIEWS.slice(0, 3)} dur={36} />
+        <MarqueeCol items={REVIEWS.slice(3, 6)} dur={30} className="hidden sm:block" />
+        <MarqueeCol items={REVIEWS.slice(6, 9)} dur={42} className="hidden lg:block" />
+      </div>
+    </div>
+  );
+}
 
 export function PlatformShowcase() {
   return (

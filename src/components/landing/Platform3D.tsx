@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Flame, TrendingUp, Play } from 'lucide-react';
-import { useTilt } from './Reveal';
+import { useTilt, CountUp } from './Reveal';
 
 // Cena 3D que representa a plataforma QIMind: cards de vidro flutuando em
 // profundidades diferentes (Índice de Treino, streak, jornada, resultado do QI,
@@ -57,7 +57,7 @@ export function Platform3D() {
           {/* ROOT · Índice de Treino */}
           <Card z={72} delay={0} style={{ left: 150, top: 150, width: 232 }} className="p-4 ring-1 ring-brand/30">
             <div className="flex items-center gap-1.5 text-[11px] font-semibold text-brand"><TrendingUp className="w-3.5 h-3.5" /> Índice de Treino</div>
-            <div className="font-display text-4xl font-bold text-ink tracking-tight tabular-nums leading-none mt-1">118</div>
+            <div className="font-display text-4xl font-bold text-ink tracking-tight tabular-nums leading-none mt-1"><CountUp end={118} /></div>
             <svg viewBox="0 0 200 44" className="w-full h-8 mt-2">
               <polyline points="0,38 34,34 68,30 102,24 136,16 170,12 200,6" fill="none" stroke="#12A08C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
               <circle cx="200" cy="6" r="3" fill="#12A08C" />
@@ -78,7 +78,7 @@ export function Platform3D() {
           {/* QI result */}
           <Card z={54} delay={1.6} style={{ left: 352, top: 22, width: 156 }} className="p-4">
             <div className="text-[10px] uppercase tracking-widest text-slate-400">Seu QI</div>
-            <div className="font-display text-4xl font-bold text-brand tracking-tight tabular-nums leading-none mt-1">128</div>
+            <div className="font-display text-4xl font-bold text-brand tracking-tight tabular-nums leading-none mt-1"><CountUp end={128} /></div>
             <div className="text-[11px] text-slate-500 mt-1">percentil 97</div>
             <svg viewBox="0 0 120 40" className="w-full h-8 mt-1.5">
               <path d="M4 34 Q60 -6 116 34" fill="none" stroke="#2F6BEB" strokeWidth="2" strokeOpacity="0.5" />
