@@ -28,31 +28,51 @@ const HABITS: { key: 'aerobic' | 'sleep' | 'skill'; label: string; icon: typeof 
 ];
 
 // Biblioteca de conteúdo (neurociência aplicada, estilo Eslen/Huberman).
-// Biblioteca de vídeos (YouTube embed). `a` = canal de origem; `yt` = ID do vídeo.
+// Biblioteca de vídeos (YouTube embed). `a` = canal; `yt` = ID; `cat` = categoria.
 const PALETTE = ['#12A08C', '#2F6BEB', '#7C4DDF', '#2E8B57', '#E0872B', '#C0392B'];
-const CONTENT: { t: string; a: string; c: string; free: boolean; yt: string }[] = [
-  { t: 'Aprendizado, memória e cognição — Dra. Roberta Ekuni', a: 'Lutz Podcast', free: true, yt: 'hMK51lr5GNM' },
-  { t: 'Como funciona a memorização e a aprendizagem no cérebro', a: 'DP Podcast', free: true, yt: 'fglBJm9iOBc' },
-  { t: 'Fundamentos das neurociências: como o cérebro aprende', a: 'Faculdade Censupeg', free: true, yt: 'aNrLg0nWxxc' },
-  { t: 'Conheça o seu cérebro', a: 'Minutos Psíquicos', free: true, yt: 'hk37Avkusv0' },
-  { t: 'Neuroplasticidade: seu cérebro não será o mesmo', a: 'Eslen Delanogare', free: true, yt: 'uVtYOnwK0K4' },
-  { t: 'O que é um neurônio?', a: 'Minutos Psíquicos', free: false, yt: 'XsLNJSshq34' },
-  { t: 'Neurocientista explica o cérebro de forma simples — Eslen', a: 'Cortes do Lutz', free: false, yt: 'RTYV2NMKoAU' },
-  { t: 'Como parar de procrastinar e aumentar a produtividade', a: 'Eslen Delanogare', free: false, yt: 'GjKW0iG63NM' },
-  { t: 'Como parar de procrastinar', a: 'Eslen Delanogare', free: false, yt: 'cMIygysMRww' },
-  { t: 'Como ficar viciado em estudar', a: 'Eslen Delanogare', free: false, yt: 'SoVDbRWfwwk' },
-  { t: 'Como ser melhor que 99% das pessoas', a: 'Eslen Delanogare', free: false, yt: 'bg8yyVGD24g' },
-  { t: 'Como mudar (rápido) sua vida', a: 'Eslen Delanogare', free: false, yt: '0rtNKdODxbo' },
-  { t: '3 passos para melhorar seus hábitos', a: 'Eslen Delanogare', free: false, yt: 'NAzqNOv0Xlw' },
-  { t: '5 hábitos que você precisa eliminar', a: 'Eslen Delanogare', free: false, yt: 'hy47ZkTFQNE' },
-  { t: 'Comer saudável vai mudar sua vida', a: 'Eslen Delanogare', free: false, yt: 'e2Ph-mKnU5I' },
-  { t: 'Por isso você está sempre cansado', a: 'Eslen Delanogare', free: false, yt: '9mc2rd7wJdA' },
-  { t: 'Por isso você está sempre desmotivado', a: 'Eslen Delanogare', free: false, yt: 'n_R9ilKqWCc' },
-  { t: 'Se sentindo incapaz? Veja este vídeo', a: 'Eslen Delanogare', free: false, yt: 'MSfzGbgvwFM' },
-  { t: '8 técnicas de controle emocional', a: 'Minutos Psíquicos', free: false, yt: 'AwxYSQGT734' },
-  { t: '4 dicas para melhorar sua saúde mental', a: 'Minutos Psíquicos', free: false, yt: 'CrwRwgNJIMU' },
-  { t: 'TDAH e Ritalina: o que você precisa saber', a: 'Minutos Psíquicos', free: false, yt: 'zl02W9WsbD4' },
-  { t: 'A psicologia do filme Divertida Mente', a: 'Minutos Psíquicos', free: false, yt: 'nbnW0vou57M' },
+const CATS = ['Neurociência', 'Memória & aprendizado', 'Foco & produtividade', 'Hábitos', 'Mentalidade', 'Exercícios'];
+const CONTENT: { t: string; a: string; c: string; free: boolean; yt: string; cat: string }[] = [
+  // Neurociência
+  { t: 'Fundamentos das neurociências: como o cérebro aprende', a: 'Faculdade Censupeg', free: true, yt: 'aNrLg0nWxxc', cat: 'Neurociência' },
+  { t: 'Conheça o seu cérebro', a: 'Minutos Psíquicos', free: true, yt: 'hk37Avkusv0', cat: 'Neurociência' },
+  { t: 'O que é um neurônio?', a: 'Minutos Psíquicos', free: false, yt: 'XsLNJSshq34', cat: 'Neurociência' },
+  { t: 'Neuroplasticidade: seu cérebro não será o mesmo', a: 'Eslen Delanogare', free: true, yt: 'uVtYOnwK0K4', cat: 'Neurociência' },
+  { t: 'Neurocientista explica o cérebro de forma simples — Eslen', a: 'Cortes do Lutz', free: false, yt: 'RTYV2NMKoAU', cat: 'Neurociência' },
+  { t: 'Como reprogramar seu cérebro em 8 semanas', a: 'NeuroVox', free: false, yt: 'NWeBTAtAHS8', cat: 'Neurociência' },
+  { t: 'A psicologia do filme Divertida Mente', a: 'Minutos Psíquicos', free: false, yt: 'nbnW0vou57M', cat: 'Neurociência' },
+  // Memória & aprendizado
+  { t: 'Aprendizado, memória e cognição — Dra. Roberta Ekuni', a: 'Lutz Podcast', free: true, yt: 'hMK51lr5GNM', cat: 'Memória & aprendizado' },
+  { t: 'Como funciona a memorização e a aprendizagem no cérebro', a: 'DP Podcast', free: true, yt: 'fglBJm9iOBc', cat: 'Memória & aprendizado' },
+  { t: 'Como memorizar absolutamente tudo', a: 'Ciência Todo Dia', free: false, yt: '3vdzghRCprU', cat: 'Memória & aprendizado' },
+  { t: 'Estudar melhor em 72 segundos (com base na ciência)', a: 'Emmanuel Nominato', free: false, yt: 'NFWTzRiHmo0', cat: 'Memória & aprendizado' },
+  { t: 'Como ser mais inteligente (em 7 min)', a: 'André Cardoso', free: false, yt: '2nN4sesL4HU', cat: 'Memória & aprendizado' },
+  { t: 'Como ser mais inteligente', a: 'Eslen Delanogare', free: false, yt: 'UKnTrG5ogKI', cat: 'Memória & aprendizado' },
+  { t: '10 hábitos para ficar mais inteligente', a: 'Seja Uma Pessoa Melhor', free: false, yt: 'I8LPSIVhKQI', cat: 'Memória & aprendizado' },
+  // Foco & produtividade
+  { t: 'Como parar de procrastinar e aumentar a produtividade', a: 'Eslen Delanogare', free: false, yt: 'GjKW0iG63NM', cat: 'Foco & produtividade' },
+  { t: 'Como parar de procrastinar', a: 'Eslen Delanogare', free: false, yt: 'cMIygysMRww', cat: 'Foco & produtividade' },
+  { t: 'Como ficar viciado em estudar', a: 'Eslen Delanogare', free: false, yt: 'SoVDbRWfwwk', cat: 'Foco & produtividade' },
+  { t: 'Como ficar viciado em estudar', a: 'bremado', free: false, yt: 'oQw1Wo1GNp0', cat: 'Foco & produtividade' },
+  { t: 'Como aprender a ser disciplinado', a: 'Eslen Delanogare', free: false, yt: 'j9rz_QAFhk0', cat: 'Foco & produtividade' },
+  { t: 'Como forçar seu cérebro a estudar (Prof. ITA)', a: 'Lutz Podcast', free: false, yt: '48W7Er0FILg', cat: 'Foco & produtividade' },
+  { t: 'Como treinar o cérebro para ter força mental', a: 'Reservatório de Dopamina', free: false, yt: 'oz2GlfCgWkg', cat: 'Foco & produtividade' },
+  // Hábitos
+  { t: 'Como mudar (rápido) sua vida', a: 'Eslen Delanogare', free: true, yt: '0rtNKdODxbo', cat: 'Hábitos' },
+  { t: '3 passos para melhorar seus hábitos', a: 'Eslen Delanogare', free: false, yt: 'NAzqNOv0Xlw', cat: 'Hábitos' },
+  { t: '5 hábitos que você precisa eliminar', a: 'Eslen Delanogare', free: false, yt: 'hy47ZkTFQNE', cat: 'Hábitos' },
+  { t: 'Comer saudável vai mudar sua vida', a: 'Eslen Delanogare', free: false, yt: 'e2Ph-mKnU5I', cat: 'Hábitos' },
+  { t: 'Por isso você está sempre cansado', a: 'Eslen Delanogare', free: false, yt: '9mc2rd7wJdA', cat: 'Hábitos' },
+  // Mentalidade
+  { t: 'Como ser melhor que 99% das pessoas', a: 'Eslen Delanogare', free: false, yt: 'bg8yyVGD24g', cat: 'Mentalidade' },
+  { t: 'A neurociência da obsessão: treine o impossível', a: 'Gustavo Duarte', free: false, yt: 'GLPsJGHoYp0', cat: 'Mentalidade' },
+  { t: 'Por isso você está sempre desmotivado', a: 'Eslen Delanogare', free: false, yt: 'n_R9ilKqWCc', cat: 'Mentalidade' },
+  { t: 'Se sentindo incapaz? Veja este vídeo', a: 'Eslen Delanogare', free: false, yt: 'MSfzGbgvwFM', cat: 'Mentalidade' },
+  { t: '8 técnicas de controle emocional', a: 'Minutos Psíquicos', free: false, yt: 'AwxYSQGT734', cat: 'Mentalidade' },
+  { t: '4 dicas para melhorar sua saúde mental', a: 'Minutos Psíquicos', free: false, yt: 'CrwRwgNJIMU', cat: 'Mentalidade' },
+  { t: 'TDAH e Ritalina: o que você precisa saber', a: 'Minutos Psíquicos', free: false, yt: 'zl02W9WsbD4', cat: 'Mentalidade' },
+  // Exercícios
+  { t: '7 exercícios cerebrais para afiar o raciocínio', a: 'Conexão Psíquica', free: true, yt: 'v_AJWMt3ZU4', cat: 'Exercícios' },
+  { t: 'Ativar seu cérebro — exercício de memória', a: 'PhysioBRAIN', free: false, yt: 'CKDu3xHVuIw', cat: 'Exercícios' },
 ].map((v, i) => ({ ...v, c: PALETTE[i % PALETTE.length] }));
 
 // Trilha de aprendizado (módulos progressivos, estilo Brilliant).
@@ -233,22 +253,31 @@ function LearnTab({ data, onTrain, onPlay }: { data: TrainingData; onTrain: (k: 
 
       <div>
         <h3 className="font-bold text-ink mb-1">Biblioteca de neurociência</h3>
-        <p className="text-[12px] text-slate-500 mb-3">Baseada em evidência. Novos vídeos toda semana.</p>
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-          {CONTENT.map((v) => (
-            <button key={v.t} onClick={() => onPlay({ t: v.t, yt: v.yt })} className={`${card} overflow-hidden text-left hover:border-brand hover:-translate-y-0.5 transition-all`}>
-              <div className="aspect-video relative grid place-items-center bg-cover bg-center" style={{ backgroundColor: v.c, backgroundImage: `url(https://img.youtube.com/vi/${v.yt}/hqdefault.jpg)` }}>
-                <div className="absolute inset-0 bg-black/25" />
-                <span className="relative w-11 h-11 rounded-full bg-white/30 grid place-items-center"><Play className="w-5 h-5 text-white ml-0.5" /></span>
-                {!v.free && <span className="absolute bottom-1.5 left-1.5 text-[10px] bg-white/90 text-ink px-1.5 py-0.5 rounded font-semibold flex items-center gap-0.5 z-10"><Lock className="w-2.5 h-2.5" /> Premium</span>}
+        <p className="text-[12px] text-slate-500 mb-4">Baseada em evidência · {CONTENT.length} vídeos · novos toda semana.</p>
+        {CATS.map((catName) => {
+          const vids = CONTENT.filter((v) => v.cat === catName);
+          if (!vids.length) return null;
+          return (
+            <div key={catName} className="mb-6">
+              <h4 className="font-semibold text-ink text-[14px] mb-2">{catName} <span className="text-slate-400 font-normal">· {vids.length}</span></h4>
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                {vids.map((v) => (
+                  <button key={v.yt} onClick={() => onPlay({ t: v.t, yt: v.yt })} className={`${card} overflow-hidden text-left hover:border-brand hover:-translate-y-0.5 transition-all`}>
+                    <div className="aspect-video relative grid place-items-center bg-cover bg-center" style={{ backgroundColor: v.c, backgroundImage: `url(https://img.youtube.com/vi/${v.yt}/hqdefault.jpg)` }}>
+                      <div className="absolute inset-0 bg-black/25" />
+                      <span className="relative w-11 h-11 rounded-full bg-white/30 grid place-items-center"><Play className="w-5 h-5 text-white ml-0.5" /></span>
+                      {!v.free && <span className="absolute bottom-1.5 left-1.5 text-[10px] bg-white/90 text-ink px-1.5 py-0.5 rounded font-semibold flex items-center gap-0.5 z-10"><Lock className="w-2.5 h-2.5" /> Premium</span>}
+                    </div>
+                    <div className="p-2.5">
+                      <div className="text-[12.5px] font-semibold text-ink leading-tight line-clamp-2">{v.t}</div>
+                      <div className="text-[10.5px] text-slate-400 mt-1">{v.a}</div>
+                    </div>
+                  </button>
+                ))}
               </div>
-              <div className="p-2.5">
-                <div className="text-[12.5px] font-semibold text-ink leading-tight line-clamp-2">{v.t}</div>
-                <div className="text-[10.5px] text-slate-400 mt-1">{v.a}</div>
-              </div>
-            </button>
-          ))}
-        </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
