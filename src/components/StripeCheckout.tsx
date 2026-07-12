@@ -9,21 +9,22 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 
 interface Props {
   email?: string;
   bump?: boolean; // order bump selecionado
+  plan?: 'monthly' | 'annual'; // plano recorrente escolhido (upsell)
   onDemoUnlock: () => void; // fallback local
 }
 
-export default function StripeCheckout({ email, bump, onDemoUnlock }: Props) {
+export default function StripeCheckout({ email, bump, plan, onDemoUnlock }: Props) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<boolean>(false);
 
   useEffect(() => {
-    // Recria a sessão quando o bump muda (o valor cobrado muda).
+    // Recria a sessão quando bump/plano mudam (o valor cobrado muda).
     setClientSecret(null);
     setError(false);
     fetch('/api/create-checkout-session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, bump }),
+      body: JSON.stringify({ email, bump, plan }),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -36,7 +37,7 @@ export default function StripeCheckout({ email, bump, onDemoUnlock }: Props) {
       .catch(() => {
         setError(true);
       });
-  }, [email, bump]);
+  }, [email, bump, plan]);
 
   if (error) {
     return (
