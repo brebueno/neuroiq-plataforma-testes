@@ -9,6 +9,7 @@ import DigitSpan from '../training/DigitSpan';
 import NBack from '../training/NBack';
 import { loadTraining, recordExercise, toggleHabit, todayHabits, TrainingData } from '../utils/training';
 import { loadGameData } from '../utils/localStorage';
+import { Logo } from './Logo';
 
 interface Props { onExit: () => void; }
 type ExKey = 'math' | 'span' | 'nback';
@@ -27,13 +28,14 @@ const HABITS: { key: 'aerobic' | 'sleep' | 'skill'; label: string; icon: typeof 
 ];
 
 // Biblioteca de conteúdo (neurociência aplicada, estilo Eslen/Huberman).
-const CONTENT = [
-  { t: 'Neuroplasticidade: seu cérebro muda a vida toda', a: 'Fundamentos', min: '8 min', c: '#12A08C', free: true },
-  { t: 'Dopamina, foco e o custo das telas', a: 'Neurociência aplicada', min: '11 min', c: '#2F6BEB', free: true },
-  { t: 'Sono: como a memória se consolida à noite', a: 'Hábitos', min: '9 min', c: '#7C4DDF', free: false },
-  { t: 'Repetição espaçada: por que você esquece', a: 'Técnicas de estudo', min: '7 min', c: '#E0872B', free: false },
-  { t: 'Palácio da memória, passo a passo', a: 'Técnicas de memória', min: '12 min', c: '#C0392B', free: false },
-  { t: 'Exercício físico e cognição: a evidência', a: 'Hábitos', min: '10 min', c: '#2E8B57', free: false },
+// Biblioteca. Preencha `yt` com o link/ID do YouTube pra cada card virar vídeo.
+const CONTENT: { t: string; a: string; min: string; c: string; free: boolean; yt: string }[] = [
+  { t: 'Neuroplasticidade: seu cérebro muda a vida toda', a: 'Fundamentos', min: '8 min', c: '#12A08C', free: true, yt: '' },
+  { t: 'Dopamina, foco e o custo das telas', a: 'Neurociência aplicada', min: '11 min', c: '#2F6BEB', free: true, yt: '' },
+  { t: 'Sono: como a memória se consolida à noite', a: 'Hábitos', min: '9 min', c: '#7C4DDF', free: false, yt: '' },
+  { t: 'Repetição espaçada: por que você esquece', a: 'Técnicas de estudo', min: '7 min', c: '#E0872B', free: false, yt: '' },
+  { t: 'Palácio da memória, passo a passo', a: 'Técnicas de memória', min: '12 min', c: '#C0392B', free: false, yt: '' },
+  { t: 'Exercício físico e cognição: a evidência', a: 'Hábitos', min: '10 min', c: '#2E8B57', free: false, yt: '' },
 ];
 
 // Trilha de aprendizado (módulos progressivos, estilo Brilliant).
@@ -58,8 +60,10 @@ function tier(index: number): { name: string; color: string; next: number } {
   return { name: 'Bronze', color: '#B57828', next: 110 };
 }
 
-function Spark({ data, big }: { data: { index: number }[]; big?: boolean }) {
-  if (data.length < 2) return <div className="text-xs text-slate-400 mt-1">Faça treinos pra ver sua curva evoluir.</div>;
+function Spark({ data, big, light }: { data: { index: number }[]; big?: boolean; light?: boolean }) {
+  const stroke = light ? '#ffffff' : '#12A08C';
+  const area = light ? 'rgba(255,255,255,0.22)' : 'rgba(18,160,140,0.10)';
+  if (data.length < 2) return <div className={`text-xs mt-1 ${light ? 'text-white/70' : 'text-slate-400'}`}>Faça treinos pra ver sua curva evoluir.</div>;
   const w = 300, h = big ? 90 : 56, pad = 4;
   const vals = data.map((d) => d.index);
   const min = Math.min(...vals) - 1, max = Math.max(...vals) + 1;
@@ -68,10 +72,44 @@ function Spark({ data, big }: { data: { index: number }[]; big?: boolean }) {
   const d = vals.map((v, i) => `${i === 0 ? 'M' : 'L'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ');
   return (
     <svg viewBox={`0 0 ${w} ${h}`} className="w-full mt-1">
-      <path d={`${d} L${x(vals.length - 1)} ${h} L${x(0)} ${h} Z`} fill="rgba(18,160,140,0.10)" />
-      <path d={d} fill="none" stroke="#12A08C" strokeWidth="2" />
-      <circle cx={x(vals.length - 1)} cy={y(vals[vals.length - 1])} r="3.5" fill="#12A08C" />
+      <path d={`${d} L${x(vals.length - 1)} ${h} L${x(0)} ${h} Z`} fill={area} />
+      <path d={d} fill="none" stroke={stroke} strokeWidth="2" />
+      <circle cx={x(vals.length - 1)} cy={y(vals[vals.length - 1])} r="3.5" fill={stroke} />
     </svg>
+  );
+}
+
+// Extrai o ID do YouTube de várias formas de URL (ou aceita o ID cru).
+function ytId(u?: string): string | null {
+  if (!u) return null;
+  const m = u.match(/(?:youtu\.be\/|watch\?v=|embed\/|shorts\/)([\w-]{11})/);
+  return m ? m[1] : /^[\w-]{11}$/.test(u) ? u : null;
+}
+
+function VideoModal({ title, url, onClose }: { title: string; url?: string; onClose: () => void }) {
+  const id = ytId(url);
+  return (
+    <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl overflow-hidden max-w-2xl w-full" onClick={(e) => e.stopPropagation()}>
+        <div className="aspect-video bg-black">
+          {id ? (
+            <iframe
+              className="w-full h-full"
+              src={`https://www.youtube.com/embed/${id}`}
+              title={title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          ) : (
+            <div className="w-full h-full grid place-items-center text-white/70 text-sm">Vídeo em breve</div>
+          )}
+        </div>
+        <div className="p-4 flex items-center justify-between gap-3">
+          <span className="font-semibold text-ink text-[15px]">{title}</span>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-sm">Fechar</button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -102,13 +140,13 @@ function HomeTab({ data, onTrain, go }: { data: TrainingData; onTrain: (k: ExKey
         </button>
       </div>
 
-      <div className={`${card} p-4`}>
+      <div className="rounded-2xl p-5 shadow-sm bg-gradient-to-br from-brand to-brand-dark text-white">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1 text-[12px] text-slate-500"><TrendingUp className="w-3.5 h-3.5" /> Índice de Treino</div>
-          <button onClick={() => go('progresso')} className="text-brand text-sm font-semibold flex items-center">Ver progresso <ChevronRight className="w-4 h-4" /></button>
+          <div className="flex items-center gap-1 text-[12px] text-white/80"><TrendingUp className="w-3.5 h-3.5" /> Índice de Treino</div>
+          <button onClick={() => go('progresso')} className="text-white/90 text-sm font-semibold flex items-center">Ver progresso <ChevronRight className="w-4 h-4" /></button>
         </div>
-        <div className="text-3xl font-extrabold text-brand tabular-nums">{data.index}</div>
-        <Spark data={data.history} />
+        <div className="text-4xl font-extrabold tabular-nums">{data.index}</div>
+        <Spark data={data.history} light />
       </div>
 
       <button onClick={() => go('aprender')} className={`${card} p-4 w-full flex items-center gap-3 hover:border-brand transition-colors text-left`}>
@@ -146,7 +184,7 @@ function TestsTab({ bestIQ }: { bestIQ: number }) {
 }
 
 // ---------- APRENDER ----------
-function LearnTab({ data, onTrain }: { data: TrainingData; onTrain: (k: ExKey) => void }) {
+function LearnTab({ data, onTrain, onPlay }: { data: TrainingData; onTrain: (k: ExKey) => void; onPlay: (v: { t: string; yt: string }) => void }) {
   const doneCount = data.todayDone.length + Object.keys(data.bestByExercise).length;
   return (
     <div className="space-y-6">
@@ -179,11 +217,11 @@ function LearnTab({ data, onTrain }: { data: TrainingData; onTrain: (k: ExKey) =
       <div>
         <h3 className="font-bold text-ink mb-1">Biblioteca de neurociência</h3>
         <p className="text-[12px] text-slate-500 mb-3">Baseada em evidência. Novos vídeos toda semana.</p>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           {CONTENT.map((v) => (
-            <div key={v.t} className={`${card} overflow-hidden`}>
+            <button key={v.t} onClick={() => onPlay({ t: v.t, yt: v.yt })} className={`${card} overflow-hidden text-left hover:border-brand hover:-translate-y-0.5 transition-all`}>
               <div className="aspect-video relative grid place-items-center" style={{ background: v.c }}>
-                <Play className="w-8 h-8 text-white/90" />
+                <span className="w-11 h-11 rounded-full bg-white/25 grid place-items-center"><Play className="w-5 h-5 text-white ml-0.5" /></span>
                 <span className="absolute top-1.5 right-1.5 text-[10px] bg-black/40 text-white px-1.5 py-0.5 rounded">{v.min}</span>
                 {!v.free && <span className="absolute bottom-1.5 left-1.5 text-[10px] bg-white/90 text-ink px-1.5 py-0.5 rounded font-semibold flex items-center gap-0.5"><Lock className="w-2.5 h-2.5" /> Premium</span>}
               </div>
@@ -191,7 +229,7 @@ function LearnTab({ data, onTrain }: { data: TrainingData; onTrain: (k: ExKey) =
                 <div className="text-[12.5px] font-semibold text-ink leading-tight line-clamp-2">{v.t}</div>
                 <div className="text-[10.5px] text-slate-400 mt-1">{v.a}</div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
@@ -209,14 +247,14 @@ function ProgressTab({ data }: { data: TrainingData }) {
   }, null);
   return (
     <div className="space-y-4">
-      <div className={`${card} p-5`}>
+      <div className="rounded-2xl p-5 shadow-sm bg-gradient-to-br from-brand to-brand-dark text-white">
         <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-1 text-[12px] text-slate-500"><TrendingUp className="w-3.5 h-3.5" /> Índice de Treino</div>
-          <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: `${t.color}22`, color: t.color }}>{t.name}</span>
+          <div className="flex items-center gap-1 text-[12px] text-white/80"><TrendingUp className="w-3.5 h-3.5" /> Índice de Treino</div>
+          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white/20 text-white">{t.name}</span>
         </div>
-        <div className="text-4xl font-extrabold text-brand tabular-nums">{data.index}</div>
-        <Spark data={data.history} big />
-        <p className="text-[11px] text-slate-400 mt-1">Seu score no app, não seu QI. Sobe com treino e consistência.</p>
+        <div className="text-4xl font-extrabold tabular-nums">{data.index}</div>
+        <Spark data={data.history} big light />
+        <p className="text-[11px] text-white/70 mt-1">Seu score no app, não seu QI. Sobe com treino e consistência.</p>
       </div>
 
       <div className={`${card} p-5`}>
@@ -307,6 +345,7 @@ export default function Platform({ onExit }: Props) {
   const [data, setData] = useState<TrainingData>(() => loadTraining());
   const [tab, setTab] = useState<Tab>('hoje');
   const [active, setActive] = useState<ExKey | null>(null);
+  const [video, setVideo] = useState<{ t: string; yt: string } | null>(null);
   const bestIQ = loadGameData().bestIQ;
 
   const finish = (key: ExKey, score: number) => { setData(recordExercise(key, score)); setActive(null); };
@@ -318,25 +357,53 @@ export default function Platform({ onExit }: Props) {
   const onTrain = (k: ExKey) => setActive(k);
   const onToggleHab = (k: 'aerobic' | 'sleep' | 'skill') => setData(toggleHabit(k));
 
+  const sections = (
+    <>
+      {tab === 'hoje' && <HomeTab data={data} onTrain={onTrain} go={setTab} />}
+      {tab === 'testes' && <TestsTab bestIQ={bestIQ} />}
+      {tab === 'aprender' && <LearnTab data={data} onTrain={onTrain} onPlay={setVideo} />}
+      {tab === 'progresso' && <ProgressTab data={data} />}
+      {tab === 'comunidade' && <CommunityTab data={data} onToggleHab={onToggleHab} />}
+    </>
+  );
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F2F7FD] to-white">
-      <header className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-slate-100">
-        <div className="max-w-md mx-auto px-4 h-14 flex items-center gap-3">
-          <button onClick={onExit} className="text-slate-400 hover:text-slate-600"><ArrowLeft className="w-5 h-5" /></button>
-          <span className="font-extrabold text-ink">{TITLES[tab]}</span>
-          <span className="ml-auto flex items-center gap-1 text-sm font-bold text-amber-500"><Flame className="w-4 h-4" /> {data.streak}</span>
+    <div className="min-h-screen bg-gradient-to-b from-[#F2F7FD] to-white lg:flex">
+      {/* Sidebar (desktop) — identidade + navegação */}
+      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:h-screen lg:sticky lg:top-0 border-r border-slate-200 bg-white px-4 py-6">
+        <div className="px-2 mb-8"><Logo className="h-8" /></div>
+        <nav className="flex flex-col gap-1">
+          {NAV.map((n) => (
+            <button key={n.key} onClick={() => setTab(n.key)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${tab === n.key ? 'bg-brand-light text-brand-dark' : 'text-slate-500 hover:bg-slate-50'}`}>
+              <n.icon className="w-5 h-5" /> {n.label}
+            </button>
+          ))}
+        </nav>
+        <div className="mt-auto space-y-2">
+          <div className="flex items-center gap-2 bg-amber-50 rounded-xl px-3 py-2.5 text-sm">
+            <Flame className="w-5 h-5 text-amber-500" /><span className="font-bold text-ink tabular-nums">{data.streak}</span><span className="text-slate-500 text-xs">dias de streak</span>
+          </div>
+          <button onClick={onExit} className="w-full text-left text-xs text-slate-400 hover:text-slate-600 px-3 py-2 flex items-center gap-1"><ArrowLeft className="w-3.5 h-3.5" /> Sair</button>
         </div>
-      </header>
+      </aside>
 
-      <main className="max-w-md mx-auto px-4 py-5 pb-28">
-        {tab === 'hoje' && <HomeTab data={data} onTrain={onTrain} go={setTab} />}
-        {tab === 'testes' && <TestsTab bestIQ={bestIQ} />}
-        {tab === 'aprender' && <LearnTab data={data} onTrain={onTrain} />}
-        {tab === 'progresso' && <ProgressTab data={data} />}
-        {tab === 'comunidade' && <CommunityTab data={data} onToggleHab={onToggleHab} />}
-      </main>
+      {/* Conteúdo */}
+      <div className="flex-1 min-w-0">
+        {/* Header (mobile) */}
+        <header className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-slate-100 lg:hidden">
+          <div className="px-4 h-14 flex items-center gap-3">
+            <button onClick={onExit} className="text-slate-400 hover:text-slate-600"><ArrowLeft className="w-5 h-5" /></button>
+            <Logo className="h-7" />
+            <span className="ml-auto flex items-center gap-1 text-sm font-bold text-amber-500"><Flame className="w-4 h-4" /> {data.streak}</span>
+          </div>
+        </header>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-20">
+        <h1 className="hidden lg:block max-w-3xl mx-auto px-6 pt-8 text-2xl font-extrabold text-ink">{TITLES[tab]}</h1>
+        <main className="mx-auto w-full max-w-md lg:max-w-3xl px-4 lg:px-6 py-5 pb-28 lg:pb-10">{sections}</main>
+      </div>
+
+      {/* Bottom nav (mobile) */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-20 lg:hidden">
         <div className="max-w-md mx-auto grid grid-cols-5">
           {NAV.map((n) => (
             <button key={n.key} onClick={() => setTab(n.key)} className={`flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium transition-colors ${tab === n.key ? 'text-brand' : 'text-slate-400 hover:text-slate-600'}`}>
@@ -346,6 +413,8 @@ export default function Platform({ onExit }: Props) {
           ))}
         </div>
       </nav>
+
+      {video && <VideoModal title={video.t} url={video.yt} onClose={() => setVideo(null)} />}
     </div>
   );
 }
