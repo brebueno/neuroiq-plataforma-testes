@@ -28,15 +28,32 @@ const HABITS: { key: 'aerobic' | 'sleep' | 'skill'; label: string; icon: typeof 
 ];
 
 // Biblioteca de conteúdo (neurociência aplicada, estilo Eslen/Huberman).
-// Biblioteca. Preencha `yt` com o link/ID do YouTube pra cada card virar vídeo.
-const CONTENT: { t: string; a: string; min: string; c: string; free: boolean; yt: string }[] = [
-  { t: 'Neuroplasticidade: seu cérebro muda a vida toda', a: 'Fundamentos', min: '8 min', c: '#12A08C', free: true, yt: '' },
-  { t: 'Dopamina, foco e o custo das telas', a: 'Neurociência aplicada', min: '11 min', c: '#2F6BEB', free: true, yt: '' },
-  { t: 'Sono: como a memória se consolida à noite', a: 'Hábitos', min: '9 min', c: '#7C4DDF', free: false, yt: '' },
-  { t: 'Repetição espaçada: por que você esquece', a: 'Técnicas de estudo', min: '7 min', c: '#E0872B', free: false, yt: '' },
-  { t: 'Palácio da memória, passo a passo', a: 'Técnicas de memória', min: '12 min', c: '#C0392B', free: false, yt: '' },
-  { t: 'Exercício físico e cognição: a evidência', a: 'Hábitos', min: '10 min', c: '#2E8B57', free: false, yt: '' },
-];
+// Biblioteca de vídeos (YouTube embed). `a` = canal de origem; `yt` = ID do vídeo.
+const PALETTE = ['#12A08C', '#2F6BEB', '#7C4DDF', '#2E8B57', '#E0872B', '#C0392B'];
+const CONTENT: { t: string; a: string; c: string; free: boolean; yt: string }[] = [
+  { t: 'Aprendizado, memória e cognição — Dra. Roberta Ekuni', a: 'Lutz Podcast', free: true, yt: 'hMK51lr5GNM' },
+  { t: 'Como funciona a memorização e a aprendizagem no cérebro', a: 'DP Podcast', free: true, yt: 'fglBJm9iOBc' },
+  { t: 'Fundamentos das neurociências: como o cérebro aprende', a: 'Faculdade Censupeg', free: true, yt: 'aNrLg0nWxxc' },
+  { t: 'Conheça o seu cérebro', a: 'Minutos Psíquicos', free: true, yt: 'hk37Avkusv0' },
+  { t: 'Neuroplasticidade: seu cérebro não será o mesmo', a: 'Eslen Delanogare', free: true, yt: 'uVtYOnwK0K4' },
+  { t: 'O que é um neurônio?', a: 'Minutos Psíquicos', free: false, yt: 'XsLNJSshq34' },
+  { t: 'Neurocientista explica o cérebro de forma simples — Eslen', a: 'Cortes do Lutz', free: false, yt: 'RTYV2NMKoAU' },
+  { t: 'Como parar de procrastinar e aumentar a produtividade', a: 'Eslen Delanogare', free: false, yt: 'GjKW0iG63NM' },
+  { t: 'Como parar de procrastinar', a: 'Eslen Delanogare', free: false, yt: 'cMIygysMRww' },
+  { t: 'Como ficar viciado em estudar', a: 'Eslen Delanogare', free: false, yt: 'SoVDbRWfwwk' },
+  { t: 'Como ser melhor que 99% das pessoas', a: 'Eslen Delanogare', free: false, yt: 'bg8yyVGD24g' },
+  { t: 'Como mudar (rápido) sua vida', a: 'Eslen Delanogare', free: false, yt: '0rtNKdODxbo' },
+  { t: '3 passos para melhorar seus hábitos', a: 'Eslen Delanogare', free: false, yt: 'NAzqNOv0Xlw' },
+  { t: '5 hábitos que você precisa eliminar', a: 'Eslen Delanogare', free: false, yt: 'hy47ZkTFQNE' },
+  { t: 'Comer saudável vai mudar sua vida', a: 'Eslen Delanogare', free: false, yt: 'e2Ph-mKnU5I' },
+  { t: 'Por isso você está sempre cansado', a: 'Eslen Delanogare', free: false, yt: '9mc2rd7wJdA' },
+  { t: 'Por isso você está sempre desmotivado', a: 'Eslen Delanogare', free: false, yt: 'n_R9ilKqWCc' },
+  { t: 'Se sentindo incapaz? Veja este vídeo', a: 'Eslen Delanogare', free: false, yt: 'MSfzGbgvwFM' },
+  { t: '8 técnicas de controle emocional', a: 'Minutos Psíquicos', free: false, yt: 'AwxYSQGT734' },
+  { t: '4 dicas para melhorar sua saúde mental', a: 'Minutos Psíquicos', free: false, yt: 'CrwRwgNJIMU' },
+  { t: 'TDAH e Ritalina: o que você precisa saber', a: 'Minutos Psíquicos', free: false, yt: 'zl02W9WsbD4' },
+  { t: 'A psicologia do filme Divertida Mente', a: 'Minutos Psíquicos', free: false, yt: 'nbnW0vou57M' },
+].map((v, i) => ({ ...v, c: PALETTE[i % PALETTE.length] }));
 
 // Trilha de aprendizado (módulos progressivos, estilo Brilliant).
 const TRILHA = [
@@ -220,10 +237,10 @@ function LearnTab({ data, onTrain, onPlay }: { data: TrainingData; onTrain: (k: 
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           {CONTENT.map((v) => (
             <button key={v.t} onClick={() => onPlay({ t: v.t, yt: v.yt })} className={`${card} overflow-hidden text-left hover:border-brand hover:-translate-y-0.5 transition-all`}>
-              <div className="aspect-video relative grid place-items-center" style={{ background: v.c }}>
-                <span className="w-11 h-11 rounded-full bg-white/25 grid place-items-center"><Play className="w-5 h-5 text-white ml-0.5" /></span>
-                <span className="absolute top-1.5 right-1.5 text-[10px] bg-black/40 text-white px-1.5 py-0.5 rounded">{v.min}</span>
-                {!v.free && <span className="absolute bottom-1.5 left-1.5 text-[10px] bg-white/90 text-ink px-1.5 py-0.5 rounded font-semibold flex items-center gap-0.5"><Lock className="w-2.5 h-2.5" /> Premium</span>}
+              <div className="aspect-video relative grid place-items-center bg-cover bg-center" style={{ backgroundColor: v.c, backgroundImage: `url(https://img.youtube.com/vi/${v.yt}/hqdefault.jpg)` }}>
+                <div className="absolute inset-0 bg-black/25" />
+                <span className="relative w-11 h-11 rounded-full bg-white/30 grid place-items-center"><Play className="w-5 h-5 text-white ml-0.5" /></span>
+                {!v.free && <span className="absolute bottom-1.5 left-1.5 text-[10px] bg-white/90 text-ink px-1.5 py-0.5 rounded font-semibold flex items-center gap-0.5 z-10"><Lock className="w-2.5 h-2.5" /> Premium</span>}
               </div>
               <div className="p-2.5">
                 <div className="text-[12.5px] font-semibold text-ink leading-tight line-clamp-2">{v.t}</div>
