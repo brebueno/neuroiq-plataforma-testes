@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Flame, TrendingUp, Home as HomeIcon, FlaskConical, BookOpen, BarChart3, Users,
   Calculator, Brain, LayoutGrid, Dumbbell, Moon, GraduationCap, Check, Play, Lock,
-  Trophy, ArrowLeft, ChevronRight, Sparkles,
+  Trophy, ArrowLeft, ChevronRight, Sparkles, Crown, ChevronUp, ChevronDown, Award, Zap, Video,
 } from 'lucide-react';
 import MentalMath from '../training/MentalMath';
 import DigitSpan from '../training/DigitSpan';
@@ -10,7 +10,41 @@ import NBack from '../training/NBack';
 import { loadTraining, recordExercise, toggleHabit, todayHabits, markWatched, TrainingData } from '../utils/training';
 import { loadGameData } from '../utils/localStorage';
 import { loadTestProfile, deriveFocus } from '../utils/profile';
+import { CountUp } from './landing/Reveal';
 import { Logo } from './Logo';
+
+// Confete leve (sem libs): dispara quando `fire` muda (remonta e reproduz).
+const CONFETTI_COLORS = ['#12A08C', '#2F6BEB', '#E0A93B', '#E0872B', '#7C4DDF', '#2E8B57'];
+function Confetti({ fire }: { fire: number }) {
+  if (!fire) return null;
+  return (
+    <div key={fire} className="pointer-events-none fixed inset-0 z-[60] overflow-hidden">
+      {Array.from({ length: 44 }).map((_, i) => {
+        const left = Math.random() * 100;
+        const delay = Math.random() * 250;
+        const dur = 1500 + Math.random() * 900;
+        const drift = (Math.random() - 0.5) * 40;
+        const size = 6 + Math.random() * 5;
+        return (
+          <span
+            key={i}
+            className="absolute top-0 animate-qmConfetti"
+            style={{
+              left: `calc(${left}% + ${drift}px)`,
+              width: size,
+              height: size * 1.7,
+              background: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+              borderRadius: '1px',
+              ['--r' as string]: `${Math.round((Math.random() - 0.5) * 1080)}deg`,
+              animationDelay: `${delay}ms`,
+              animationDuration: `${dur}ms`,
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+}
 
 interface Props { onExit: () => void; onStartTest?: (t: 'iq' | 'personality' | 'career') => void; }
 type ExKey = 'math' | 'span' | 'nback';
@@ -418,7 +452,7 @@ function HomeTab({ data, onTrain, go }: { data: TrainingData; onTrain: (k: ExKey
           <div className="flex items-center gap-1 text-[12px] text-white/80"><TrendingUp className="w-3.5 h-3.5" /> Índice de Treino</div>
           <span className="text-white/90 text-sm font-semibold flex items-center">Progresso <ChevronRight className="w-4 h-4" /></span>
         </div>
-        <div className="relative font-display text-4xl font-bold tabular-nums">{data.index}</div>
+        <div className="relative font-display text-4xl font-bold tabular-nums"><CountUp end={data.index} /></div>
         <div className="relative"><Spark data={data.history} light /></div>
       </button>
 
@@ -607,10 +641,42 @@ function ProgressTab({ data }: { data: TrainingData }) {
           <div className="flex items-center gap-1 text-[12px] text-white/80"><TrendingUp className="w-3.5 h-3.5" /> Índice de Treino</div>
           <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white/20 text-white">{t.name}</span>
         </div>
-        <div className="font-display text-4xl font-bold tabular-nums">{data.index}</div>
+        <div className="font-display text-4xl font-bold tabular-nums"><CountUp end={data.index} /></div>
         <Spark data={data.history} big light />
         <p className="text-[11px] text-white/70 mt-1">Seu score no app, não seu QI. Sobe com treino e consistência.</p>
       </div>
+
+      {(() => {
+        const trained = EXERCISES.filter((e) => data.bestByExercise[e.key] != null).length;
+        const badges = [
+          { icon: Zap, label: 'Primeiro treino', on: trained >= 1, color: '#12A08C' },
+          { icon: Flame, label: 'Ofensiva 7 dias', on: data.streak >= 7, color: '#E0872B' },
+          { icon: Brain, label: '3 habilidades', on: trained >= EXERCISES.length, color: '#7C4DDF' },
+          { icon: Video, label: '5 vídeos vistos', on: data.watched.length >= 5, color: '#2F6BEB' },
+          { icon: TrendingUp, label: 'Índice 110+', on: data.index >= 110, color: '#2E8B57' },
+          { icon: Award, label: 'Índice 120+', on: data.index >= 120, color: '#E0A93B' },
+        ];
+        const got = badges.filter((b) => b.on).length;
+        return (
+          <div className={`${card} p-5`}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-display tracking-tight font-bold text-ink flex items-center gap-2"><Award className="w-4 h-4 text-brand" /> Conquistas</h3>
+              <span className="text-[11px] font-semibold text-slate-400 tabular-nums">{got}/{badges.length}</span>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {badges.map((b) => (
+                <div key={b.label} className={`flex flex-col items-center text-center gap-1.5 rounded-2xl p-3 border transition-all ${b.on ? 'border-slate-100 bg-white' : 'border-dashed border-slate-200 bg-slate-50'}`}>
+                  <span className="relative w-11 h-11 rounded-full grid place-items-center" style={{ background: b.on ? b.color : '#e2e8f0' }}>
+                    <b.icon className={`w-5 h-5 ${b.on ? 'text-white' : 'text-slate-400'}`} />
+                    {!b.on && <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-white grid place-items-center border border-slate-200"><Lock className="w-2.5 h-2.5 text-slate-400" /></span>}
+                  </span>
+                  <span className={`text-[10.5px] font-semibold leading-tight ${b.on ? 'text-ink' : 'text-slate-400'}`}>{b.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       <div className={`${card} p-5`}>
         <h3 className="font-display tracking-tight font-bold text-ink mb-3">Por habilidade</h3>
@@ -640,29 +706,69 @@ function ProgressTab({ data }: { data: TrainingData }) {
 }
 
 // ---------- COMUNIDADE ----------
+const MEDAL = ['#E0A93B', '#9AA7B8', '#B57828']; // ouro, prata, bronze
+const AVATAR = ['#12A08C', '#2F6BEB', '#7C4DDF', '#E0872B', '#2E8B57', '#C0392B'];
+const initials = (n: string) => n.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+
 function CommunityTab({ data, onToggleHab }: { data: TrainingData; onToggleHab: (k: 'aerobic' | 'sleep' | 'skill') => void }) {
   const t = tier(data.index);
   const board = LEADERBOARD.map((r) => (r.me ? { ...r, v: data.index } : r)).sort((a, b) => b.v - a.v);
   const hb = todayHabits(data);
+  const podium = [1, 0, 2]; // ordem visual: 2º, 1º, 3º
+  const podiumH = [96, 74, 58];
+  const relegFrom = board.length - 2;
   return (
     <div className="space-y-4">
-      <div className={`${card} p-5 text-center`}>
-        <Trophy className="w-7 h-7 mx-auto mb-1" style={{ color: t.color }} />
-        <div className="text-xs uppercase tracking-widest text-slate-400">Sua liga</div>
-        <div className="font-display text-2xl font-bold tracking-tight" style={{ color: t.color }}>{t.name}</div>
-        <p className="text-[12px] text-slate-500 mt-1">{t.next < 999 ? `Faltam ${Math.max(0, t.next - data.index)} pontos pra subir de liga.` : 'Liga máxima. Você está no topo.'}</p>
+      {/* Cabeçalho da liga */}
+      <div className="relative overflow-hidden rounded-3xl p-5 text-center text-white" style={{ background: `linear-gradient(135deg, ${t.color}, ${t.color}cc)` }}>
+        <div className="pointer-events-none absolute -top-10 -right-8 w-40 h-40 rounded-full bg-white/10" />
+        <Trophy className="w-8 h-8 mx-auto mb-1" />
+        <div className="text-[11px] uppercase tracking-widest text-white/80">Sua liga</div>
+        <div className="font-display text-3xl font-bold tracking-tight">{t.name}</div>
+        <p className="text-[12px] text-white/85 mt-1">{t.next < 999 ? `Faltam ${Math.max(0, t.next - data.index)} pontos pra subir de liga.` : 'Liga máxima. Você está no topo.'}</p>
       </div>
 
+      {/* Pódio */}
+      <div className={`${card} p-4 pt-6`}>
+        <div className="flex items-end justify-center gap-3">
+          {podium.map((bi, col) => {
+            const r = board[bi];
+            if (!r) return null;
+            return (
+              <div key={bi} className="flex flex-col items-center flex-1 max-w-[96px]">
+                {bi === 0 && <Crown className="w-5 h-5 mb-1" style={{ color: MEDAL[0] }} />}
+                <span className="w-12 h-12 rounded-full grid place-items-center text-white font-bold text-sm ring-2 ring-offset-2" style={{ background: AVATAR[bi % AVATAR.length], boxShadow: `0 0 0 2px ${MEDAL[bi]}` }}>{initials(r.n)}</span>
+                <span className={`mt-1.5 text-[11px] font-semibold text-center leading-tight truncate w-full ${r.me ? 'text-brand-dark' : 'text-ink'}`}>{r.n}</span>
+                <span className="font-display text-sm font-bold tabular-nums" style={{ color: t.color }}>{r.v}</span>
+                <div className="w-full rounded-t-xl mt-1.5 grid place-items-start justify-center pt-1.5" style={{ height: podiumH[col], background: `linear-gradient(180deg, ${MEDAL[bi]}, ${MEDAL[bi]}44)` }}>
+                  <span className="font-display text-lg font-bold text-white/90">{bi + 1}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Ranking com zonas de promoção/rebaixamento */}
       <div className={`${card} p-4`}>
-        <h3 className="font-display tracking-tight font-bold text-ink mb-3">Ranking da semana</h3>
+        <h3 className="font-display tracking-tight font-bold text-ink mb-2">Ranking da semana</h3>
+        <div className="flex items-center gap-1.5 text-[10.5px] font-bold text-emerald-600 mb-1.5"><ChevronUp className="w-3.5 h-3.5" /> ZONA DE PROMOÇÃO</div>
         <div className="space-y-1">
-          {board.map((r, i) => (
-            <div key={r.n} className={`flex items-center gap-3 p-2 rounded-lg ${r.me ? 'bg-brand-light' : ''}`}>
-              <span className="w-6 text-center font-bold text-slate-400 tabular-nums">{i + 1}</span>
-              <span className={`flex-1 ${r.me ? 'font-bold text-brand-dark' : 'text-ink'}`}>{r.n}</span>
-              <span className="tabular-nums font-semibold text-slate-600">{r.v}</span>
-            </div>
-          ))}
+          {board.map((r, i) => {
+            const promo = i < 3;
+            const releg = i >= relegFrom;
+            return (
+              <div key={r.n}>
+                {i === relegFrom && <div className="flex items-center gap-1.5 text-[10.5px] font-bold text-red-500 mt-2 mb-1.5"><ChevronDown className="w-3.5 h-3.5" /> ZONA DE REBAIXAMENTO</div>}
+                <div className={`flex items-center gap-3 p-2 rounded-xl ${r.me ? 'bg-brand-light ring-1 ring-brand/30' : promo ? 'bg-emerald-50/60' : releg ? 'bg-red-50/50' : ''}`}>
+                  <span className={`w-6 text-center font-display font-bold tabular-nums ${promo ? 'text-emerald-600' : releg ? 'text-red-500' : 'text-slate-400'}`}>{i + 1}</span>
+                  <span className="w-8 h-8 rounded-full grid place-items-center text-white font-bold text-[11px] flex-shrink-0" style={{ background: AVATAR[i % AVATAR.length] }}>{initials(r.n)}</span>
+                  <span className={`flex-1 ${r.me ? 'font-bold text-brand-dark' : 'text-ink'}`}>{r.n}</span>
+                  <span className="tabular-nums font-semibold text-slate-600">{r.v}</span>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -701,9 +807,16 @@ export default function Platform({ onExit, onStartTest }: Props) {
   const [tab, setTab] = useState<Tab>('hoje');
   const [active, setActive] = useState<ExKey | null>(null);
   const [video, setVideo] = useState<{ t: string; yt: string } | null>(null);
+  const [confetti, setConfetti] = useState(0);
   const bestIQ = loadGameData().bestIQ;
 
-  const finish = (key: ExKey, score: number) => { setData(recordExercise(key, score)); setActive(null); };
+  const finish = (key: ExKey, score: number) => {
+    const nd = recordExercise(key, score);
+    setData(nd);
+    setActive(null);
+    // Bateu a meta diária (fechou as 3 sessões)? Solta confete.
+    if (nd.todayDone.length >= EXERCISES.length) setConfetti((c) => c + 1);
+  };
 
   if (active === 'math') return <MentalMath onDone={(s) => finish('math', s)} onExit={() => setActive(null)} />;
   if (active === 'span') return <DigitSpan onDone={(s) => finish('span', s)} onExit={() => setActive(null)} />;
@@ -758,7 +871,7 @@ export default function Platform({ onExit, onStartTest }: Props) {
         </header>
 
         <h1 className="hidden lg:block relative max-w-3xl mx-auto px-6 pt-8 font-display text-[26px] font-bold tracking-tight text-ink">{TITLES[tab]}</h1>
-        <main className="relative mx-auto w-full max-w-md lg:max-w-3xl px-4 lg:px-6 py-5 pb-28 lg:pb-10">{sections}</main>
+        <main key={tab} className="relative mx-auto w-full max-w-md lg:max-w-3xl px-4 lg:px-6 py-5 pb-28 lg:pb-10 animate-qmRise">{sections}</main>
       </div>
 
       {/* Bottom nav (mobile) */}
@@ -772,6 +885,8 @@ export default function Platform({ onExit, onStartTest }: Props) {
           ))}
         </div>
       </nav>
+
+      <Confetti fire={confetti} />
 
       {video && (
         <VideoModal

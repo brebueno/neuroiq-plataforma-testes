@@ -24,10 +24,20 @@ export default {
           from: { transform: 'translateY(0)' },
           to: { transform: 'translateY(-50%)' },
         },
+        qmRise: {
+          from: { opacity: '0', transform: 'translateY(12px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        qmConfetti: {
+          '0%': { transform: 'translateY(-10vh) rotate(0deg)', opacity: '1' },
+          '100%': { transform: 'translateY(110vh) rotate(var(--r,720deg))', opacity: '0' },
+        },
       },
       animation: {
         qmFloat: 'qmFloat 6.5s ease-in-out infinite',
         qmMarquee: 'qmMarquee linear infinite',
+        qmRise: 'qmRise 0.45s cubic-bezier(0.16,1,0.3,1) both',
+        qmConfetti: 'qmConfetti 1.8s ease-in forwards',
       },
     },
   },
