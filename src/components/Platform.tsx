@@ -281,7 +281,7 @@ function VideoModal({ title, url, watched, onComplete, onClose }: { title: strin
   );
 }
 
-const card = 'bg-white border border-slate-200 rounded-2xl shadow-sm';
+const card = 'bg-white border border-slate-200/80 rounded-2xl shadow-[0_1px_2px_rgba(18,32,59,0.04),0_14px_32px_-24px_rgba(18,32,59,0.28)]';
 
 // ---------- HOJE ----------
 function HomeTab({ data, onTrain, go }: { data: TrainingData; onTrain: (k: ExKey) => void; go: (t: Tab) => void }) {
@@ -295,7 +295,7 @@ function HomeTab({ data, onTrain, go }: { data: TrainingData; onTrain: (k: ExKey
   return (
     <div className="space-y-4">
       {focus && (
-        <div className="rounded-2xl p-5 shadow-sm bg-gradient-to-br from-brand to-brand-dark text-white">
+        <div className="rounded-2xl p-5 bg-gradient-to-br from-brand to-brand-dark text-white shadow-[0_18px_44px_-22px_rgba(18,160,140,0.75)]">
           <div className="flex items-center gap-1.5 text-[12px] text-white/80"><Sparkles className="w-3.5 h-3.5" /> Seu plano personalizado</div>
           <p className="text-[15px] mt-2 leading-snug">
             Seu teste mostrou força em <b>{focus.strongest.label.toLowerCase()}</b>. O maior espaço pra crescer está em <b>{focus.area}</b>, e é por aí que sua jornada começa.
@@ -307,7 +307,7 @@ function HomeTab({ data, onTrain, go }: { data: TrainingData; onTrain: (k: ExKey
       <div className="flex items-center gap-3 bg-gradient-to-r from-amber-50 to-white border border-amber-200 rounded-2xl p-4">
         <Flame className={`w-9 h-9 ${data.streak > 0 ? 'text-amber-500' : 'text-slate-300'}`} />
         <div className="flex-1">
-          <div className="text-xl font-extrabold text-ink">{data.streak} {data.streak === 1 ? 'dia' : 'dias'} de streak</div>
+          <div className="font-display text-xl font-bold text-ink">{data.streak} {data.streak === 1 ? 'dia' : 'dias'} de streak</div>
           <div className="text-[12px] text-slate-500">Não quebre a corrente. Treine 1 sessão hoje.</div>
         </div>
       </div>
@@ -323,12 +323,12 @@ function HomeTab({ data, onTrain, go }: { data: TrainingData; onTrain: (k: ExKey
         </button>
       </div>
 
-      <div className="rounded-2xl p-5 shadow-sm bg-gradient-to-br from-brand to-brand-dark text-white">
+      <div className="rounded-2xl p-5 bg-gradient-to-br from-brand to-brand-dark text-white shadow-[0_18px_44px_-22px_rgba(18,160,140,0.75)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1 text-[12px] text-white/80"><TrendingUp className="w-3.5 h-3.5" /> Índice de Treino</div>
           <button onClick={() => go('progresso')} className="text-white/90 text-sm font-semibold flex items-center">Ver progresso <ChevronRight className="w-4 h-4" /></button>
         </div>
-        <div className="text-4xl font-extrabold tabular-nums">{data.index}</div>
+        <div className="font-display text-4xl font-bold tabular-nums">{data.index}</div>
         <Spark data={data.history} light />
       </div>
 
@@ -352,7 +352,7 @@ function TestsTab({ bestIQ, onStartTest }: { bestIQ: number; onStartTest?: (t: '
     <div className="space-y-4">
       <div className={`${card} p-5 text-center`}>
         <div className="text-xs uppercase tracking-widest text-slate-400">Seu último QI</div>
-        <div className="text-5xl font-extrabold text-brand tabular-nums my-1">{bestIQ || '··'}</div>
+        <div className="font-display text-5xl font-bold text-brand tabular-nums my-1">{bestIQ || '··'}</div>
         <p className="text-[12px] text-slate-500">Refaça periodicamente e acompanhe a evolução do seu laudo.</p>
       </div>
       {tests.map((t) => (
@@ -379,7 +379,7 @@ function LearnTab({ data, onTrain, onPlay }: { data: TrainingData; onTrain: (k: 
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="font-bold text-ink mb-1">Jornada do Cérebro</h3>
+        <h3 className="font-display tracking-tight font-bold text-ink mb-1">Jornada do Cérebro</h3>
         <p className="text-[12px] text-slate-500 mb-2">Siga na ordem: um conteúdo, um treino. Cada passo desbloqueia o próximo.</p>
         <div className="flex items-center gap-2 mb-4">
           <div className="flex-1 bg-slate-200 rounded-full h-2"><div className="bg-brand h-2 rounded-full transition-all" style={{ width: `${Math.round((doneN / allSteps.length) * 100)}%` }} /></div>
@@ -422,7 +422,7 @@ function LearnTab({ data, onTrain, onPlay }: { data: TrainingData; onTrain: (k: 
       </div>
 
       <div>
-        <h3 className="font-bold text-ink mb-1">Explorar toda a biblioteca</h3>
+        <h3 className="font-display tracking-tight font-bold text-ink mb-1">Explorar toda a biblioteca</h3>
         <p className="text-[12px] text-slate-500 mb-4">Se quiser ir além da jornada · {CONTENT.length} vídeos · novos toda semana.</p>
         {CATS.map((catName) => {
           const vids = CONTENT.filter((v) => v.cat === catName);
@@ -462,18 +462,18 @@ function ProgressTab({ data }: { data: TrainingData }) {
   }, null);
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl p-5 shadow-sm bg-gradient-to-br from-brand to-brand-dark text-white">
+      <div className="rounded-2xl p-5 bg-gradient-to-br from-brand to-brand-dark text-white shadow-[0_18px_44px_-22px_rgba(18,160,140,0.75)]">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-1 text-[12px] text-white/80"><TrendingUp className="w-3.5 h-3.5" /> Índice de Treino</div>
           <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white/20 text-white">{t.name}</span>
         </div>
-        <div className="text-4xl font-extrabold tabular-nums">{data.index}</div>
+        <div className="font-display text-4xl font-bold tabular-nums">{data.index}</div>
         <Spark data={data.history} big light />
         <p className="text-[11px] text-white/70 mt-1">Seu score no app, não seu QI. Sobe com treino e consistência.</p>
       </div>
 
       <div className={`${card} p-5`}>
-        <h3 className="font-bold text-ink mb-3">Por habilidade</h3>
+        <h3 className="font-display tracking-tight font-bold text-ink mb-3">Por habilidade</h3>
         <div className="space-y-3">
           {EXERCISES.map((e) => {
             const v = data.bestByExercise[e.key] ?? 0;
@@ -488,7 +488,7 @@ function ProgressTab({ data }: { data: TrainingData }) {
       </div>
 
       <div className={`${card} p-5`}>
-        <h3 className="font-bold text-ink mb-2 flex items-center gap-2"><Sparkles className="w-4 h-4 text-brand" /> Insights</h3>
+        <h3 className="font-display tracking-tight font-bold text-ink mb-2 flex items-center gap-2"><Sparkles className="w-4 h-4 text-brand" /> Insights</h3>
         <ul className="text-[13.5px] text-slate-600 space-y-1.5">
           <li>🔥 Streak de <b className="text-ink">{data.streak}</b> {data.streak === 1 ? 'dia' : 'dias'}. Consistência é o que mais move seu índice.</li>
           {strongest ? <li>💪 Seu ponto mais forte: <b className="text-ink">{strongest.label.toLowerCase()}</b>. Aproveite pra encarar níveis maiores.</li> : <li>▶️ Faça sua primeira sessão pra desbloquear seus insights.</li>}
@@ -509,12 +509,12 @@ function CommunityTab({ data, onToggleHab }: { data: TrainingData; onToggleHab: 
       <div className={`${card} p-5 text-center`}>
         <Trophy className="w-7 h-7 mx-auto mb-1" style={{ color: t.color }} />
         <div className="text-xs uppercase tracking-widest text-slate-400">Sua liga</div>
-        <div className="text-2xl font-extrabold" style={{ color: t.color }}>{t.name}</div>
+        <div className="font-display text-2xl font-bold tracking-tight" style={{ color: t.color }}>{t.name}</div>
         <p className="text-[12px] text-slate-500 mt-1">{t.next < 999 ? `Faltam ${Math.max(0, t.next - data.index)} pontos pra subir de liga.` : 'Liga máxima. Você está no topo.'}</p>
       </div>
 
       <div className={`${card} p-4`}>
-        <h3 className="font-bold text-ink mb-3">Ranking da semana</h3>
+        <h3 className="font-display tracking-tight font-bold text-ink mb-3">Ranking da semana</h3>
         <div className="space-y-1">
           {board.map((r, i) => (
             <div key={r.n} className={`flex items-center gap-3 p-2 rounded-lg ${r.me ? 'bg-brand-light' : ''}`}>
@@ -527,7 +527,7 @@ function CommunityTab({ data, onToggleHab }: { data: TrainingData; onToggleHab: 
       </div>
 
       <div className={`${card} p-4`}>
-        <h3 className="font-bold text-ink mb-1">Desafio da semana</h3>
+        <h3 className="font-display tracking-tight font-bold text-ink mb-1">Desafio da semana</h3>
         <p className="text-[13px] text-slate-500 mb-3">Complete os 3 hábitos de saúde cognitiva (o que tem mais evidência).</p>
         <div className="space-y-2">
           {HABITS.map((h) => {
@@ -604,7 +604,10 @@ export default function Platform({ onExit, onStartTest }: Props) {
       </aside>
 
       {/* Conteúdo */}
-      <div className="flex-1 min-w-0">
+      <div className="relative flex-1 min-w-0">
+        {/* glows ambientes (identidade) */}
+        <div className="pointer-events-none absolute top-0 right-0 w-[520px] h-[520px] rounded-full opacity-50" style={{ background: 'radial-gradient(circle, rgba(18,160,140,0.12), transparent 65%)' }} />
+        <div className="pointer-events-none absolute top-[40%] -left-40 w-[440px] h-[440px] rounded-full opacity-40" style={{ background: 'radial-gradient(circle, rgba(47,107,235,0.10), transparent 66%)' }} />
         {/* Header (mobile) */}
         <header className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-slate-100 lg:hidden">
           <div className="px-4 h-14 flex items-center gap-3">
@@ -614,8 +617,8 @@ export default function Platform({ onExit, onStartTest }: Props) {
           </div>
         </header>
 
-        <h1 className="hidden lg:block max-w-3xl mx-auto px-6 pt-8 text-2xl font-extrabold text-ink">{TITLES[tab]}</h1>
-        <main className="mx-auto w-full max-w-md lg:max-w-3xl px-4 lg:px-6 py-5 pb-28 lg:pb-10">{sections}</main>
+        <h1 className="hidden lg:block relative max-w-3xl mx-auto px-6 pt-8 font-display text-[26px] font-bold tracking-tight text-ink">{TITLES[tab]}</h1>
+        <main className="relative mx-auto w-full max-w-md lg:max-w-3xl px-4 lg:px-6 py-5 pb-28 lg:pb-10">{sections}</main>
       </div>
 
       {/* Bottom nav (mobile) */}
