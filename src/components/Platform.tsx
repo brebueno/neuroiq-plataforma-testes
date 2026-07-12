@@ -284,57 +284,148 @@ function VideoModal({ title, url, watched, onComplete, onClose }: { title: strin
 const card = 'bg-white border border-slate-200/80 rounded-2xl shadow-[0_1px_2px_rgba(18,32,59,0.04),0_14px_32px_-24px_rgba(18,32,59,0.28)]';
 
 // ---------- HOJE ----------
+// Anel de meta diária (estilo Duolingo).
+function GoalRing({ done, total }: { done: number; total: number }) {
+  const r = 34;
+  const c = 2 * Math.PI * r;
+  const pct = Math.min(1, total ? done / total : 0);
+  return (
+    <div className="relative w-[88px] h-[88px] flex-shrink-0">
+      <svg viewBox="0 0 88 88" className="w-full h-full -rotate-90">
+        <circle cx="44" cy="44" r={r} fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="9" />
+        <circle cx="44" cy="44" r={r} fill="none" stroke="#fff" strokeWidth="9" strokeLinecap="round" strokeDasharray={`${(pct * c).toFixed(1)} ${c.toFixed(1)}`} className="transition-all duration-700" />
+      </svg>
+      <div className="absolute inset-0 grid place-items-center text-white">
+        <div className="font-display text-2xl font-bold leading-none">{done}<span className="text-white/70 text-base">/{total}</span></div>
+      </div>
+    </div>
+  );
+}
+
+function StatChip({ icon, value, label, small }: { icon: React.ReactNode; value: React.ReactNode; label: string; small?: boolean }) {
+  return (
+    <div className="flex items-center gap-2 px-1 min-w-0">
+      {icon}
+      <div className="leading-tight min-w-0">
+        <div className={`font-display font-bold text-ink tabular-nums truncate ${small ? 'text-sm' : 'text-lg'}`}>{value}</div>
+        <div className="text-[9.5px] text-slate-400 uppercase tracking-wide">{label}</div>
+      </div>
+    </div>
+  );
+}
+
+// Últimos 7 dias com marcação de ofensiva (mesma chave UTC do store).
+const WEEKDAYS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+function weekStrip(data: TrainingData) {
+  const active = new Set<string>([
+    ...(data.history || []).map((h) => h.date),
+    ...(data.habits || []).map((h) => h.date),
+    data.lastActiveDate,
+  ].filter(Boolean));
+  const now = Date.now();
+  return Array.from({ length: 7 }, (_, k) => {
+    const i = 6 - k;
+    const d = new Date(now - i * 86400000);
+    const key = d.toISOString().slice(0, 10);
+    return { key, label: WEEKDAYS[d.getUTCDay()], active: active.has(key), today: i === 0 };
+  });
+}
+
 function HomeTab({ data, onTrain, go }: { data: TrainingData; onTrain: (k: ExKey) => void; go: (t: Tab) => void }) {
   const profile = loadTestProfile();
   const focus = profile ? deriveFocus(profile) : null;
-  // A "sessão de hoje" começa pelo exercício que ataca o ponto fraco do teste
-  // (se ainda não foi feito hoje); depois cai no fluxo normal.
+  // A "lição" começa pelo exercício que ataca o ponto fraco do teste (se ainda
+  // não foi feito hoje); depois cai no fluxo normal.
   const recommended = focus && !data.todayDone.includes(focus.ex) ? EXERCISES.find((e) => e.key === focus.ex) : null;
   const next = recommended ?? EXERCISES.find((e) => !data.todayDone.includes(e.key)) ?? EXERCISES[0];
   const done = data.todayDone.length;
+  const goalMet = done >= EXERCISES.length;
+  const left = EXERCISES.length - done;
+  const t = tier(data.index);
+  const week = weekStrip(data);
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
+      {/* Barra de stats gamificada */}
+      <div className={`${card} p-3 flex items-center justify-around`}>
+        <StatChip icon={<Flame className={`w-5 h-5 ${data.streak > 0 ? 'text-amber-500' : 'text-slate-300'}`} />} value={data.streak} label="ofensiva" />
+        <span className="w-px h-8 bg-slate-100" />
+        <StatChip icon={<TrendingUp className="w-5 h-5 text-brand" />} value={data.index} label="índice" />
+        <span className="w-px h-8 bg-slate-100" />
+        <StatChip icon={<Trophy className="w-5 h-5" style={{ color: t.color }} />} value={t.name} label="liga" small />
+      </div>
+
+      {/* Meta diária (anel + estado) */}
+      <div className="relative overflow-hidden rounded-3xl p-6 bg-gradient-to-br from-brand to-brand-dark text-white shadow-[0_20px_46px_-22px_rgba(18,160,140,0.85)]">
+        <div className="pointer-events-none absolute -top-16 -right-10 w-56 h-56 rounded-full bg-white/10" />
+        <div className="relative flex items-center gap-5">
+          <GoalRing done={done} total={EXERCISES.length} />
+          <div className="min-w-0">
+            <div className="text-[11px] uppercase tracking-widest text-white/80">Meta diária</div>
+            <div className="font-display text-2xl font-bold leading-tight">{goalMet ? 'Meta batida! 🎉' : 'Bora treinar hoje'}</div>
+            <div className="text-[13px] text-white/85 mt-1">{goalMet ? 'Volta amanhã pra manter a ofensiva viva.' : `Faltam ${left} ${left === 1 ? 'sessão' : 'sessões'} pra fechar o dia.`}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Sua semana (ofensiva em bolinhas) */}
+      <div className={`${card} p-4`}>
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[13px] font-bold text-ink font-display">Sua semana</span>
+          <span className="text-[11px] text-slate-400 flex items-center gap-1"><Flame className="w-3 h-3 text-amber-500" /> {data.streak} de ofensiva</span>
+        </div>
+        <div className="flex justify-between">
+          {week.map((d) => (
+            <div key={d.key} className="flex flex-col items-center gap-1.5">
+              <span className={`text-[11px] font-semibold ${d.today ? 'text-brand' : 'text-slate-400'}`}>{d.label}</span>
+              <span className={`w-8 h-8 rounded-full grid place-items-center ${d.active ? 'bg-amber-100' : 'bg-slate-100'} ${d.today ? 'ring-2 ring-brand ring-offset-1' : ''}`}>
+                <Flame className={`w-4 h-4 ${d.active ? 'text-amber-500' : 'text-slate-300'}`} />
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Plano personalizado do teste */}
       {focus && (
-        <div className="rounded-2xl p-5 bg-gradient-to-br from-brand to-brand-dark text-white shadow-[0_18px_44px_-22px_rgba(18,160,140,0.75)]">
-          <div className="flex items-center gap-1.5 text-[12px] text-white/80"><Sparkles className="w-3.5 h-3.5" /> Seu plano personalizado</div>
-          <p className="text-[15px] mt-2 leading-snug">
-            Seu teste mostrou força em <b>{focus.strongest.label.toLowerCase()}</b>. O maior espaço pra crescer está em <b>{focus.area}</b>, e é por aí que sua jornada começa.
+        <div className={`${card} p-4 border-l-4 border-l-brand`}>
+          <div className="flex items-center gap-1.5 text-[12px] font-semibold text-brand"><Sparkles className="w-3.5 h-3.5" /> Seu plano personalizado</div>
+          <p className="text-[14px] text-slate-600 mt-1.5 leading-snug">
+            Força em <b className="text-ink">{focus.strongest.label.toLowerCase()}</b>. O maior espaço pra crescer está em <b className="text-ink">{focus.area}</b>, e sua lição de hoje ataca isso.
           </p>
-          <p className="text-[13px] text-white/85 mt-2">Separamos o exercício certo pra isso, logo abaixo.</p>
         </div>
       )}
 
-      <div className="flex items-center gap-3 bg-gradient-to-r from-amber-50 to-white border border-amber-200 rounded-2xl p-4">
-        <Flame className={`w-9 h-9 ${data.streak > 0 ? 'text-amber-500' : 'text-slate-300'}`} />
-        <div className="flex-1">
-          <div className="font-display text-xl font-bold text-ink">{data.streak} {data.streak === 1 ? 'dia' : 'dias'} de streak</div>
-          <div className="text-[12px] text-slate-500">Não quebre a corrente. Treine 1 sessão hoje.</div>
-        </div>
-      </div>
-
+      {/* Lição do dia (botão candy 3D) */}
       <div className={`${card} p-5`}>
-        <div className="text-xs uppercase tracking-widest text-brand mb-1">{recommended ? 'Recomendado pra você' : 'Sua sessão de hoje'}</div>
-        <div className="flex items-center gap-3 mt-2">
-          <span className="w-11 h-11 rounded-xl bg-brand-light grid place-items-center"><next.icon className="w-6 h-6 text-brand" /></span>
-          <div className="flex-1"><div className="font-bold text-ink">{next.label}</div><div className="text-[12px] text-slate-500">{next.desc}</div></div>
+        <div className="text-[11px] uppercase tracking-widest text-brand font-semibold mb-2">{recommended ? 'Recomendado pra você' : 'Sua lição de hoje'}</div>
+        <div className="flex items-center gap-3">
+          <span className="w-14 h-14 rounded-2xl bg-brand-light grid place-items-center"><next.icon className="w-7 h-7 text-brand" /></span>
+          <div className="flex-1 min-w-0"><div className="font-display font-bold text-ink text-[17px]">{next.label}</div><div className="text-[12px] text-slate-500">{next.desc}</div></div>
         </div>
-        <button onClick={() => onTrain(next.key)} className="w-full mt-4 bg-brand text-white py-3.5 rounded-xl font-semibold hover:bg-brand-dark transition-colors flex items-center justify-center gap-2">
-          <Play className="w-5 h-5" /> Continuar treino ({done}/{EXERCISES.length})
+        <button onClick={() => onTrain(next.key)} className="w-full mt-4 bg-brand text-white font-display font-bold uppercase tracking-wide py-4 rounded-2xl border-b-4 border-black/25 hover:brightness-105 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2">
+          <Play className="w-5 h-5 fill-white" /> {done > 0 ? 'Continuar lição' : 'Começar lição'}
         </button>
-      </div>
-
-      <div className="rounded-2xl p-5 bg-gradient-to-br from-brand to-brand-dark text-white shadow-[0_18px_44px_-22px_rgba(18,160,140,0.75)]">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1 text-[12px] text-white/80"><TrendingUp className="w-3.5 h-3.5" /> Índice de Treino</div>
-          <button onClick={() => go('progresso')} className="text-white/90 text-sm font-semibold flex items-center">Ver progresso <ChevronRight className="w-4 h-4" /></button>
+        <div className="mt-3 flex items-center justify-center gap-1.5">
+          {EXERCISES.map((e, i) => <span key={e.key} className={`h-1.5 rounded-full transition-all ${i < done ? 'w-8 bg-brand' : 'w-4 bg-slate-200'}`} />)}
         </div>
-        <div className="font-display text-4xl font-bold tabular-nums">{data.index}</div>
-        <Spark data={data.history} light />
       </div>
 
+      {/* Índice de Treino (card colorido, leva ao progresso) */}
+      <button onClick={() => go('progresso')} className="w-full text-left relative overflow-hidden rounded-3xl p-5 bg-gradient-to-br from-[#2F6BEB] to-[#1E49A8] text-white shadow-[0_20px_46px_-24px_rgba(47,107,235,0.85)]">
+        <div className="pointer-events-none absolute -bottom-12 -left-6 w-44 h-44 rounded-full bg-white/10" />
+        <div className="relative flex items-center justify-between">
+          <div className="flex items-center gap-1 text-[12px] text-white/80"><TrendingUp className="w-3.5 h-3.5" /> Índice de Treino</div>
+          <span className="text-white/90 text-sm font-semibold flex items-center">Progresso <ChevronRight className="w-4 h-4" /></span>
+        </div>
+        <div className="relative font-display text-4xl font-bold tabular-nums">{data.index}</div>
+        <div className="relative"><Spark data={data.history} light /></div>
+      </button>
+
+      {/* Trilha */}
       <button onClick={() => go('aprender')} className={`${card} p-4 w-full flex items-center gap-3 hover:border-brand transition-colors text-left`}>
-        <span className="w-10 h-10 rounded-xl bg-brand-light grid place-items-center"><BookOpen className="w-5 h-5 text-brand" /></span>
-        <div className="flex-1"><div className="font-semibold text-ink">Continuar sua trilha</div><div className="text-[12px] text-slate-500">Aprenda como o cérebro funciona</div></div>
+        <span className="w-11 h-11 rounded-2xl bg-brand-light grid place-items-center"><BookOpen className="w-5 h-5 text-brand" /></span>
+        <div className="flex-1"><div className="font-display font-bold text-ink">Continuar sua trilha</div><div className="text-[12px] text-slate-500">Aprenda como o cérebro funciona</div></div>
         <ChevronRight className="w-5 h-5 text-slate-400" />
       </button>
     </div>
