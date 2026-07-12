@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Flame, TrendingUp, Home as HomeIcon, FlaskConical, BookOpen, BarChart3, Users,
   Calculator, Brain, LayoutGrid, Dumbbell, Moon, GraduationCap, Check, Play, Lock,
@@ -53,7 +53,7 @@ const CONTENT: { t: string; a: string; c: string; free: boolean; yt: string; cat
   { t: 'Como parar de procrastinar e aumentar a produtividade', a: 'Eslen Delanogare', free: false, yt: 'GjKW0iG63NM', cat: 'Foco & produtividade' },
   { t: 'Como parar de procrastinar', a: 'Eslen Delanogare', free: false, yt: 'cMIygysMRww', cat: 'Foco & produtividade' },
   { t: 'Como ficar viciado em estudar', a: 'Eslen Delanogare', free: false, yt: 'SoVDbRWfwwk', cat: 'Foco & produtividade' },
-  { t: 'Como ficar viciado em estudar', a: 'bremado', free: false, yt: 'oQw1Wo1GNp0', cat: 'Foco & produtividade' },
+  { t: 'O que faz o cérebro querer estudar', a: 'bremado', free: false, yt: 'oQw1Wo1GNp0', cat: 'Foco & produtividade' },
   { t: 'Como aprender a ser disciplinado', a: 'Eslen Delanogare', free: false, yt: 'j9rz_QAFhk0', cat: 'Foco & produtividade' },
   { t: 'Como forçar seu cérebro a estudar (Prof. ITA)', a: 'Lutz Podcast', free: false, yt: '48W7Er0FILg', cat: 'Foco & produtividade' },
   { t: 'Como treinar o cérebro para ter força mental', a: 'Reservatório de Dopamina', free: false, yt: 'oz2GlfCgWkg', cat: 'Foco & produtividade' },
@@ -70,7 +70,6 @@ const CONTENT: { t: string; a: string; c: string; free: boolean; yt: string; cat
   { t: 'Se sentindo incapaz? Veja este vídeo', a: 'Eslen Delanogare', free: false, yt: 'MSfzGbgvwFM', cat: 'Mentalidade' },
   { t: '8 técnicas de controle emocional', a: 'Minutos Psíquicos', free: false, yt: 'AwxYSQGT734', cat: 'Mentalidade' },
   { t: '4 dicas para melhorar sua saúde mental', a: 'Minutos Psíquicos', free: false, yt: 'CrwRwgNJIMU', cat: 'Mentalidade' },
-  { t: 'TDAH e Ritalina: o que você precisa saber', a: 'Minutos Psíquicos', free: false, yt: 'zl02W9WsbD4', cat: 'Mentalidade' },
   // Exercícios
   { t: '7 exercícios cerebrais para afiar o raciocínio', a: 'Conexão Psíquica', free: true, yt: 'v_AJWMt3ZU4', cat: 'Exercícios' },
   { t: 'Ativar seu cérebro: exercício de memória', a: 'PhysioBRAIN', free: false, yt: 'CKDu3xHVuIw', cat: 'Exercícios' },
@@ -184,24 +183,95 @@ function ytId(u?: string): string | null {
   return m ? m[1] : /^[\w-]{11}$/.test(u) ? u : null;
 }
 
-function VideoModal({ title, url, onClose }: { title: string; url?: string; onClose: () => void }) {
+// Carrega a YouTube IFrame API uma vez (pra medir tempo assistido de verdade).
+let ytApiPromise: Promise<void> | null = null;
+function loadYTApi(): Promise<void> {
+  const w = window as unknown as { YT?: { Player?: unknown }; onYouTubeIframeAPIReady?: () => void };
+  if (w.YT && w.YT.Player) return Promise.resolve();
+  if (ytApiPromise) return ytApiPromise;
+  ytApiPromise = new Promise((resolve) => {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+    const prev = w.onYouTubeIframeAPIReady;
+    w.onYouTubeIframeAPIReady = () => { prev?.(); resolve(); };
+  });
+  return ytApiPromise;
+}
+
+const WATCH_GOAL = 300; // 5 min pra concluir (ou 90% se o vídeo for mais curto)
+const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+function VideoModal({ title, url, watched, onComplete, onClose }: { title: string; url?: string; watched: boolean; onComplete: () => void; onClose: () => void }) {
   const id = ytId(url);
+  const hostRef = useRef<HTMLDivElement>(null);
+  const acc = useRef(0); // segundos realmente assistidos (não conta pulos)
+  const last = useRef(0);
+  const [secs, setSecs] = useState(0);
+  const [goal, setGoal] = useState(WATCH_GOAL);
+  const [done, setDone] = useState(watched);
+
+  useEffect(() => {
+    if (!id) return;
+    let poll = 0;
+    let mounted = true;
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    let player: any = null;
+    loadYTApi().then(() => {
+      if (!mounted || !hostRef.current) return;
+      const YT = (window as any).YT;
+      player = new YT.Player(hostRef.current, {
+        videoId: id,
+        playerVars: { rel: 0, modestbranding: 1 },
+        events: {
+          onReady: () => {
+            const d = player?.getDuration?.() || 0;
+            if (d) setGoal(Math.min(WATCH_GOAL, Math.floor(d * 0.9)));
+          },
+        },
+      });
+      poll = window.setInterval(() => {
+        if (!player?.getCurrentTime) return;
+        const t = player.getCurrentTime();
+        const playing = player.getPlayerState?.() === 1;
+        const delta = t - last.current;
+        if (playing && delta > 0 && delta < 2) acc.current += delta; // ignora saltos (seek)
+        last.current = t;
+        setSecs(Math.floor(acc.current));
+        if (acc.current >= goal && !done) { setDone(true); onComplete(); }
+      }, 1000);
+    });
+    return () => { mounted = false; if (poll) clearInterval(poll); try { player?.destroy?.(); } catch { /* noop */ } };
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+  }, [id, goal, done, onComplete]);
+
+  const pct = Math.min(100, Math.round((secs / goal) * 100));
+
   return (
     <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-2xl overflow-hidden max-w-2xl w-full" onClick={(e) => e.stopPropagation()}>
         <div className="aspect-video bg-black">
           {id ? (
-            <iframe
-              className="w-full h-full"
-              src={`https://www.youtube.com/embed/${id}`}
-              title={title}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+            <div ref={hostRef} className="w-full h-full" />
           ) : (
             <div className="w-full h-full grid place-items-center text-white/70 text-sm">Vídeo em breve</div>
           )}
         </div>
+        {id && (
+          <div className="px-4 pt-3">
+            {done ? (
+              <div className="flex items-center gap-2 text-[13px] font-semibold text-emerald-600"><Check className="w-4 h-4" /> Concluído! Passo desbloqueado.</div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between text-[12px] text-slate-500 mb-1.5">
+                  <span>Assista pelo menos {fmt(goal)} pra concluir</span>
+                  <span className="tabular-nums font-semibold">{fmt(secs)} / {fmt(goal)}</span>
+                </div>
+                <div className="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden"><div className="h-full rounded-full bg-brand transition-all" style={{ width: `${pct}%` }} /></div>
+              </>
+            )}
+          </div>
+        )}
         <div className="p-4 flex items-center justify-between gap-3">
           <span className="font-semibold text-ink text-[15px]">{title}</span>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-sm">Fechar</button>
@@ -302,7 +372,9 @@ function LearnTab({ data, onTrain, onPlay }: { data: TrainingData; onTrain: (k: 
   const doneOf = (s: Step) => (s.ex ? data.bestByExercise[s.ex] != null : !!s.yt && data.watched.includes(s.yt));
   let firstOpen = allSteps.findIndex((s) => !doneOf(s));
   if (firstOpen < 0) firstOpen = allSteps.length;
-  const doneN = allSteps.filter(doneOf).length;
+  // Progresso é POSICIONAL (quantos passos antes do cursor), senão exercícios
+  // repetidos em módulos diferentes inflavam a barra e ficavam verdes sozinhos.
+  const doneN = firstOpen;
   let gi = -1;
   return (
     <div className="space-y-6">
@@ -320,7 +392,7 @@ function LearnTab({ data, onTrain, onPlay }: { data: TrainingData; onTrain: (k: 
               {mod.steps.map((s, si) => {
                 gi += 1;
                 const idx = gi;
-                const done = doneOf(s);
+                const done = idx < firstOpen;
                 const locked = idx > firstOpen;
                 const current = idx === firstOpen;
                 const isVideo = s.kind === 'video';
@@ -364,7 +436,6 @@ function LearnTab({ data, onTrain, onPlay }: { data: TrainingData; onTrain: (k: 
                     <div className="aspect-video relative grid place-items-center bg-cover bg-center" style={{ backgroundColor: v.c, backgroundImage: `url(https://img.youtube.com/vi/${v.yt}/hqdefault.jpg)` }}>
                       <div className="absolute inset-0 bg-black/25" />
                       <span className="relative w-11 h-11 rounded-full bg-white/30 grid place-items-center"><Play className="w-5 h-5 text-white ml-0.5" /></span>
-                      {!v.free && <span className="absolute bottom-1.5 left-1.5 text-[10px] bg-white/90 text-ink px-1.5 py-0.5 rounded font-semibold flex items-center gap-0.5 z-10"><Lock className="w-2.5 h-2.5" /> Premium</span>}
                     </div>
                     <div className="p-2.5">
                       <div className="text-[12.5px] font-semibold text-ink leading-tight line-clamp-2">{v.t}</div>
@@ -500,7 +571,7 @@ export default function Platform({ onExit, onStartTest }: Props) {
 
   const onTrain = (k: ExKey) => setActive(k);
   const onToggleHab = (k: 'aerobic' | 'sleep' | 'skill') => setData(toggleHabit(k));
-  const openVideo = (v: { t: string; yt: string }) => { if (v.yt) setData(markWatched(v.yt)); setVideo(v); };
+  const openVideo = (v: { t: string; yt: string }) => setVideo(v);
 
   const sections = (
     <>
@@ -559,7 +630,15 @@ export default function Platform({ onExit, onStartTest }: Props) {
         </div>
       </nav>
 
-      {video && <VideoModal title={video.t} url={video.yt} onClose={() => setVideo(null)} />}
+      {video && (
+        <VideoModal
+          title={video.t}
+          url={video.yt}
+          watched={data.watched.includes(video.yt)}
+          onComplete={() => setData(markWatched(video.yt))}
+          onClose={() => setVideo(null)}
+        />
+      )}
     </div>
   );
 }
