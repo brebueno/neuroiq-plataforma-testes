@@ -36,10 +36,13 @@ export default async function handler(req, res) {
   const origin = process.env.PUBLIC_APP_URL || rawOrigin;
   const trialDays = Number(process.env.STRIPE_TRIAL_DAYS ?? 7);
   const email = req.body && typeof req.body === 'object' ? req.body.email : undefined;
+  const wantsBump = req.body && typeof req.body === 'object' ? req.body.bump === true : false;
+  const priceBump = process.env.STRIPE_PRICE_BUMP; // one-time (order bump), opcional
 
-  // Item recorrente sempre; item avulso (entrada de R$7) quando configurado.
+  // Item recorrente sempre; item avulso (entrada) e order bump quando configurados.
   const lineItems = [{ price: priceMonthly, quantity: 1 }];
   if (priceTrial) lineItems.unshift({ price: priceTrial, quantity: 1 });
+  if (wantsBump && priceBump) lineItems.unshift({ price: priceBump, quantity: 1 });
 
   try {
     const session = await stripe.checkout.sessions.create({

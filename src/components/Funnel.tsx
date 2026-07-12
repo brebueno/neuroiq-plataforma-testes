@@ -25,12 +25,14 @@ const OFFER = {
   trialDays: 7,
   renewalPrice: '159,00',
   renewalPeriod: 'mês',
+  bumpPrice: '14,90', // order bump one-time (cobra STRIPE_PRICE_BUMP no checkout)
 };
 
 type Stage = 'tease' | 'paywall';
 
 export default function Funnel({ headline, lockedLabel, lockedValue, bullets, onUnlock, onBack, initialStage = 'tease', email }: FunnelProps) {
   const [stage, setStage] = useState<Stage>(initialStage);
+  const [bump, setBump] = useState(false);
 
   // ---------- TEASE: result is ready, but locked ----------
   if (stage === 'tease') {
@@ -119,8 +121,16 @@ export default function Funnel({ headline, lockedLabel, lockedValue, bullets, on
           </span>
         </div>
 
+        {/* Order bump: add-on de oferta única, marcado antes do checkout */}
+        <label className={`flex items-start gap-2.5 rounded-xl p-3 mb-4 text-xs cursor-pointer border-2 transition-colors ${bump ? 'border-brand bg-brand-light/60' : 'border-dashed border-slate-300 bg-slate-50'}`}>
+          <input type="checkbox" checked={bump} onChange={(e) => setBump(e.target.checked)} className="mt-0.5 w-4 h-4 accent-brand flex-shrink-0" />
+          <span className="text-slate-700 leading-snug">
+            <strong className="text-ink">Sim, quero o Relatório Comparativo</strong> (+{OFFER.currency}{OFFER.bumpPrice}): seu perfil lado a lado com 12 mentes famosas + guia de interpretação avançada. <span className="text-brand font-semibold">Oferta única, some depois deste checkout.</span>
+          </span>
+        </label>
+
         {/* Stripe Elements, pagamento embutido, sem sair da página */}
-        <StripeCheckout onDemoUnlock={onUnlock} email={email} />
+        <StripeCheckout onDemoUnlock={onUnlock} email={email} bump={bump} />
 
         <button onClick={onBack} className="w-full mt-4 text-gray-400 hover:text-gray-600 text-sm">
           Agora não, voltar

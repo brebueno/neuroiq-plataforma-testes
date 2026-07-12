@@ -8,18 +8,22 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 
 
 interface Props {
   email?: string;
+  bump?: boolean; // order bump selecionado
   onDemoUnlock: () => void; // fallback local
 }
 
-export default function StripeCheckout({ email, onDemoUnlock }: Props) {
+export default function StripeCheckout({ email, bump, onDemoUnlock }: Props) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<boolean>(false);
 
   useEffect(() => {
+    // Recria a sessão quando o bump muda (o valor cobrado muda).
+    setClientSecret(null);
+    setError(false);
     fetch('/api/create-checkout-session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, bump }),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -32,7 +36,7 @@ export default function StripeCheckout({ email, onDemoUnlock }: Props) {
       .catch(() => {
         setError(true);
       });
-  }, [email]);
+  }, [email, bump]);
 
   if (error) {
     return (
@@ -59,7 +63,8 @@ export default function StripeCheckout({ email, onDemoUnlock }: Props) {
 
   return (
     <div id="checkout" className="w-full">
-      <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
+      {/* key força o remount do checkout embutido quando o clientSecret muda (bump). */}
+      <EmbeddedCheckoutProvider key={clientSecret} stripe={stripePromise} options={{ clientSecret }}>
         <EmbeddedCheckout />
       </EmbeddedCheckoutProvider>
     </div>
