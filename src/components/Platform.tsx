@@ -7,7 +7,7 @@ import {
 import MentalMath from '../training/MentalMath';
 import DigitSpan from '../training/DigitSpan';
 import NBack from '../training/NBack';
-import { loadTraining, recordExercise, toggleHabit, todayHabits, TrainingData } from '../utils/training';
+import { loadTraining, recordExercise, toggleHabit, todayHabits, markWatched, TrainingData } from '../utils/training';
 import { loadGameData } from '../utils/localStorage';
 import { Logo } from './Logo';
 
@@ -107,15 +107,42 @@ const CONTENT: { t: string; a: string; c: string; free: boolean; yt: string; cat
 
 // Trilha de aprendizado (currículo: conteúdo em vídeo + sessão de treino, em
 // sequência). Cada módulo de conteúdo aponta pra um vídeo real da biblioteca.
-const TRILHA: { t: string; kind: 'conteúdo' | 'treino'; ex?: ExKey; yt?: string; src?: string }[] = [
-  { t: 'Como o cérebro aprende', kind: 'conteúdo', yt: 'aNrLg0nWxxc', src: 'Faculdade Censupeg' },
-  { t: 'Neuroplasticidade: você pode mudar', kind: 'conteúdo', yt: 'uVtYOnwK0K4', src: 'Eslen Delanogare' },
-  { t: 'Sessão: cálculo mental', kind: 'treino', ex: 'math' },
-  { t: 'Como funciona a sua memória', kind: 'conteúdo', yt: 'fglBJm9iOBc', src: 'DP Podcast' },
-  { t: 'Sessão: span de dígitos', kind: 'treino', ex: 'span' },
-  { t: 'Como memorizar (quase) tudo', kind: 'conteúdo', yt: '3vdzghRCprU', src: 'Ciência Todo Dia' },
-  { t: 'Sessão: N-back', kind: 'treino', ex: 'nback' },
-  { t: 'Foco: como parar de procrastinar', kind: 'conteúdo', yt: 'GjKW0iG63NM', src: 'Eslen Delanogare' },
+// Jornada guiada (mapa): módulos em ordem pedagógica, INTERCALANDO vídeo
+// (teoria) e treino (exercício do app OU vídeo "como treinar" do PhysioBRAIN).
+// Cada passo desbloqueia o próximo — o "sentido de ir avançando".
+type Step = { t: string; kind: 'video' | 'treino'; ex?: ExKey; yt?: string; src?: string };
+const CURRICULUM: { m: string; steps: Step[] }[] = [
+  { m: '1 · Entenda seu cérebro', steps: [
+    { t: 'Como o cérebro aprende', kind: 'video', yt: 'aNrLg0nWxxc', src: 'Faculdade Censupeg' },
+    { t: 'Sessão: cálculo mental', kind: 'treino', ex: 'math' },
+    { t: 'Neuroplasticidade: você pode mudar', kind: 'video', yt: 'uVtYOnwK0K4', src: 'Eslen Delanogare' },
+    { t: 'Como treinar: ativação cerebral', kind: 'treino', yt: '7xCbC75a_Kg', src: 'PhysioBRAIN' },
+  ] },
+  { m: '2 · Memória & aprendizado', steps: [
+    { t: 'Como funciona a sua memória', kind: 'video', yt: 'fglBJm9iOBc', src: 'DP Podcast' },
+    { t: 'Sessão: span de dígitos', kind: 'treino', ex: 'span' },
+    { t: 'A neurociência da memória', kind: 'video', yt: 'X5MCxXihKLQ', src: 'Dra. Roberta Ekuni' },
+    { t: 'Como treinar: ativar o cérebro', kind: 'treino', yt: 'mgalWJtI25U', src: 'PhysioBRAIN' },
+    { t: 'Prática de recordação (recall)', kind: 'video', yt: '8B3wkObYkCs', src: 'Dra. Roberta Ekuni' },
+    { t: 'Sessão: N-back', kind: 'treino', ex: 'nback' },
+  ] },
+  { m: '3 · Foco & disciplina', steps: [
+    { t: 'Por isso você não consegue focar', kind: 'video', yt: 'XrtXmFbSQ0o', src: 'NeuroVox' },
+    { t: 'Sessão: cálculo mental', kind: 'treino', ex: 'math' },
+    { t: 'Como parar de procrastinar', kind: 'video', yt: 'GjKW0iG63NM', src: 'Eslen Delanogare' },
+    { t: 'Como treinar: ativar o cérebro', kind: 'treino', yt: 'aDdyier_HsM', src: 'PhysioBRAIN' },
+  ] },
+  { m: '4 · Hábitos que afiam a mente', steps: [
+    { t: 'Substituir hábitos ruins por bons', kind: 'video', yt: 'HKj0nneWVnQ', src: 'Fabio Perin' },
+    { t: 'Sessão: span de dígitos', kind: 'treino', ex: 'span' },
+    { t: 'Comer saudável muda sua vida', kind: 'video', yt: 'e2Ph-mKnU5I', src: 'Eslen Delanogare' },
+    { t: 'Como treinar: ativar o cérebro', kind: 'treino', yt: 'bIF9HihGNG8', src: 'PhysioBRAIN' },
+  ] },
+  { m: '5 · Mentalidade', steps: [
+    { t: 'É por isso que nada muda (neurociência)', kind: 'video', yt: 'dyhfFZXf3fE', src: 'NeuroVox' },
+    { t: 'Sessão: N-back', kind: 'treino', ex: 'nback' },
+    { t: 'Aprenda a regular suas emoções', kind: 'video', yt: 'pdGp7IKJTMc', src: 'Eslen Podcast' },
+  ] },
 ];
 
 const LEADERBOARD = [
@@ -255,38 +282,60 @@ function TestsTab({ bestIQ }: { bestIQ: number }) {
 
 // ---------- APRENDER ----------
 function LearnTab({ data, onTrain, onPlay }: { data: TrainingData; onTrain: (k: ExKey) => void; onPlay: (v: { t: string; yt: string }) => void }) {
-  const doneCount = data.todayDone.length + Object.keys(data.bestByExercise).length;
+  const allSteps = CURRICULUM.flatMap((mod) => mod.steps);
+  const doneOf = (s: Step) => (s.ex ? data.bestByExercise[s.ex] != null : !!s.yt && data.watched.includes(s.yt));
+  let firstOpen = allSteps.findIndex((s) => !doneOf(s));
+  if (firstOpen < 0) firstOpen = allSteps.length;
+  const doneN = allSteps.filter(doneOf).length;
+  let gi = -1;
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="font-bold text-ink mb-1">Trilha: Fundamentos da Mente</h3>
-        <p className="text-[12px] text-slate-500 mb-3">Aprenda a teoria e treine na prática, passo a passo.</p>
-        <div className={`${card} p-2`}>
-          {TRILHA.map((m, i) => {
-            const isTrain = m.kind === 'treino';
-            const complete = isTrain && m.ex ? data.bestByExercise[m.ex] != null : false;
-            const locked = i > doneCount + 2;
-            return (
-              <button
-                key={i}
-                disabled={locked}
-                onClick={() => { if (locked) return; if (isTrain && m.ex) onTrain(m.ex); else if (m.yt) onPlay({ t: m.t, yt: m.yt }); }}
-                className={`w-full flex items-center gap-3 p-3 rounded-xl text-left ${locked ? 'opacity-45' : 'hover:bg-slate-50'} transition-colors`}
-              >
-                <span className={`w-8 h-8 rounded-full grid place-items-center flex-shrink-0 text-xs font-bold ${complete ? 'bg-emerald-100 text-emerald-600' : locked ? 'bg-slate-100 text-slate-400' : isTrain ? 'bg-brand-light text-brand' : 'bg-blue-50 text-blue-600'}`}>
-                  {complete ? <Check className="w-4 h-4" /> : locked ? <Lock className="w-3.5 h-3.5" /> : isTrain ? i + 1 : <Play className="w-3.5 h-3.5" />}
-                </span>
-                <div className="flex-1"><div className="font-medium text-ink text-[14.5px]">{m.t}</div><div className="text-[11px] text-slate-400">{isTrain ? 'Sessão de treino' : `Vídeo · ${m.src ?? 'conteúdo'}`}</div></div>
-                {!locked && <ChevronRight className="w-4 h-4 text-slate-400" />}
-              </button>
-            );
-          })}
+        <h3 className="font-bold text-ink mb-1">Jornada do Cérebro</h3>
+        <p className="text-[12px] text-slate-500 mb-2">Siga na ordem: um conteúdo, um treino. Cada passo desbloqueia o próximo.</p>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="flex-1 bg-slate-200 rounded-full h-2"><div className="bg-brand h-2 rounded-full transition-all" style={{ width: `${Math.round((doneN / allSteps.length) * 100)}%` }} /></div>
+          <span className="text-xs font-semibold text-slate-500 tabular-nums">{doneN}/{allSteps.length}</span>
+        </div>
+        <div className="space-y-3">
+          {CURRICULUM.map((mod) => (
+            <div key={mod.m} className={`${card} p-4`}>
+              <h4 className="font-bold text-ink text-[14px] mb-3">{mod.m}</h4>
+              {mod.steps.map((s, si) => {
+                gi += 1;
+                const idx = gi;
+                const done = doneOf(s);
+                const locked = idx > firstOpen;
+                const current = idx === firstOpen;
+                const isVideo = s.kind === 'video';
+                const last = si === mod.steps.length - 1;
+                return (
+                  <div key={si} className="flex gap-3">
+                    <div className="flex flex-col items-center">
+                      <span className={`w-8 h-8 rounded-full grid place-items-center text-xs font-bold flex-shrink-0 ${done ? 'bg-emerald-500 text-white' : current ? 'bg-brand text-white ring-4 ring-brand-light' : locked ? 'bg-slate-100 text-slate-400' : 'bg-brand-light text-brand'}`}>
+                        {done ? <Check className="w-4 h-4" /> : locked ? <Lock className="w-3.5 h-3.5" /> : isVideo ? <Play className="w-3.5 h-3.5" /> : <Dumbbell className="w-3.5 h-3.5" />}
+                      </span>
+                      {!last && <span className={`w-0.5 flex-1 my-1 ${done ? 'bg-emerald-300' : 'bg-slate-200'}`} />}
+                    </div>
+                    <button
+                      disabled={locked}
+                      onClick={() => { if (locked) return; if (s.ex) onTrain(s.ex); else if (s.yt) onPlay({ t: s.t, yt: s.yt }); }}
+                      className={`flex-1 text-left pb-4 min-w-0 ${locked ? 'opacity-50' : ''}`}
+                    >
+                      <div className="font-medium text-ink text-[14px] flex items-center gap-2 flex-wrap">{s.t}{current && <span className="text-[10px] bg-brand text-white px-1.5 py-0.5 rounded-full">continuar</span>}</div>
+                      <div className="text-[11px] text-slate-400">{isVideo ? `Vídeo · ${s.src ?? ''}` : s.ex ? 'Sessão de treino' : `Como treinar · ${s.src ?? ''}`}</div>
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
         </div>
       </div>
 
       <div>
-        <h3 className="font-bold text-ink mb-1">Biblioteca de neurociência</h3>
-        <p className="text-[12px] text-slate-500 mb-4">Baseada em evidência · {CONTENT.length} vídeos · novos toda semana.</p>
+        <h3 className="font-bold text-ink mb-1">Explorar toda a biblioteca</h3>
+        <p className="text-[12px] text-slate-500 mb-4">Se quiser ir além da jornada · {CONTENT.length} vídeos · novos toda semana.</p>
         {CATS.map((catName) => {
           const vids = CONTENT.filter((v) => v.cat === catName);
           if (!vids.length) return null;
@@ -435,12 +484,13 @@ export default function Platform({ onExit }: Props) {
 
   const onTrain = (k: ExKey) => setActive(k);
   const onToggleHab = (k: 'aerobic' | 'sleep' | 'skill') => setData(toggleHabit(k));
+  const openVideo = (v: { t: string; yt: string }) => { if (v.yt) setData(markWatched(v.yt)); setVideo(v); };
 
   const sections = (
     <>
       {tab === 'hoje' && <HomeTab data={data} onTrain={onTrain} go={setTab} />}
       {tab === 'testes' && <TestsTab bestIQ={bestIQ} />}
-      {tab === 'aprender' && <LearnTab data={data} onTrain={onTrain} onPlay={setVideo} />}
+      {tab === 'aprender' && <LearnTab data={data} onTrain={onTrain} onPlay={openVideo} />}
       {tab === 'progresso' && <ProgressTab data={data} />}
       {tab === 'comunidade' && <CommunityTab data={data} onToggleHab={onToggleHab} />}
     </>

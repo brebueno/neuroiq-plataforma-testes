@@ -25,6 +25,7 @@ export interface TrainingData {
   habits: HabitLog[]; // log por dia
   todayDone: string[]; // exercícios feitos hoje
   todayKey: string; // dia de referência do todayDone
+  watched: string[]; // IDs de vídeo assistidos (desbloqueia a jornada)
 }
 
 const DEFAULT: TrainingData = {
@@ -36,6 +37,7 @@ const DEFAULT: TrainingData = {
   habits: [],
   todayDone: [],
   todayKey: '',
+  watched: [],
 };
 
 export const todayStr = (): string => new Date().toISOString().slice(0, 10);
@@ -124,6 +126,15 @@ export function toggleHabit(kind: 'aerobic' | 'sleep' | 'skill'): TrainingData {
     bumpStreak(d);
     pushHistory(d);
   }
+  return save(d);
+}
+
+// Marca um vídeo como assistido (avança a jornada + conta como atividade do dia).
+export function markWatched(yt: string): TrainingData {
+  const d = loadTraining();
+  if (!d.watched.includes(yt)) d.watched.push(yt);
+  bumpStreak(d);
+  pushHistory(d);
   return save(d);
 }
 
