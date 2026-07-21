@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import { sendMetaEvent, buildUserData } from './_capi.js';
 
 // Stripe webhook, keeps subscription state in sync over time (renewals,
 // cancellations, failed payments). Stripe requires the RAW request body to
@@ -37,6 +38,52 @@ async function revokeAccess(customerId, reason) {
 }
 // -----------------------------------------------------------------------------
 
+// ---- Conversions API (fonte de verdade das conversões) ----------------------
+// Purchase = entrada paga (checkout concluído). event_id = id da sessão, pra
+// deduplicar com o Purchase do browser (PaymentReturn usa o mesmo id).
+async function firePurchase(s) {
+  try {
+    const md = s.metadata || {};
+    const email = (s.customer_details && s.customer_details.email) || s.customer_email || undefined;
+    await sendMetaEvent({
+      eventName: 'Purchase',
+      eventId: s.id,
+      eventSourceUrl: md.event_source_url,
+      actionSource: 'website',
+      userData: buildUserData({ email, fbp: md.fbp, fbc: md.fbc }),
+      customData: {
+        value: (s.amount_total ?? 0) / 100,
+        currency: (s.currency || 'brl').toUpperCase(),
+        content_name: 'assinatura_qimind',
+      },
+    });
+  } catch (err) {
+    console.error('[webhook] firePurchase', err);
+  }
+}
+
+// Subscribe = RENOVAÇÃO do ciclo (ex: R$159 após o trial). O sinal de alto valor
+// e "pagador real" — ideal pra otimização por valor mais pra frente.
+async function fireRenewal(inv) {
+  try {
+    const md = (inv.subscription_details && inv.subscription_details.metadata) || {};
+    await sendMetaEvent({
+      eventName: 'Subscribe',
+      eventId: inv.id,
+      actionSource: 'website',
+      userData: buildUserData({ email: inv.customer_email || undefined, fbp: md.fbp, fbc: md.fbc }),
+      customData: {
+        value: (inv.amount_paid ?? 0) / 100,
+        currency: (inv.currency || 'brl').toUpperCase(),
+        content_name: 'assinatura_qimind_renovacao',
+      },
+    });
+  } catch (err) {
+    console.error('[webhook] fireRenewal', err);
+  }
+}
+// -----------------------------------------------------------------------------
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
@@ -68,6 +115,7 @@ export default async function handler(req, res) {
       case 'checkout.session.completed': {
         const s = event.data.object;
         await grantAccess(s.customer, s.subscription, 'checkout_completed');
+        await firePurchase(s); // Purchase server-side (dedup por event_id = s.id)
         break;
       }
       case 'customer.subscription.updated': {
@@ -85,6 +133,13 @@ export default async function handler(req, res) {
       case 'invoice.payment_failed': {
         const inv = event.data.object;
         await revokeAccess(inv.customer, 'payment_failed');
+        break;
+      }
+      case 'invoice.payment_succeeded': {
+        const inv = event.data.object;
+        // Só a RENOVAÇÃO (novo ciclo). A entrada já virou Purchase no
+        // checkout.session.completed — aqui entra o valor cheio (ex: R$159).
+        if (inv.billing_reason === 'subscription_cycle') await fireRenewal(inv);
         break;
       }
       default:

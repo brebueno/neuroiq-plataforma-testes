@@ -19,6 +19,7 @@ import { buildQuiz, TYPE_LABEL } from './quiz/build';
 import { GameState, Level, QuestionResult } from './types/game';
 import { calculateIQFromResults, getIQClassification, getIQPercentile } from './utils/iqCalculator';
 import { loadGameData, updateHighScore, updateBestIQ, markLevelCompleted } from './utils/localStorage';
+import { trackTestStart } from './lib/tracking';
 
 // A single question in a test = which difficulty level + which puzzle variant to show.
 interface PlannedQuestion {
@@ -112,6 +113,7 @@ function App() {
 
   const startFullTest = () => {
     const qs = buildQuiz();
+    trackTestStart('teste_qi'); // ViewContent — início do teste de QI (funil pago)
     setMode('full');
     setPlan([]);
     setQuestions(qs);

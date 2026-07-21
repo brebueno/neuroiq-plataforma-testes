@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Loader2 } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js';
+import { trackInitiateCheckout, attributionSnapshot } from '../lib/tracking';
 
 // Inicialize o Stripe fora do componente para evitar recriações
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
@@ -16,15 +17,21 @@ interface Props {
 export default function StripeCheckout({ email, bump, plan, onDemoUnlock }: Props) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<boolean>(false);
+  const icFired = useRef(false);
 
   useEffect(() => {
     // Recria a sessão quando bump/plano mudam (o valor cobrado muda).
     setClientSecret(null);
     setError(false);
+    // InitiateCheckout uma vez só (não a cada troca de bump/plano).
+    if (!icFired.current) {
+      icFired.current = true;
+      trackInitiateCheckout(email);
+    }
     fetch('/api/create-checkout-session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, bump, plan }),
+      body: JSON.stringify({ email, bump, plan, attribution: attributionSnapshot() }),
     })
       .then((res) => res.json())
       .then((data) => {

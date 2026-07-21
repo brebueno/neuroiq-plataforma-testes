@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Loader2, Check, X } from 'lucide-react';
+import { track } from '../lib/tracking';
 
 // Shown when the user returns from Stripe Checkout. It calls the server, which
 // asks Stripe whether the session actually completed, so access is only
@@ -20,7 +21,25 @@ export default function PaymentReturn() {
     }
     fetch(`/api/verify-session?session_id=${encodeURIComponent(sessionId)}`)
       .then((r) => r.json())
-      .then((d) => setState(d?.paid ? 'ok' : 'failed'))
+      .then((d) => {
+        if (d?.paid) {
+          // Purchase no browser com event_id = session_id -> deduplica com o
+          // Purchase server-side do stripe-webhook (que usa o mesmo id).
+          try {
+            track(
+              'Purchase',
+              {
+                value: (d.amountTotal ?? 0) / 100,
+                currency: (d.currency || 'brl').toUpperCase(),
+                content_name: 'assinatura_qimind',
+              },
+              {},
+              { eventId: sessionId },
+            );
+          } catch { /* ignore */ }
+        }
+        setState(d?.paid ? 'ok' : 'failed');
+      })
       .catch(() => setState('failed'));
   }, []);
 

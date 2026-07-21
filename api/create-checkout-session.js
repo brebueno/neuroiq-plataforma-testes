@@ -12,6 +12,21 @@ import Stripe from 'stripe';
 //                             fim do trial.
 // Env obrigatória: STRIPE_SECRET_KEY + STRIPE_PRICE_MONTHLY (trial é opcional).
 
+// Copia os identificadores de anúncio (fbp/fbc/click-ids/UTM) pro metadata da
+// sessão. O stripe-webhook usa isso pra disparar o Purchase server-side com o
+// mesmo match. Stripe exige valores string (<= 500 chars).
+function toTrackingMetadata(a) {
+  if (!a || typeof a !== 'object') return {};
+  const keys = ['fbp', 'fbc', 'fbclid', 'gclid', 'gbraid', 'wbraid',
+    'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'event_source_url'];
+  const out = {};
+  for (const k of keys) {
+    const v = a[k];
+    if (typeof v === 'string' && v) out[k] = v.slice(0, 500);
+  }
+  return out;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
@@ -40,6 +55,9 @@ export default async function handler(req, res) {
   const wantsAnnual = req.body && typeof req.body === 'object' ? req.body.plan === 'annual' : false;
   const priceBump = process.env.STRIPE_PRICE_BUMP; // one-time (order bump), opcional
   const priceAnnual = process.env.STRIPE_PRICE_ANNUAL; // recorrente anual (upsell), opcional
+  const trackingMeta = toTrackingMetadata(
+    req.body && typeof req.body === 'object' ? req.body.attribution : undefined,
+  );
 
   // Recorrente: anual (upsell) se escolhido e configurado, senão mensal.
   const recurring = wantsAnnual && priceAnnual ? priceAnnual : priceMonthly;
@@ -53,10 +71,14 @@ export default async function handler(req, res) {
       line_items: lineItems,
       // Trial no recorrente: o R$159 só é cobrado após `trialDays`. O item avulso
       // (R$7) entra na 1ª fatura e é cobrado agora, no checkout.
-      subscription_data: trialDays > 0 ? { trial_period_days: trialDays } : undefined,
+      subscription_data: {
+        ...(trialDays > 0 ? { trial_period_days: trialDays } : {}),
+        metadata: trackingMeta,
+      },
       customer_email: email || undefined,
       allow_promotion_codes: true,
       ui_mode: 'embedded_page',
+      metadata: trackingMeta,
       return_url: `${origin}/?session_id={CHECKOUT_SESSION_ID}`,
     });
     res.status(200).json({ clientSecret: session.client_secret });

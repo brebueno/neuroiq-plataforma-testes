@@ -28,6 +28,8 @@ export default async function handler(req, res) {
       paid: Boolean(paid),
       status: s.status,
       paymentStatus: s.payment_status,
+      amountTotal: s.amount_total,
+      currency: s.currency,
     });
   } catch (err) {
     res.status(500).json({ paid: false, error: err instanceof Error ? err.message : 'Erro' });

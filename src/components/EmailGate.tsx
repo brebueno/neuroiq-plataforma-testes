@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Mail, ArrowRight } from 'lucide-react';
+import { trackLead } from '../lib/tracking';
 
 // Captura de e-mail ANTES do reveal, recupera o lead mesmo quem não paga
 // (sequência de abandono). Enquadrado como benefício ("pra receber o
@@ -25,6 +26,8 @@ export default function EmailGate({ onSubmit, onBack }: EmailGateProps) {
     } catch {
       /* segue mesmo se o lead falhar */
     }
+    // Lead no Pixel + CAPI (o email eleva o Event Match Quality).
+    try { trackLead(email); } catch { /* ignore */ }
     onSubmit(email);
   };
 
