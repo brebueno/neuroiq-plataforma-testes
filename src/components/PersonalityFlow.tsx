@@ -41,7 +41,7 @@ export default function PersonalityFlow({ onExit }: PersonalityFlowProps) {
   }
 
   if (stage === 'email') {
-    return <EmailGate onSubmit={(e) => { setEmail(e); setStage('reveal'); }} onBack={onExit} />;
+    return <EmailGate onSubmit={(l) => { setEmail(l.email); setStage('reveal'); }} onBack={onExit} />;
   }
 
   if (stage === 'reveal' && result) {

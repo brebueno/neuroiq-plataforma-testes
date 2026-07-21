@@ -9,6 +9,7 @@ import DigitSpan from '../training/DigitSpan';
 import NBack from '../training/NBack';
 import { loadTraining, recordExercise, toggleHabit, todayHabits, markWatched, TrainingData } from '../utils/training';
 import { loadGameData } from '../utils/localStorage';
+import { useLatestResult } from '../hooks/useLatestResult';
 import { loadTestProfile, deriveFocus } from '../utils/profile';
 import { CountUp } from './landing/Reveal';
 import { Logo } from './Logo';
@@ -808,7 +809,10 @@ export default function Platform({ onExit, onStartTest }: Props) {
   const [active, setActive] = useState<ExKey | null>(null);
   const [video, setVideo] = useState<{ t: string; yt: string } | null>(null);
   const [confetti, setConfetti] = useState(0);
-  const bestIQ = loadGameData().bestIQ;
+  // "Seu último QI" = o resultado real salvo no Supabase (fonte de verdade).
+  // Fallback pro bestIQ do localStorage só quando deslogado/sem Supabase.
+  const { iq: latestIQ } = useLatestResult();
+  const bestIQ = latestIQ ?? loadGameData().bestIQ;
 
   const finish = (key: ExKey, score: number) => {
     const nd = recordExercise(key, score);

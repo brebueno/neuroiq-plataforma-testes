@@ -3,6 +3,8 @@ import { Lock, Check, ShieldCheck } from 'lucide-react';
 import StripeCheckout from './StripeCheckout';
 import { LiveActivity, TrustBar } from './SocialProof';
 import { PROOF } from '../utils/socialProof';
+import { Lead } from './EmailGate';
+import { Demographics } from './TestOnboarding';
 
 interface FunnelProps {
   headline?: string;
@@ -13,6 +15,8 @@ interface FunnelProps {
   onBack: () => void;
   initialStage?: Stage; // start at 'paywall' when a richer reveal already played the tease
   email?: string; // captured before the reveal, prefills Stripe checkout
+  lead?: Lead | null; // nome + telefone + email capturados no lead gate
+  demographics?: Demographics | null; // gênero + faixa etária do onboarding
 }
 
 /**
@@ -35,7 +39,7 @@ const OFFER = {
 type Stage = 'tease' | 'paywall';
 type Plan = 'monthly' | 'annual';
 
-export default function Funnel({ headline, lockedLabel, lockedValue, bullets, onUnlock, onBack, initialStage = 'tease', email }: FunnelProps) {
+export default function Funnel({ headline, lockedLabel, lockedValue, bullets, onUnlock, onBack, initialStage = 'tease', email, lead, demographics }: FunnelProps) {
   const [stage, setStage] = useState<Stage>(initialStage);
   const [bump, setBump] = useState(false);
   const [plan, setPlan] = useState<Plan>('annual'); // pré-seleciona o anual (upsell, maior LTV)
@@ -164,7 +168,7 @@ export default function Funnel({ headline, lockedLabel, lockedValue, bullets, on
         </label>
 
         {/* Stripe Elements, pagamento embutido, sem sair da página */}
-        <StripeCheckout onDemoUnlock={onUnlock} email={email} bump={bump} plan={plan} />
+        <StripeCheckout onDemoUnlock={onUnlock} email={email} bump={bump} plan={plan} lead={lead} demographics={demographics} />
 
         <button onClick={onBack} className="w-full mt-4 text-gray-400 hover:text-gray-600 text-sm">
           Agora não, voltar

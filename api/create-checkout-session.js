@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import { rateLimit, clientIp } from './_ratelimit.js';
 
 // Vercel serverless function: cria uma Stripe Checkout Session (assinatura).
 // A chave SECRETA nunca fica no frontend nem no repo, só aqui, via env var da
@@ -32,6 +33,10 @@ export default async function handler(req, res) {
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
+  if (!rateLimit(`checkout:${clientIp(req)}`, { limit: 20, windowMs: 60000 }).ok) {
+    res.status(429).json({ error: 'Muitas tentativas. Aguarde um instante.' });
+    return;
+  }
 
   const secret = process.env.STRIPE_SECRET_KEY;
   const priceMonthly = process.env.STRIPE_PRICE_MONTHLY;
@@ -59,6 +64,18 @@ export default async function handler(req, res) {
     req.body && typeof req.body === 'object' ? req.body.attribution : undefined,
   );
 
+  // Lead (nome/telefone) + demografia (gênero/faixa etária) no metadata: o
+  // stripe-webhook usa isso pra popular `profiles` no Supabase e reconciliar a
+  // conta criada no 1º acesso (por email). Stripe exige strings (<= 500 chars).
+  const lead = req.body && typeof req.body === 'object' && req.body.lead ? req.body.lead : {};
+  const demo = req.body && typeof req.body === 'object' && req.body.demographics ? req.body.demographics : {};
+  const leadMeta = {};
+  if (typeof lead.name === 'string' && lead.name) leadMeta.name = lead.name.slice(0, 500);
+  if (typeof lead.phone === 'string' && lead.phone) leadMeta.phone = lead.phone.slice(0, 500);
+  if (typeof demo.gender === 'string' && demo.gender) leadMeta.gender = demo.gender.slice(0, 50);
+  if (typeof demo.ageBand === 'string' && demo.ageBand) leadMeta.age_band = demo.ageBand.slice(0, 50);
+  const meta = { ...trackingMeta, ...leadMeta };
+
   // Recorrente: anual (upsell) se escolhido e configurado, senão mensal.
   const recurring = wantsAnnual && priceAnnual ? priceAnnual : priceMonthly;
   const lineItems = [{ price: recurring, quantity: 1 }];
@@ -73,12 +90,12 @@ export default async function handler(req, res) {
       // (R$7) entra na 1ª fatura e é cobrado agora, no checkout.
       subscription_data: {
         ...(trialDays > 0 ? { trial_period_days: trialDays } : {}),
-        metadata: trackingMeta,
+        metadata: meta,
       },
-      customer_email: email || undefined,
+      customer_email: email || (typeof lead.email === 'string' ? lead.email : undefined) || undefined,
       allow_promotion_codes: true,
       ui_mode: 'embedded_page',
-      metadata: trackingMeta,
+      metadata: meta,
       return_url: `${origin}/?session_id={CHECKOUT_SESSION_ID}`,
     });
     res.status(200).json({ clientSecret: session.client_secret });

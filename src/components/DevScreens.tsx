@@ -62,7 +62,7 @@ export default function DevScreens() {
         ))}
       </div>
 
-      {screen === 'landing' && <Landing onStartIQ={noop} onStartPersonality={noop} onStartCareer={noop} onPractice={noop} />}
+      {screen === 'landing' && <Landing onStartIQ={noop} onStartPersonality={noop} onStartCareer={noop} onPractice={noop} onEnter={noop} />}
       {screen === 'email' && <EmailGate onSubmit={noop} onBack={noop} />}
       {screen === 'reveal' && <RevealSequence percentile={96} accuracyPct={77} avgSeconds={18} onUnlock={noop} onBack={noop} />}
       {screen === 'paywall' && (

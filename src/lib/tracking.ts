@@ -171,8 +171,8 @@ export function attributionSnapshot() {
 export const trackTestStart = (testName: string): string =>
   track('ViewContent', { content_name: testName, content_category: 'test' });
 
-export const trackLead = (email: string): string =>
-  track('Lead', { content_name: 'email_gate' }, { email });
+export const trackLead = (email: string, phone?: string): string =>
+  track('Lead', { content_name: 'lead_gate' }, phone ? { email, phone } : { email });
 
 export const trackInitiateCheckout = (email?: string): string =>
   track('InitiateCheckout', { content_name: 'checkout_qimind', currency: 'BRL' }, email ? { email } : {});

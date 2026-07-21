@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Brain, RotateCcw, Zap } from 'lucide-react';
+import { Brain, RotateCcw, Zap, Loader2, Lock } from 'lucide-react';
 import Platform from './components/Platform';
 import LevelSelection from './components/LevelSelection';
 import PuzzleGame from './components/PuzzleGame';
 import Funnel from './components/Funnel';
 import RevealSequence from './components/RevealSequence';
-import EmailGate from './components/EmailGate';
+import EmailGate, { Lead } from './components/EmailGate';
+import TestOnboarding, { Demographics } from './components/TestOnboarding';
 import Landing from './components/Landing';
 import PersonalityFlow from './components/PersonalityFlow';
 import CareerFlow from './components/CareerFlow';
@@ -20,6 +21,11 @@ import { GameState, Level, QuestionResult } from './types/game';
 import { calculateIQFromResults, getIQClassification, getIQPercentile } from './utils/iqCalculator';
 import { loadGameData, updateHighScore, updateBestIQ, markLevelCompleted } from './utils/localStorage';
 import { trackTestStart } from './lib/tracking';
+import { stashPendingResult } from './lib/pendingResult';
+import { useAuth } from './hooks/useAuth';
+import { useSubscription } from './hooks/useSubscription';
+import { supabaseEnabled } from './lib/supabase';
+import Login from './components/Login';
 
 // A single question in a test = which difficulty level + which puzzle variant to show.
 interface PlannedQuestion {
@@ -61,6 +67,8 @@ function App() {
   const [revealed, setRevealed] = useState(false);
   const [email, setEmail] = useState('');
   const [emailCaptured, setEmailCaptured] = useState(false);
+  const [lead, setLead] = useState<Lead | null>(null);
+  const [demographics, setDemographics] = useState<Demographics | null>(null);
   const [activeTest, setActiveTest] = useState<'personality' | 'career' | null>(null);
   const [route, setRoute] = useState(typeof window !== 'undefined' ? window.location.hash : '');
 
@@ -69,6 +77,10 @@ function App() {
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
+
+  // Auth + assinatura pro gate da plataforma (usuário que volta).
+  const { user, loading: authLoading, signOut } = useAuth();
+  const { isPaid, loading: subLoading } = useSubscription();
 
   // DEV preview: open /#preview to see the 3 result screens with sample data.
   // Gated por import.meta.env.DEV, não vai no bundle de produção.
@@ -120,6 +132,9 @@ function App() {
     setPaid(false);
     setRevealed(false);
     setEmailCaptured(false);
+    setLead(null);
+    // demographics é mantido entre tentativas (não re-perguntar no retry);
+    // só reseta ao voltar pro início (backToMenu).
     setGameState({
       currentLevel: (qs[0]?.difficulty ?? 1) as Level,
       currentPuzzle: 0,
@@ -199,6 +214,8 @@ function App() {
     setIsNewHighScore(false);
     setIsNewBestIQ(false);
     setActiveTest(null);
+    setLead(null);
+    setDemographics(null);
   };
 
   // Sai da plataforma pra landing de forma limpa (reseta estado + limpa hash),
@@ -223,6 +240,51 @@ function App() {
   // ---------- PLATAFORMA (entregável de LTV pós-compra) ----------
   // Vem depois das funções de estado pra poder resetar corretamente na saída.
   if (route === '#plataforma') {
+    // Gate: só entra quem está logado E com assinatura ativa. Sem Supabase
+    // configurado (dev), abre direto.
+    if (supabaseEnabled) {
+      if (authLoading || (user && subLoading)) {
+        return (
+          <div className="min-h-screen bg-gradient-to-b from-[#F2F7FD] to-white grid place-items-center">
+            <Loader2 className="w-8 h-8 text-brand animate-spin" />
+          </div>
+        );
+      }
+      if (!user) {
+        return (
+          <Login
+            onSuccess={() => { /* useAuth reage e libera abaixo */ }}
+            onBack={exitPlatform}
+            onNoAccount={() => { exitPlatform(); startFullTest(); }}
+          />
+        );
+      }
+      if (!isPaid) {
+        return (
+          <div className="min-h-screen bg-gradient-to-b from-[#F2F7FD] to-white flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 max-w-md w-full text-center">
+              <div className="w-14 h-14 rounded-full bg-amber-100 grid place-items-center mx-auto mb-4">
+                <Lock className="w-7 h-7 text-amber-600" />
+              </div>
+              <h1 className="text-2xl font-extrabold text-ink mb-2">Sua assinatura não está ativa</h1>
+              <p className="text-slate-500 text-sm mb-6">Faça o teste e desbloqueie o acesso completo à plataforma.</p>
+              <button
+                onClick={() => { exitPlatform(); startFullTest(); }}
+                className="w-full bg-brand text-white py-3.5 rounded-xl font-semibold hover:bg-brand-dark transition-colors"
+              >
+                Fazer o teste
+              </button>
+              <button
+                onClick={async () => { await signOut?.(); exitPlatform(); }}
+                className="mt-3 text-slate-400 hover:text-slate-600 text-sm"
+              >
+                Sair
+              </button>
+            </div>
+          </div>
+        );
+      }
+    }
     return <Platform onExit={exitPlatform} onStartTest={startTestFromPlatform} />;
   }
 
@@ -245,7 +307,7 @@ function App() {
     if (!emailCaptured) {
       return (
         <EmailGate
-          onSubmit={(e) => { setEmail(e); setEmailCaptured(true); }}
+          onSubmit={(l) => { setLead(l); setEmail(l.email); setEmailCaptured(true); }}
           onBack={backToMenu}
         />
       );
@@ -258,7 +320,27 @@ function App() {
           percentile={getIQPercentile(gameState.iq)}
           accuracyPct={accuracyPct}
           avgSeconds={avgSeconds}
-          onUnlock={() => setRevealed(true)}
+          onUnlock={() => {
+            // Guarda o resultado antes do paywall: o retorno do Stripe recarrega
+            // a página e o state se perde; salvamos em test_results no 1º acesso.
+            stashPendingResult({
+              testType: 'iq',
+              score: gameState.score,
+              questionsTotal: gameState.totalPuzzles,
+              questionsCorrect: gameState.score,
+              resultData: {
+                iq: gameState.iq,
+                classification: getIQClassification(gameState.iq),
+                percentile: getIQPercentile(gameState.iq),
+                accuracyPct,
+                score: gameState.score,
+                total: gameState.totalPuzzles,
+                gender: demographics?.gender,
+                ageBand: demographics?.ageBand,
+              },
+            });
+            setRevealed(true);
+          }}
           onBack={backToMenu}
         />
       );
@@ -268,6 +350,8 @@ function App() {
       <Funnel
         initialStage="paywall"
         email={email}
+        lead={lead}
+        demographics={demographics}
         headline="Teste de QI concluído, veja seu resultado!"
         lockedLabel="Seu QI"
         lockedValue={String(gameState.iq)}
@@ -373,6 +457,11 @@ function App() {
         </div>
       </div>
     );
+  }
+
+  // ---------- ONBOARDING (teste de QI: coleta gênero/idade antes das questões) ----------
+  if (mode === 'full' && !demographics) {
+    return <TestOnboarding onDone={(d) => setDemographics(d)} onBack={backToMenu} />;
   }
 
   // ---------- IN-TEST ----------

@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
 import { sendMetaEvent, buildUserData } from './_capi.js';
+import { setSubscriptionByCustomer } from './_supabase.js';
 
 // Stripe webhook, keeps subscription state in sync over time (renewals,
 // cancellations, failed payments). Stripe requires the RAW request body to
@@ -27,14 +28,20 @@ async function readRawBody(req) {
 // TODO (Fase 1): persist access in a real store (Vercel KV / Upstash Redis /
 // Supabase). Keyed by Stripe customer id (and/or email). `verify-session`
 // handles the immediate unlock; these keep it correct as subscriptions change.
-async function grantAccess(customerId, subscriptionId, status) {
-  console.log('[webhook] grant access', { customerId, subscriptionId, status });
-  // await kv.set(`access:${customerId}`, { active: true, subscriptionId, status });
+// Sincroniza a assinatura em `profiles` (Supabase) pelo stripe_customer_id.
+// O profile é criado no signup (trigger handle_new_user) e ganha o
+// stripe_customer_id no complete-signup pós-pagamento; aqui só ATUALIZAMOS o
+// status. Se nenhum profile bater (usuário ainda não criou conta), afeta 0
+// linhas, sem erro — o acesso imediato já veio do verify-session.
+async function grantAccess(customerId, subscriptionId, status, endsAt) {
+  const normalized = status === 'checkout_completed' ? 'trialing' : status;
+  const n = await setSubscriptionByCustomer(customerId, { status: normalized, endsAt });
+  console.log('[webhook] grant access', { customerId, subscriptionId, status: normalized, profilesUpdated: n });
 }
 
 async function revokeAccess(customerId, reason) {
-  console.log('[webhook] revoke access', { customerId, reason });
-  // await kv.set(`access:${customerId}`, { active: false, reason });
+  const n = await setSubscriptionByCustomer(customerId, { status: 'canceled' });
+  console.log('[webhook] revoke access', { customerId, reason, profilesUpdated: n });
 }
 // -----------------------------------------------------------------------------
 
@@ -50,7 +57,7 @@ async function firePurchase(s) {
       eventId: s.id,
       eventSourceUrl: md.event_source_url,
       actionSource: 'website',
-      userData: buildUserData({ email, fbp: md.fbp, fbc: md.fbc }),
+      userData: buildUserData({ email, phone: md.phone, fbp: md.fbp, fbc: md.fbc }),
       customData: {
         value: (s.amount_total ?? 0) / 100,
         currency: (s.currency || 'brl').toUpperCase(),
@@ -71,7 +78,7 @@ async function fireRenewal(inv) {
       eventName: 'Subscribe',
       eventId: inv.id,
       actionSource: 'website',
-      userData: buildUserData({ email: inv.customer_email || undefined, fbp: md.fbp, fbc: md.fbc }),
+      userData: buildUserData({ email: inv.customer_email || undefined, phone: md.phone, fbp: md.fbp, fbc: md.fbc }),
       customData: {
         value: (inv.amount_paid ?? 0) / 100,
         currency: (inv.currency || 'brl').toUpperCase(),
@@ -121,7 +128,8 @@ export default async function handler(req, res) {
       case 'customer.subscription.updated': {
         const sub = event.data.object;
         const active = sub.status === 'active' || sub.status === 'trialing';
-        if (active) await grantAccess(sub.customer, sub.id, sub.status);
+        const endsAt = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : undefined;
+        if (active) await grantAccess(sub.customer, sub.id, sub.status, endsAt);
         else await revokeAccess(sub.customer, `status:${sub.status}`);
         break;
       }

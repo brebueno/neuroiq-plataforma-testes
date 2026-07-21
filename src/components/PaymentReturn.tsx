@@ -1,30 +1,41 @@
 import { useEffect, useState } from 'react';
 import { Loader2, Check, X } from 'lucide-react';
 import { track } from '../lib/tracking';
+import { supabaseEnabled } from '../lib/supabase';
+import { useAuth } from '../hooks/useAuth';
+import { peekPendingResult } from '../lib/pendingResult';
+import CreateAccount from './CreateAccount';
 
-// Shown when the user returns from Stripe Checkout. It calls the server, which
-// asks Stripe whether the session actually completed, so access is only
-// granted on a real, verified payment (not by faking ?paid=1 in the URL).
+// Retorno do Stripe Checkout. O servidor pergunta pra Stripe se a sessão foi
+// concluída (acesso só com pagamento verificado, não por ?paid=1 na URL).
+// Com pagamento OK e Supabase ligado, oferece o cadastro no 1º acesso (criar
+// senha) — que linka o pagamento à conta e salva o resultado do teste.
 
 type State = 'checking' | 'ok' | 'failed';
 
 export default function PaymentReturn() {
   const [state, setState] = useState<State>('checking');
+  const [sessionId, setSessionId] = useState('');
+  const [accountDone, setAccountDone] = useState(false);
+  // Captura o resultado ANTES do CreateAccount fazer o flush (que remove) —
+  // pra mostrar o QI (o entregável) na hora, no pico do pagamento.
+  const [pending] = useState(() => peekPendingResult());
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const sessionId = params.get('session_id');
-    if (!sessionId) {
-      // No session id (e.g. local demo redirect), nothing to verify.
+    const sid = params.get('session_id');
+    setSessionId(sid || '');
+    if (!sid) {
       setState('ok');
       return;
     }
-    fetch(`/api/verify-session?session_id=${encodeURIComponent(sessionId)}`)
+    fetch(`/api/verify-session?session_id=${encodeURIComponent(sid)}`)
       .then((r) => r.json())
       .then((d) => {
         if (d?.paid) {
           // Purchase no browser com event_id = session_id -> deduplica com o
-          // Purchase server-side do stripe-webhook (que usa o mesmo id).
+          // Purchase server-side do stripe-webhook (mesmo id).
           try {
             track(
               'Purchase',
@@ -34,7 +45,7 @@ export default function PaymentReturn() {
                 content_name: 'assinatura_qimind',
               },
               {},
-              { eventId: sessionId },
+              { eventId: sid },
             );
           } catch { /* ignore */ }
         }
@@ -80,20 +91,52 @@ export default function PaymentReturn() {
     );
   }
 
+  // Pago. Se o Supabase está ligado, o pagamento tem sessão e o usuário ainda
+  // não está logado, oferece o cadastro no 1º acesso.
+  const needsAccount = supabaseEnabled && !!sessionId && !authLoading && !user && !accountDone;
+  if (needsAccount) {
+    return <CreateAccount sessionId={sessionId} onDone={() => setAccountDone(true)} />;
+  }
+
+  // Entregável: o QI que a pessoa pagou pra ver, na hora. Vem do resultado real
+  // capturado (mesmo dado salvo no test_results), então bate com a plataforma.
+  const rd = (pending?.resultData as {
+    iq?: number; classification?: string; percentile?: number;
+  }) || {};
+  const hasIQ = typeof rd.iq === 'number';
+
   return (
     <div className={shell}>
       <div className={card}>
-        <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-          <Check className="w-7 h-7 text-green-600" />
+        <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-1.5 rounded-full text-sm font-medium mb-5">
+          <Check className="w-4 h-4" /> Pagamento confirmado
         </div>
-        <div className="text-4xl mb-2">🎉</div>
-        <h1 className="text-2xl font-extrabold text-ink mb-2">Pagamento confirmado!</h1>
-        <p className="text-gray-600 mb-6">Seu acesso foi liberado. Bem-vindo(a) ao clube.</p>
+
+        {hasIQ ? (
+          <>
+            <div className="text-xs uppercase tracking-widest text-slate-400">Seu QI</div>
+            <div className="font-display text-6xl font-bold text-brand tabular-nums my-1">{rd.iq}</div>
+            <p className="text-slate-600 font-medium">
+              {rd.classification}
+              {typeof rd.percentile === 'number' ? ` · percentil ${rd.percentile}` : ''}
+            </p>
+            <p className="text-slate-500 text-sm mt-3 mb-6">
+              Salvo na sua conta. Veja o laudo completo, o mapa de raciocínio e comece a treinar.
+            </p>
+          </>
+        ) : (
+          <>
+            <div className="text-4xl mb-2">🎉</div>
+            <h1 className="text-2xl font-extrabold text-ink mb-2">Tudo pronto!</h1>
+            <p className="text-gray-600 mb-6">Seu acesso está liberado. Bem-vindo(a) ao clube.</p>
+          </>
+        )}
+
         <button
           onClick={() => (window.location.href = '/#plataforma')}
           className="w-full bg-brand text-white py-3.5 rounded-xl hover:bg-brand-dark transition-colors font-semibold"
         >
-          Entrar na plataforma
+          {hasIQ ? 'Ver meu relatório completo' : 'Entrar na plataforma'}
         </button>
       </div>
     </div>

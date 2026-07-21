@@ -3,6 +3,8 @@ import { Loader2 } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js';
 import { trackInitiateCheckout, attributionSnapshot } from '../lib/tracking';
+import { Lead } from './EmailGate';
+import { Demographics } from './TestOnboarding';
 
 // Inicialize o Stripe fora do componente para evitar recriações
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
@@ -11,10 +13,12 @@ interface Props {
   email?: string;
   bump?: boolean; // order bump selecionado
   plan?: 'monthly' | 'annual'; // plano recorrente escolhido (upsell)
+  lead?: Lead | null; // nome + telefone + email (pro webhook popular profiles)
+  demographics?: Demographics | null; // gênero + faixa etária
   onDemoUnlock: () => void; // fallback local
 }
 
-export default function StripeCheckout({ email, bump, plan, onDemoUnlock }: Props) {
+export default function StripeCheckout({ email, bump, plan, lead, demographics, onDemoUnlock }: Props) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<boolean>(false);
   const icFired = useRef(false);
@@ -31,7 +35,7 @@ export default function StripeCheckout({ email, bump, plan, onDemoUnlock }: Prop
     fetch('/api/create-checkout-session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, bump, plan, attribution: attributionSnapshot() }),
+      body: JSON.stringify({ email, bump, plan, lead, demographics, attribution: attributionSnapshot() }),
     })
       .then((res) => res.json())
       .then((data) => {
